@@ -5,7 +5,8 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest) {
   try {
-    const { cvData } = await request.json()
+    const { cvData, templates: rawTemplates } = await request.json()
+    const templates = rawTemplates.flat?.() || rawTemplates // flatten if double nested
 
     const comprehensivePrompt = `Perform a comprehensive analysis of this professional profile and provide detailed recommendations:
 
@@ -17,10 +18,13 @@ Skills: ${cvData.skills.join(", ")}
 Experience: ${cvData.experience.map((exp: { position: any; company: any; startDate: any; endDate: any; description: any }) => `${exp.position} at ${exp.company} (${exp.startDate}-${exp.endDate}): ${exp.description}`).join("; ")}
 Education: ${cvData.education.map((edu: { degree: any; field: any; institution: any; startDate: any; endDate: any }) => `${edu.degree} in ${edu.field} from ${edu.institution} (${edu.startDate}-${edu.endDate})`).join("; ")}
 
+Templates Available:
+${templates.map((t: any) => `- ${t.name} (${t.type})`).join("\n")}
+
 Provide comprehensive analysis including:
 
 1. TEMPLATE RECOMMENDATION:
-   - Analyze the profile and recommend the best template (modern/minimal/classic)
+   - Analyze the profile and recommend the **best template by name** (must match one from the provided list)
    - Consider industry, experience level, and career goals
    - Provide reasoning for the recommendation
 
@@ -45,7 +49,8 @@ Provide comprehensive analysis including:
    - Career advancement suggestions
 
 Format response as JSON with:
-- recommendedTemplate: "modern" | "minimal" | "classic"
+- recommendedTemplateName: string (must exactly match one of the template names provided above)
+- recommendedTemplateId: string (must exactly match the template's id from the list, not the name or any other value)
 - templateReason: string explaining why this template is best
 - industryMatch: number (0-100)
 - profileStrength: number (1-10)
@@ -59,7 +64,7 @@ Format response as JSON with:
 - nextSteps: string[]`
 
     const { text } = await generateText({
-      model: groq("llama3-70b-8192"),      
+      model: groq("llama3-70b-8192"),
       prompt: comprehensivePrompt,
       system:
         "You are a senior career strategist and executive resume writer with 15+ years of experience. You specialize in comprehensive profile analysis, industry insights, and strategic career positioning. Provide detailed, actionable insights that help professionals advance their careers.",

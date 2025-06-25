@@ -5,8 +5,9 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { FileText, Eye, Sparkles } from "lucide-react"
-import originalTemplates from "@/data/data"
+import { templates } from "@/data/data"
 import { Template } from "@/types/cv-types"
+import TemplatePreview from "@/components/TemplatePreview"
 
 
 const categorySortOrder = [
@@ -26,6 +27,74 @@ const categoryDisplayNames: { [key: string]: string } = {
   Creative: "Creative",
   Elegant: "Elegant",
 }
+const sampleCV = {
+  personalInfo: {
+    fullName: "John Doe",
+    email: "john.doe@example.com",
+    phone: "+1 (555) 123-4567",
+    address: "123 Main Street, New York, NY",
+    jobTitle: "Frontend Developer",
+    summary:
+      "Creative and detail-oriented Frontend Developer with 3+ years of experience building scalable, responsive web applications using React, TypeScript, and modern UI libraries.",
+  },
+
+  education: [
+    {
+      id: "edu-1",
+      institution: "New York University",
+      degree: "Bachelor of Science",
+      field: "Computer Science",
+      startDate: "2016-09-01",
+      endDate: "2020-06-01",
+      gpa: "3.7",
+    },
+  ],
+
+  experience: [
+    {
+      id: "exp-1",
+      company: "TechNova Inc.",
+      position: "Frontend Developer",
+      startDate: "2022-01-01",
+      endDate: "Present",
+      description:
+        "Built and maintained user-facing features using React and Next.js. Collaborated with designers and backend developers to create high-quality UI/UX experiences.",
+      current: true,
+    },
+    {
+      id: "exp-2",
+      company: "WebWorks Studio",
+      position: "Junior Web Developer",
+      startDate: "2020-07-01",
+      endDate: "2021-12-01",
+      description:
+        "Assisted in designing and developing responsive websites. Maintained internal CMS and worked with clients to update site content.",
+      current: false,
+    },
+  ],
+
+  skills: [
+    "HTML5",
+    "CSS3",
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "Next.js",
+    "Tailwind CSS",
+    "Git",
+    "REST APIs",
+  ],
+
+  certifications: [
+    "Frontend Developer Certification - freeCodeCamp",
+    "JavaScript Algorithms and Data Structures - Coursera",
+  ],
+
+  languages: ["English (Native)", "Spanish (Intermediate)"],
+
+  hobbies: ["Photography", "Chess", "Blogging", "Traveling"],
+}
+
 
 export default function TemplatesPage() {
   const [shuffledTemplates, setShuffledTemplates] = useState<Template[]>([])
@@ -34,7 +103,7 @@ export default function TemplatesPage() {
 
   // Shuffle templates on mount
   useEffect(() => {
-    const shuffled = [...originalTemplates].sort(() => 0.5 - Math.random())
+    const shuffled = [...templates].sort(() => 0.5 - Math.random())
     setShuffledTemplates(shuffled)
   }, [])
 
@@ -82,9 +151,8 @@ export default function TemplatesPage() {
             <ul className="flex flex-wrap gap-3">
               <li>
                 <button
-                  className={`px-4 py-2 rounded-full border transition ${
-                    !selectedCategory ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
-                  }`}
+                  className={`px-4 py-2 rounded-full border transition ${!selectedCategory ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+                    }`}
                   onClick={() => setSelectedCategory(null)}
                 >
                   All
@@ -93,11 +161,10 @@ export default function TemplatesPage() {
               {categorySortOrder.map((type) => (
                 <li key={type}>
                   <button
-                    className={`px-4 py-2 rounded-full border transition ${
-                      selectedCategory === type
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
-                    }`}
+                    className={`px-4 py-2 rounded-full border transition ${selectedCategory === type
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+                      }`}
                     onClick={() => setSelectedCategory(type)}
                   >
                     {categoryDisplayNames[type] || type}
@@ -109,14 +176,12 @@ export default function TemplatesPage() {
 
           {/* Template Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            {displayedTemplates.map((tpl, idx) => (
+            {displayedTemplates.map((tpl) => (
               <Card
                 key={tpl.previewUrl}
                 className="border-0 shadow-lg hover:shadow-xl transition-shadow overflow-hidden flex flex-col"
               >
-                <div className="h-56 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                  <FileText className="h-16 w-16 text-gray-400" />
-                </div>
+                <TemplatePreview selectedTemplate={tpl.id}  cvData={sampleCV}/>
                 <CardContent className="p-6 text-center flex-1 flex flex-col">
                   <h3 className="text-2xl font-semibold mb-2">{tpl.name}</h3>
                   <p className="text-gray-500 text-sm mb-4">{getCategoryDescription(tpl)}</p>

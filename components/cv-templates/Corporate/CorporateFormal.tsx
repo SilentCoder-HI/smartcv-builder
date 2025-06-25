@@ -18,7 +18,7 @@ export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFo
   }
 
   return (
-    <div className="min-h-[297mm] w-full p-12 bg-white font-serif text-gray-800 border border-gray-300 shadow-sm">
+    <div className="h-full w-full p-12 bg-white font-serif text-gray-800 border border-gray-300 shadow-sm">
       {/* Header */}
       <div className="border-b-2 border-gray-500 pb-6 mb-8">
         <h1
@@ -133,12 +133,27 @@ export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFo
       <div className="grid md:grid-cols-2 gap-8">
         {data.skills.length > 0 && (
           <div>
-            <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-400">Skills</h2>
-            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
-              {data.skills.map((skill, i) => (
-                <li key={i}>{skill}</li>
+            <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-400">
+              Skills
+            </h2>
+            <div className="space-y-2">
+              {data.skills.map((skillCategory, i) => (
+                <div key={i}>
+                  <div className="font-medium text-gray-800">{skillCategory.category}</div>
+                  <ul className="flex flex-wrap gap-2 pl-0">
+                    {skillCategory.items.map((skill, j) => (
+                      <li
+                        key={j}
+                        className="bg-gray-100 rounded-full px-3 py-1 text-sm text-gray-700"
+                        style={{ listStyle: "none" }}
+                      >
+                        {skill}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
@@ -153,12 +168,15 @@ export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFo
           </div>
         )}
 
-        {data.languages.length > 0 && (
+        {Array.isArray(data.languages) && data.languages.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-400">Languages</h2>
             <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
               {data.languages.map((lang, i) => (
-                <li key={i}>{lang}</li>
+                <li key={i}>
+                  {lang.language}
+                  {lang.proficiency ? ` – ${lang.proficiency}` : ""}
+                </li>
               ))}
             </ul>
           </div>

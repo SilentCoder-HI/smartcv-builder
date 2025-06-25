@@ -18,7 +18,7 @@ export default function MinimalSerif({ data, isPreview = false, onEdit }: Props)
   }
 
   return (
-    <div className="bg-white min-h-[297mm] w-full p-12 font-serif text-gray-900">
+    <div className="bg-white h-full w-full p-12 font-serif text-gray-900">
       {/* Header */}
       <div className="text-center mb-10 border-b pb-6 border-gray-300">
         <h1
@@ -134,14 +134,38 @@ export default function MinimalSerif({ data, isPreview = false, onEdit }: Props)
         {/* Right Column */}
         <div className="space-y-10">
           {/* Skills */}
-          {data.skills.length > 0 && (
+          {Array.isArray(data.skills) && data.skills.length > 0 && (
             <div>
-              <h2 className="text-xl font-semibold mb-3 border-b border-gray-300 pb-1">Skills</h2>
-              <div className="flex flex-wrap gap-2">
-                {data.skills.map((skill, index) => (
-                  <span key={index} className="bg-gray-100 text-sm px-3 py-1 rounded-full text-gray-800">
-                    {skill}
-                  </span>
+              <h2
+                style={{
+                  fontSize: "1.25rem",
+                  fontWeight: 600,
+                  marginBottom: "0.75rem",
+                  borderBottom: "1px solid #D1D5DB",
+                  paddingBottom: "0.25rem",
+                }}
+              >
+                Skills
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {data.skills.map((skillObj, index) => (
+                  <div key={index} style={{ display: "flex", flexWrap: "wrap" }}>
+                    <strong
+                      style={{
+                        fontWeight: 600,
+                        fontSize: "1rem",
+                        color: "#1F2937",
+                        marginRight: "0.5rem",
+                      }}
+                    >
+                      {skillObj.category}:
+                    </strong>
+                    <span style={{ fontSize: "0.875rem", color: "#1F2937" }}>
+                      {Array.isArray(skillObj.items)
+                        ? skillObj.items.join(", ")
+                        : String(skillObj.items)}
+                    </span>
+                  </div>
                 ))}
               </div>
             </div>
@@ -160,12 +184,14 @@ export default function MinimalSerif({ data, isPreview = false, onEdit }: Props)
           )}
 
           {/* Languages */}
-          {data.languages.length > 0 && (
+          {data.languages && data.languages.length > 0 && (
             <div>
               <h2 className="text-xl font-semibold mb-3 border-b border-gray-300 pb-1">Languages</h2>
-              <ul className="list-disc list-inside text-sm text-gray-800">
+              <ul className="list-disc list-inside text-sm text-gray-800 space-y-1">
                 {data.languages.map((lang, index) => (
-                  <li key={index}>{lang}</li>
+                  <li key={index}>
+                    {lang.language} <span className="text-gray-600">({lang.proficiency})</span>
+                  </li>
                 ))}
               </ul>
             </div>

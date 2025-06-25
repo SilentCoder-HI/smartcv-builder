@@ -18,7 +18,7 @@ export default function ClassicBlue({ data, isPreview = false, onEdit }: Props) 
   }
 
   return (
-    <div className="bg-white min-h-[297mm] w-full p-12 font-serif text-blue-900">
+    <div className="bg-white h-full w-full p-12 font-serif text-blue-900">
       {/* Header */}
       <div className="text-center mb-10 border-b pb-6 border-blue-300">
         <h1
@@ -136,11 +136,23 @@ export default function ClassicBlue({ data, isPreview = false, onEdit }: Props) 
           {data.skills.length > 0 && (
             <div>
               <h2 className="text-xl font-semibold mb-3 border-b border-blue-300 pb-1">Skills</h2>
-              <div className="flex flex-wrap gap-2">
-                {data.skills.map((skill, index) => (
-                  <span key={index} className="bg-blue-100 text-sm px-3 py-1 rounded-full text-blue-800">
-                    {skill}
-                  </span>
+              <div className="space-y-3">
+                {data.skills.map((skillCategory, idx) => (
+                  <div key={idx}>
+                    <div className="font-medium text-blue-900 text-base mb-1">
+                      {skillCategory.category}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {skillCategory.items.map((skill, i) => (
+                        <span
+                          key={i}
+                          className="bg-blue-100 text-sm px-3 py-1 rounded-full text-blue-800"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -159,12 +171,15 @@ export default function ClassicBlue({ data, isPreview = false, onEdit }: Props) 
           )}
 
           {/* Languages */}
-          {data.languages.length > 0 && (
+          {Array.isArray(data.languages) && data.languages.length > 0 && (
             <div>
               <h2 className="text-xl font-semibold mb-3 border-b border-blue-300 pb-1">Languages</h2>
               <ul className="list-disc list-inside text-sm text-blue-800">
                 {data.languages.map((lang, index) => (
-                  <li key={index}>{lang}</li>
+                  <li key={index}>
+                    {lang.language}
+                    {lang.proficiency ? ` – ${lang.proficiency}` : ""}
+                  </li>
                 ))}
               </ul>
             </div>

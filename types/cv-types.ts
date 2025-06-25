@@ -1,3 +1,5 @@
+import { FC } from "react"
+
 export interface PersonalInfo {
   fullName: string
   email: string
@@ -26,15 +28,21 @@ export interface Experience {
   description: string
   current: boolean
 }
-
+export interface Skill {
+  category: string
+  items: string[]
+}
 export interface CVData {
   personalInfo: PersonalInfo
   education: Education[]
   experience: Experience[]
-  skills: string[]
+  skills: Skill[]
   certifications: string[]
-  languages: string[]
   hobbies: string[]
+  languages?: {
+    language: string;
+    proficiency: string;
+  }[];
 }
 export interface JobAnalysisResults {
   matchScore: number;
@@ -51,7 +59,9 @@ export interface Template {
   name: string
   previewUrl: string
   category: string
-  type: string
-  componentPath: string
   description: string
+  id: string
+  component: FC<any>; // or FC<Props> if defined
+  type: string
+  aiPrompt:string
 }

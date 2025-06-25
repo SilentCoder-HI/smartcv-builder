@@ -18,7 +18,7 @@ export function CorporateModern({ data, isPreview = false, onEdit }: CorporateMo
   }
 
   return (
-    <div className="min-h-[297mm] w-full p-12 bg-gray-50 font-sans text-gray-800 border border-gray-300 shadow-sm">
+    <div className="h-full w-full p-12 bg-gray-50 font-sans text-gray-800 border border-gray-300 shadow-sm">
       {/* Header */}
       <div className="border-b border-gray-300 pb-6 mb-8">
         <h1
@@ -134,11 +134,24 @@ export function CorporateModern({ data, isPreview = false, onEdit }: CorporateMo
         {data.skills.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-300">Skills</h2>
-            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
-              {data.skills.map((skill, i) => (
-                <li key={i}>{skill}</li>
+            <div className="space-y-2">
+              {data.skills.map((skillCategory, i) => (
+                <div key={i}>
+                  <div className="font-medium text-gray-800">{skillCategory.category}</div>
+                  <ul className="flex flex-wrap gap-2 pl-0">
+                    {skillCategory.items.map((skill, j) => (
+                      <li
+                        key={j}
+                        className="bg-gray-100 rounded-full px-3 py-1 text-sm text-gray-700"
+                        style={{ listStyle: "none" }}
+                      >
+                        {skill}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
@@ -153,12 +166,15 @@ export function CorporateModern({ data, isPreview = false, onEdit }: CorporateMo
           </div>
         )}
 
-        {data.languages.length > 0 && (
+        {Array.isArray(data.languages) && data.languages.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-300">Languages</h2>
             <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
               {data.languages.map((lang, i) => (
-                <li key={i}>{lang}</li>
+                <li key={i}>
+                  {lang.language}
+                  {lang.proficiency ? ` – ${lang.proficiency}` : ""}
+                </li>
               ))}
             </ul>
           </div>

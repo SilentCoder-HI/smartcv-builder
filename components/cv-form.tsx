@@ -7,24 +7,80 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Trash2, ArrowRight, Sparkles, CheckCircle } from "lucide-react"
-import type { CVData, JobAnalysisResults } from "@/types/cv-types"
+
+export interface Skill {
+  category: string
+  items: string[]
+}
+
+export interface PersonalInfo {
+  fullName: string
+  jobTitle: string
+  email: string
+  phone: string
+  address?: string
+  summary?: string
+}
+
+export interface Education {
+  id: string
+  institution: string
+  degree: string
+  field: string
+  startDate: string
+  endDate: string
+  gpa?: string
+}
+
+export interface Experience {
+  id: string
+  company: string
+  position: string
+  startDate: string
+  endDate: string
+  description: string
+  current: boolean
+}
+
+export interface JobAnalysisResults {
+  matchScore: number
+  missingSkills: string[]
+  keywordSuggestions: string[]
+  improvementSuggestions: string[]
+  optimizedSummary?: string
+}
+
+export interface CVData {
+  personalInfo: PersonalInfo
+  education: Education[]
+  experience: Experience[]
+  skills: Skill[]
+  certifications: string[]
+  hobbies: string[]
+  languages?: {
+    language: string
+    proficiency: string
+  }[]
+}
 
 interface CVFormProps {
   cvData: CVData
   setCvData: (data: CVData) => void
   onNext: () => void
+  scrollRef?: React.RefObject<HTMLDivElement>
 }
 
-export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
+export function CVForm({ cvData, setCvData, onNext, scrollRef }: CVFormProps) {
+
   const [isGeneratingContent, setIsGeneratingContent] = useState(false)
   const [jobDescription, setJobDescription] = useState("")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [analysisResults, setAnalysisResults] = useState<JobAnalysisResults | null>(null);
+  const [analysisResults, setAnalysisResults] = useState<JobAnalysisResults | null>(null)
 
   const analyzeJobDescription = async () => {
-    if (!jobDescription.trim()) return;
+    if (!jobDescription.trim()) return
 
-    setIsAnalyzing(true);
+    setIsAnalyzing(true)
     try {
       const response = await fetch("/api/analyze-job-description", {
         method: "POST",
@@ -32,34 +88,44 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ jobDescription, cvData }),
-      });
+      })
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API Error:", errorText);
-        throw new Error("Failed to analyze job description.");
+        const errorText = await response.text()
+        console.error("API Error:", errorText)
+        throw new Error("Failed to analyze job description.")
       }
 
-      const data = await response.json();
-
-      setAnalysisResults(data); // assuming `data` is the actual result
-      return data;
+      const data = await response.json()
+      setAnalysisResults(data)
+      return data
     } catch (error) {
-      console.error("Analysis failed:", error);
+      console.error("Analysis failed:", error)
     } finally {
-      setIsAnalyzing(false);
+      setIsAnalyzing(false)
     }
-  };
+  }
 
   const applyAIRecommendations = () => {
     if (!analysisResults) return
 
     // Apply recommended skills
     if (analysisResults.missingSkills?.length > 0) {
-      const newSkills = [...cvData.skills, ...analysisResults.missingSkills]
+      const newSkills = [...cvData.skills]
+      const technicalSkills = newSkills.find(skill => skill.category.toLowerCase() === "technical")
+
+      if (technicalSkills) {
+        technicalSkills.items = [...new Set([...technicalSkills.items, ...analysisResults.missingSkills])]
+      } else {
+        newSkills.push({
+          category: "Technical",
+          items: analysisResults.missingSkills
+        })
+      }
+
       setCvData({
         ...cvData,
-        skills: [...new Set(newSkills)], // Remove duplicates
+        skills: newSkills,
       })
     }
 
@@ -77,7 +143,7 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
     alert("AI recommendations applied successfully!")
   }
 
-  const updatePersonalInfo = (field: string, value: string) => {
+  const updatePersonalInfo = (field: keyof PersonalInfo, value: string) => {
     setCvData({
       ...cvData,
       personalInfo: {
@@ -99,13 +165,12 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
           field: "",
           startDate: "",
           endDate: "",
-          gpa: "",
         },
       ],
     })
   }
 
-  const updateEducation = (id: string, field: string, value: string) => {
+  const updateEducation = (id: string, field: keyof Education, value: string) => {
     setCvData({
       ...cvData,
       education: cvData.education.map((edu) => (edu.id === id ? { ...edu, [field]: value } : edu)),
@@ -137,7 +202,7 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
     })
   }
 
-  const updateExperience = (id: string, field: string, value: string | boolean) => {
+  const updateExperience = (id: string, field: keyof Experience, value: string | boolean) => {
     setCvData({
       ...cvData,
       experience: cvData.experience.map((exp) => (exp.id === id ? { ...exp, [field]: value } : exp)),
@@ -154,13 +219,36 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
   const addSkill = () => {
     setCvData({
       ...cvData,
-      skills: [...cvData.skills, ""],
+      skills: [
+        ...cvData.skills,
+        {
+          category: "",
+          items: [] // Initialize as empty array
+        },
+      ],
+    })
+  }
+  const updateSkillItems = (index: number, value: string) => {
+    const newSkills = [...cvData.skills]
+    newSkills[index] = {
+      ...newSkills[index],
+      items: value.split(",")
+        .map(item => item.trim())
+        .filter(item => item) || [], // Fallback to empty array
+    }
+    setCvData({
+      ...cvData,
+      skills: newSkills,
     })
   }
 
-  const updateSkill = (index: number, value: string) => {
+
+  const updateSkillCategory = (index: number, value: string) => {
     const newSkills = [...cvData.skills]
-    newSkills[index] = value
+    newSkills[index] = {
+      ...newSkills[index],
+      category: value,
+    }
     setCvData({
       ...cvData,
       skills: newSkills,
@@ -195,14 +283,28 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
 
       if (response.ok) {
         const aiContent = await response.json()
+
+        // Transform AI skills data to match our expected format
+        const formattedSkills = aiContent.skills
+          ? aiContent.skills.map((skill: any) => ({
+            category: skill.category || "Technical",
+            items: Array.isArray(skill.items)
+              ? skill.items
+              : typeof skill.items === 'string'
+                ? skill.items.split(',').map((s: string) => s.trim())
+                : []
+          }))
+          : cvData.skills
+
         setCvData({
           ...cvData,
           personalInfo: {
             ...cvData.personalInfo,
             summary: aiContent.summary || cvData.personalInfo.summary,
           },
-          skills: aiContent.skills || cvData.skills,
+          skills: formattedSkills,
         })
+
       }
     } catch (error) {
       console.error("Error generating AI content:", error)
@@ -218,6 +320,55 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
       cvData.personalInfo.phone &&
       cvData.personalInfo.jobTitle
     )
+  }
+
+  const addLanguage = () => {
+    setCvData({
+      ...cvData,
+      languages: [...(cvData.languages || []), { language: "", proficiency: "" }],
+    })
+  }
+
+  const updateLanguage = (index: number, field: "language" | "proficiency", value: string) => {
+    const newLanguages = [...(cvData.languages || [])]
+    newLanguages[index] = {
+      ...newLanguages[index],
+      [field]: value,
+    }
+    setCvData({
+      ...cvData,
+      languages: newLanguages,
+    })
+  }
+
+  const removeLanguage = (index: number) => {
+    setCvData({
+      ...cvData,
+      languages: (cvData.languages || []).filter((_, i) => i !== index),
+    })
+  }
+
+  const addHobby = () => {
+    setCvData({
+      ...cvData,
+      hobbies: [...(cvData.hobbies || []), ""],
+    })
+  }
+
+  const updateHobby = (index: number, value: string) => {
+    const newHobbies = [...(cvData.hobbies || [])]
+    newHobbies[index] = value
+    setCvData({
+      ...cvData,
+      hobbies: newHobbies,
+    })
+  }
+
+  const removeHobby = (index: number) => {
+    setCvData({
+      ...cvData,
+      hobbies: (cvData.hobbies || []).filter((_, i) => i !== index),
+    })
   }
 
   return (
@@ -290,7 +441,7 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
             <Label htmlFor="address">Address</Label>
             <Input
               id="address"
-              value={cvData.personalInfo.address}
+              value={cvData.personalInfo.address || ""}
               onChange={(e) => updatePersonalInfo("address", e.target.value)}
               placeholder="City, State, Country"
             />
@@ -299,7 +450,7 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
             <Label htmlFor="summary">Professional Summary</Label>
             <Textarea
               id="summary"
-              value={cvData.personalInfo.summary}
+              value={cvData.personalInfo.summary || ""}
               onChange={(e) => updatePersonalInfo("summary", e.target.value)}
               placeholder="Brief description of your professional background and goals..."
               rows={4}
@@ -370,7 +521,7 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
                   <div>
                     <span className="font-medium text-gray-700">Recommended Skills to Add:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {analysisResults.missingSkills.map((skill: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined, index: Key | null | undefined) => (
+                      {analysisResults.missingSkills.map((skill, index) => (
                         <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
                           {skill}
                         </span>
@@ -383,7 +534,7 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
                   <div>
                     <span className="font-medium text-gray-700">Important Keywords:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {analysisResults.keywordSuggestions.map((keyword: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined, index: Key | null | undefined) => (
+                      {analysisResults.keywordSuggestions.map((keyword, index) => (
                         <span key={index} className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
                           {keyword}
                         </span>
@@ -396,7 +547,7 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
                   <div>
                     <span className="font-medium text-gray-700">Improvement Suggestions:</span>
                     <ul className="mt-1 space-y-1">
-                      {analysisResults.improvementSuggestions.map((suggestion: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined, index: Key | null | undefined) => (
+                      {analysisResults.improvementSuggestions.map((suggestion, index) => (
                         <li key={index} className="text-gray-600 text-xs flex items-start">
                           <span className="text-purple-500 mr-1">•</span>
                           {suggestion}
@@ -582,27 +733,133 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
       </Card>
 
       {/* Skills */}
+      {/* Skills Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             Skills
-            <Button onClick={addSkill} variant="outline" size="sm">
+            <Button
+              onClick={addSkill}
+              variant="outline"
+              size="sm"
+              disabled={cvData.skills.length >= 8}
+            >
               <Plus className="w-4 h-4 mr-2" />
-              Add Skill
+              Add Skill Category
             </Button>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-2 gap-4">
-            {cvData.skills.map((skill, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <Input
-                  value={skill}
-                  onChange={(e) => updateSkill(index, e.target.value)}
-                  placeholder="e.g., JavaScript, Project Management"
-                />
+          <div className="space-y-4">
+            {cvData.skills.map((skill: { category: string; items: string[] }, index: number) => {
+              // Ensure items is always an array of strings
+              let skillItems: string[] = [];
+              if (Array.isArray(skill.items)) {
+                skillItems = skill.items.filter((item) => typeof item === "string");
+              } else if (typeof skill.items === "string") {
+                skillItems = (skill.items as string).split(",").map((s: string) => s.trim())
+              }
+
+              return (
+                <div key={index} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium">Skill Category {index + 1}</h4>
+                    <Button
+                      onClick={() => removeSkill(index)}
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <div>
+                    <Label>Category Name</Label>
+                    <Input
+                      value={skill.category || ''}
+                      onChange={(e) => updateSkillCategory(index, e.target.value)}
+                      placeholder="e.g., Technical, Soft Skills"
+                    />
+                  </div>
+                  <div>
+                    <Label>Skills (comma separated)</Label>
+                    <Input
+                      value={skillItems.join(", ")}
+                      onChange={(e) => updateSkillItems(index, e.target.value)}
+                      placeholder="e.g., JavaScript, Python, Communication"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Separate multiple skills with commas
+                    </p>
+                  </div>
+                  {skillItems.length > 0 && (
+                    <div className="mt-2">
+                      <Label>Preview:</Label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {skillItems.map((item: string, i: number) => (
+                          <span
+                            key={i}
+                            className="px-2.5 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+
+            {cvData.skills.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <p>No skill categories added yet. Click "Add Skill Category" to get started.</p>
+                <p className="text-sm mt-2">Example: "Technical: JavaScript, Python"</p>
+              </div>
+            )}
+
+            {cvData.skills.length >= 8 && (
+              <div className="text-center text-sm text-gray-500 mt-2">
+                Maximum of 8 skill categories reached
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Languages Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            Languages
+            <Button onClick={addLanguage} variant="outline" size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Language
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {(cvData.languages || []).map((lang, index) => (
+              <div key={index} className="grid md:grid-cols-3 gap-4 items-end">
+                <div>
+                  <Label>Language</Label>
+                  <Input
+                    value={lang.language}
+                    onChange={(e) => updateLanguage(index, "language", e.target.value)}
+                    placeholder="e.g., Spanish"
+                  />
+                </div>
+                <div>
+                  <Label>Proficiency</Label>
+                  <Input
+                    value={lang.proficiency}
+                    onChange={(e) => updateLanguage(index, "proficiency", e.target.value)}
+                    placeholder="e.g., Fluent, Intermediate"
+                  />
+                </div>
                 <Button
-                  onClick={() => removeSkill(index)}
+                  onClick={() => removeLanguage(index)}
                   variant="ghost"
                   size="sm"
                   className="text-red-600 hover:text-red-700"
@@ -612,9 +869,48 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
               </div>
             ))}
           </div>
-          {cvData.skills.length === 0 && (
+          {(cvData.languages || []).length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              <p>No skills added yet. Click "Add Skill" to get started.</p>
+              <p>No languages added yet. Click "Add Language" to get started.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Hobbies Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            Hobbies & Interests
+            <Button onClick={addHobby} variant="outline" size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Hobby
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-4">
+            {(cvData.hobbies || []).map((hobby, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <Input
+                  value={hobby}
+                  onChange={(e) => updateHobby(index, e.target.value)}
+                  placeholder="e.g., Photography, Hiking"
+                />
+                <Button
+                  onClick={() => removeHobby(index)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          {(cvData.hobbies || []).length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <p>No hobbies added yet. Click "Add Hobby" to get started.</p>
             </div>
           )}
         </CardContent>
@@ -622,7 +918,8 @@ export function CVForm({ cvData, setCvData, onNext }: CVFormProps) {
 
       {/* Navigation */}
       <div className="flex justify-end">
-        <Button onClick={onNext} disabled={!isFormValid()} size="lg" className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={() => {onNext(),scrollRef?.current?.scrollIntoView({ behavior: "smooth", block: "start" })}}
+          size="lg" className="bg-blue-600 hover:bg-blue-700">
           Continue to Templates
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>

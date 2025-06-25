@@ -18,38 +18,38 @@ export default function ClassicBlack({ data, isPreview = false, onEdit }: Props)
   }
 
   return (
-    <div className="bg-white min-h-[297mm] w-full p-12 font-serif text-black">
+    <div style={{ backgroundColor: "white", padding: "3rem", fontFamily: "serif", color: "black", width: "100%" }}>
       {/* Header */}
-      <div className="text-center mb-10 border-b pb-6 border-gray-300">
+      <div style={{ textAlign: "center", marginBottom: "2.5rem", paddingBottom: "1.5rem", borderBottom: "1px solid #d1d5db" }}>
         <h1
-          className={`text-4xl font-bold mb-1 ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-1 rounded" : ""}`}
+          style={{ fontSize: "2.25rem", fontWeight: "bold", marginBottom: "0.25rem", cursor: isPreview ? "default" : "pointer" }}
           onClick={() => handleClick("personalInfo.fullName", data.personalInfo.fullName)}
         >
           {data.personalInfo.fullName || "Your Name"}
         </h1>
         <p
-          className={`text-lg italic mb-4 text-gray-700 ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-1 rounded" : ""}`}
+          style={{ fontSize: "1.125rem", fontStyle: "italic", marginBottom: "1rem", color: "#4b5563", cursor: isPreview ? "default" : "pointer" }}
           onClick={() => handleClick("personalInfo.jobTitle", data.personalInfo.jobTitle)}
         >
           {data.personalInfo.jobTitle || "Job Title"}
         </p>
 
-        <div className="flex justify-center space-x-6 text-sm text-gray-700">
+        <div style={{ display: "flex", justifyContent: "center", gap: "1.5rem", fontSize: "0.875rem", color: "#4b5563" }}>
           {data.personalInfo.email && (
-            <div className="flex items-center">
-              <Mail className="w-4 h-4 mr-1" />
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <Mail style={{ width: "1rem", height: "1rem", marginRight: "0.25rem" }} />
               <span>{data.personalInfo.email}</span>
             </div>
           )}
           {data.personalInfo.phone && (
-            <div className="flex items-center">
-              <Phone className="w-4 h-4 mr-1" />
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <Phone style={{ width: "1rem", height: "1rem", marginRight: "0.25rem" }} />
               <span>{data.personalInfo.phone}</span>
             </div>
           )}
           {data.personalInfo.address && (
-            <div className="flex items-center">
-              <MapPin className="w-4 h-4 mr-1" />
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <MapPin style={{ width: "1rem", height: "1rem", marginRight: "0.25rem" }} />
               <span>{data.personalInfo.address}</span>
             </div>
           )}
@@ -58,10 +58,10 @@ export default function ClassicBlack({ data, isPreview = false, onEdit }: Props)
 
       {/* Summary */}
       {data.personalInfo.summary && (
-        <div className="mb-10">
-          <h2 className="text-xl font-semibold mb-3 border-b border-gray-300 pb-1">Professional Summary</h2>
+        <div style={{ marginBottom: "2.5rem" }}>
+          <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.75rem", borderBottom: "1px solid #d1d5db", paddingBottom: "0.25rem" }}>Professional Summary</h2>
           <p
-            className={`text-gray-800 leading-relaxed text-sm text-justify ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-2 rounded" : ""}`}
+            style={{ color: "#1f2937", lineHeight: 1.6, fontSize: "0.875rem", textAlign: "justify", cursor: isPreview ? "default" : "pointer" }}
             onClick={() => handleClick("personalInfo.summary", data.personalInfo.summary)}
           >
             {data.personalInfo.summary}
@@ -69,34 +69,34 @@ export default function ClassicBlack({ data, isPreview = false, onEdit }: Props)
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 gap-12">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "3rem" }}>
         {/* Left Column */}
-        <div className="space-y-10">
+        <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
           {/* Experience */}
           {data.experience.length > 0 && (
             <div>
-              <h2 className="text-xl font-semibold mb-3 border-b border-gray-300 pb-1">Experience</h2>
-              <div className="space-y-6">
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.75rem", borderBottom: "1px solid #d1d5db", paddingBottom: "0.25rem" }}>Experience</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                 {data.experience.map((exp) => (
                   <div key={exp.id}>
                     <h3
-                      className={`text-base font-bold text-black ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-1 rounded" : ""}`}
+                      style={{ fontSize: "1rem", fontWeight: "bold", color: "black", cursor: isPreview ? "default" : "pointer" }}
                       onClick={() => handleClick(`experience.position.${exp.id}`, exp.position)}
                     >
                       {exp.position}
                     </h3>
                     <p
-                      className={`text-sm italic text-gray-700 ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-1 rounded" : ""}`}
+                      style={{ fontSize: "0.875rem", fontStyle: "italic", color: "#4b5563", cursor: isPreview ? "default" : "pointer" }}
                       onClick={() => handleClick(`experience.company.${exp.id}`, exp.company)}
                     >
                       {exp.company}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p style={{ fontSize: "0.75rem", color: "#6b7280" }}>
                       {exp.startDate} – {exp.current ? "Present" : exp.endDate}
                     </p>
                     {exp.description && (
                       <p
-                        className={`text-sm mt-2 text-gray-800 leading-relaxed ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-2 rounded" : ""}`}
+                        style={{ fontSize: "0.875rem", marginTop: "0.5rem", color: "#1f2937", lineHeight: 1.6, cursor: isPreview ? "default" : "pointer" }}
                         onClick={() => handleClick(`experience.description.${exp.id}`, exp.description)}
                       >
                         {exp.description}
@@ -111,18 +111,18 @@ export default function ClassicBlack({ data, isPreview = false, onEdit }: Props)
           {/* Education */}
           {data.education.length > 0 && (
             <div>
-              <h2 className="text-xl font-semibold mb-3 border-b border-gray-300 pb-1">Education</h2>
-              <div className="space-y-4">
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.75rem", borderBottom: "1px solid #d1d5db", paddingBottom: "0.25rem" }}>Education</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 {data.education.map((edu) => (
                   <div key={edu.id}>
-                    <h3 className="text-base font-bold text-black">
+                    <h3 style={{ fontSize: "1rem", fontWeight: "bold", color: "black" }}>
                       {edu.degree} {edu.field && `in ${edu.field}`}
                     </h3>
-                    <p className="text-sm text-gray-700">{edu.institution}</p>
-                    <p className="text-xs text-gray-500">
+                    <p style={{ fontSize: "0.875rem", color: "#4b5563" }}>{edu.institution}</p>
+                    <p style={{ fontSize: "0.75rem", color: "#6b7280" }}>
                       {edu.startDate} – {edu.endDate}
                     </p>
-                    {edu.gpa && <p className="text-xs text-gray-500">GPA: {edu.gpa}</p>}
+                    {edu.gpa && <p style={{ fontSize: "0.75rem", color: "#6b7280" }}>GPA: {edu.gpa}</p>}
                   </div>
                 ))}
               </div>
@@ -131,16 +131,65 @@ export default function ClassicBlack({ data, isPreview = false, onEdit }: Props)
         </div>
 
         {/* Right Column */}
-        <div className="space-y-10">
+        <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
           {/* Skills */}
-          {data.skills.length > 0 && (
+          {Array.isArray(data.skills) && data.skills.length > 0 && (
             <div>
-              <h2 className="text-xl font-semibold mb-3 border-b border-gray-300 pb-1">Skills</h2>
-              <div className="flex flex-wrap gap-2">
-                {data.skills.map((skill, index) => (
-                  <span key={index} className="bg-gray-100 text-sm px-3 py-1 rounded-full text-gray-800">
-                    {skill}
-                  </span>
+              <h2
+                style={{
+                  fontSize: "1.25rem",
+                  fontWeight: 600,
+                  marginBottom: "0.75rem",
+                  borderBottom: "1px solid #d1d5db",
+                  paddingBottom: "0.25rem",
+                }}
+              >
+                Skills
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {data.skills.map((skillCategory, idx) => (
+                  <div key={idx}>
+                    <div
+                      style={{
+                        fontWeight: 500,
+                        color: "#374151",
+                        fontSize: "0.95rem",
+                        marginBottom: "0.25rem",
+                      }}
+                    >
+                      {skillCategory.category}
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                      {Array.isArray(skillCategory.items) ? (
+                        skillCategory.items.map((skill, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              backgroundColor: "#f3f4f6",
+                              fontSize: "0.875rem",
+                              padding: "0.25rem 0.75rem",
+                              borderRadius: "9999px",
+                              color: "#1f2937",
+                            }}
+                          >
+                            {skill}
+                          </span>
+                        ))
+                      ) : (
+                        <span
+                          style={{
+                            backgroundColor: "#f3f4f6",
+                            fontSize: "0.875rem",
+                            padding: "0.25rem 0.75rem",
+                            borderRadius: "9999px",
+                            color: "#1f2937",
+                          }}
+                        >
+                          {String(skillCategory.items)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -149,8 +198,8 @@ export default function ClassicBlack({ data, isPreview = false, onEdit }: Props)
           {/* Certifications */}
           {data.certifications.length > 0 && (
             <div>
-              <h2 className="text-xl font-semibold mb-3 border-b border-gray-300 pb-1">Certifications</h2>
-              <ul className="list-disc list-inside text-sm text-gray-800">
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.75rem", borderBottom: "1px solid #d1d5db", paddingBottom: "0.25rem" }}>Certifications</h2>
+              <ul style={{ listStyle: "disc", paddingLeft: "1rem", fontSize: "0.875rem", color: "#1f2937" }}>
                 {data.certifications.map((cert, index) => (
                   <li key={index}>{cert}</li>
                 ))}
@@ -159,12 +208,15 @@ export default function ClassicBlack({ data, isPreview = false, onEdit }: Props)
           )}
 
           {/* Languages */}
-          {data.languages.length > 0 && (
+          {Array.isArray(data.languages) && data.languages.length > 0 && (
             <div>
-              <h2 className="text-xl font-semibold mb-3 border-b border-gray-300 pb-1">Languages</h2>
-              <ul className="list-disc list-inside text-sm text-gray-800">
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.75rem", borderBottom: "1px solid #d1d5db", paddingBottom: "0.25rem" }}>Languages</h2>
+              <ul style={{ listStyle: "disc", paddingLeft: "1rem", fontSize: "0.875rem", color: "#1f2937" }}>
                 {data.languages.map((lang, index) => (
-                  <li key={index}>{lang}</li>
+                  <li key={index}>
+                    {lang.language}
+                    {lang.proficiency ? ` – ${lang.proficiency}` : ""}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -173,8 +225,8 @@ export default function ClassicBlack({ data, isPreview = false, onEdit }: Props)
           {/* Hobbies */}
           {data.hobbies.length > 0 && (
             <div>
-              <h2 className="text-xl font-semibold mb-3 border-b border-gray-300 pb-1">Hobbies</h2>
-              <ul className="list-disc list-inside text-sm text-gray-800">
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.75rem", borderBottom: "1px solid #d1d5db", paddingBottom: "0.25rem" }}>Hobbies</h2>
+              <ul style={{ listStyle: "disc", paddingLeft: "1rem", fontSize: "0.875rem", color: "#1f2937" }}>
                 {data.hobbies.map((hobby, index) => (
                   <li key={index}>{hobby}</li>
                 ))}

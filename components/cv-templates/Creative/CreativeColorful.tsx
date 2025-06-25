@@ -18,7 +18,7 @@ export function CreativeColorful({ data, isPreview = false, onEdit }: CreativeCo
   }
 
   return (
-    <div className="min-h-[297mm] w-full bg-gradient-to-br from-pink-50 via-white to-blue-50 p-10 font-sans text-gray-900">
+    <div className="h-full w-full bg-gradient-to-br from-pink-50 via-white to-blue-50 p-10 font-sans text-gray-900">
       {/* Header */}
       <div className="text-center mb-10">
         <h1
@@ -113,11 +113,21 @@ export function CreativeColorful({ data, isPreview = false, onEdit }: CreativeCo
       {data.skills.length > 0 && (
         <div className="mb-10">
           <h2 className="text-xl font-bold mb-3 text-pink-700 uppercase">Skills</h2>
-          <div className="flex flex-wrap gap-3">
-            {data.skills.map((skill, i) => (
-              <span key={i} className="px-3 py-1 bg-pink-100 text-pink-700 text-xs rounded-full">
-                {skill}
-              </span>
+          <div className="space-y-3">
+            {data.skills.map((skillCategory, i) => (
+              <div key={i}>
+                <div className="font-semibold text-pink-700">{skillCategory.category}</div>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {skillCategory.items.map((skill, j) => (
+                    <span
+                      key={j}
+                      className="px-3 py-1 bg-pink-100 text-pink-700 text-xs rounded-full"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -159,12 +169,15 @@ export function CreativeColorful({ data, isPreview = false, onEdit }: CreativeCo
         )}
 
         {/* Languages */}
-        {data.languages.length > 0 && (
+        {Array.isArray(data.languages) && data.languages.length > 0 && (
           <div>
             <h2 className="text-xl font-bold mb-3 text-blue-700 uppercase">Languages</h2>
             <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
               {data.languages.map((lang, i) => (
-                <li key={i}>{lang}</li>
+                <li key={i}>
+                  {lang.language}
+                  {lang.proficiency ? ` – ${lang.proficiency}` : ""}
+                </li>
               ))}
             </ul>
           </div>

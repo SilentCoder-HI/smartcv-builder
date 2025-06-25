@@ -1,94 +1,148 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Download, FileText, Share2, CheckCircle } from "lucide-react"
-import type { CVData } from "@/types/cv-types"
-import { CVTemplateModern } from "@/components/cv-templates/modern"
-import { CVTemplateMinimal } from "@/components/cv-templates/minimal"
-import { CVTemplateClassic } from "@/components/cv-templates/classic"
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  ArrowLeft,
+  Download,
+  FileText,
+  Share2,
+  CheckCircle,
+} from "lucide-react"
+import type { CVData } from "@/types/cv-types"
+
+// Templates
+import ClassicBlack from "@/components/cv-templates/Classic/ClassicBlack"
+import ClassicBlue from "@/components/cv-templates/Classic/ClassicBlue"
+import { CorporateModern } from "@/components/cv-templates/Corporate/CorporateModern"
+import { CorporateFormal } from "@/components/cv-templates/Corporate/CorporateFormal"
+import { CreativeColorful } from "@/components/cv-templates/Creative/CreativeColorful"
+import { CreativePortfolio } from "@/components/cv-templates/Creative/CreativePortfolio"
+import { ElegantContrast } from "@/components/cv-templates/Elegant/ElegantContrast"
+import { ElegantSerif } from "@/components/cv-templates/Elegant/ElegantSerif"
+import MinimalSerif from "@/components/cv-templates/Minimal/MinimalSerif"
+import MinimalWhite from "@/components/cv-templates/Minimal/MinimalWhite"
+import ModernGrid from "@/components/cv-templates/Modern/ModernGrid"
+import ModernDark from "@/components/cv-templates/Modern/ModernDark"
+import ModernLight from "@/components/cv-templates/Modern/ModernLight"
 
 interface ExportOptionsProps {
   cvData: CVData
   selectedTemplate: string
   onPrev: () => void
+  scrollRef?: React.RefObject<HTMLDivElement>
 }
 
 const templates = {
-  modern: CVTemplateModern,
-  minimal: CVTemplateMinimal,
-  classic: CVTemplateClassic,
+  "classic-black": ClassicBlack,
+  "classic-blue": ClassicBlue,
+  "corporate-modern": CorporateModern,
+  "corporate-formal": CorporateFormal,
+  "creative-colorful": CreativeColorful,
+  "creative-portfolio": CreativePortfolio,
+  "elegant-contrast": ElegantContrast,
+  "elegant-serif": ElegantSerif,
+  "minimal-serif": MinimalSerif,
+  "minimal-white": MinimalWhite,
+  "modern-grid": ModernGrid,
+  "modern-dark": ModernDark,
+  "modern-light": ModernLight,
 }
 
-export function ExportOptions({ cvData, selectedTemplate, onPrev }: ExportOptionsProps) {
+export function ExportOptions({ cvData, selectedTemplate, onPrev, scrollRef }: ExportOptionsProps) {
   const [isExporting, setIsExporting] = useState(false)
   const [exportComplete, setExportComplete] = useState(false)
 
-  const TemplateComponent = templates[selectedTemplate as keyof typeof templates] || CVTemplateModern
+  const TemplateComponent = templates[selectedTemplate as keyof typeof templates] || templates["classic-black"]
 
   const exportToPDF = async () => {
     setIsExporting(true)
     try {
-      // Create a temporary div to render the CV
+      // 1. Create hidden container
       const tempDiv = document.createElement("div")
+      tempDiv.id = "pdf-container"
       tempDiv.style.position = "absolute"
       tempDiv.style.left = "-9999px"
-      tempDiv.style.width = "210mm" // A4 width
+      tempDiv.style.top = "0"
+      tempDiv.style.width = "794px" // A4 size in pixels @ 96dpi
+      tempDiv.style.padding = "40px"
       tempDiv.style.backgroundColor = "white"
       document.body.appendChild(tempDiv)
-
-      // Import html2pdf dynamically
-      const html2pdf = (await import("html2pdf.js")).default
-
-      // Render the CV component to the temp div
+  
+      // 2. Render template inside it
       const { createRoot } = await import("react-dom/client")
       const root = createRoot(tempDiv)
-
+  
       await new Promise<void>((resolve) => {
         root.render(
-          <div style={{ width: "210mm", minHeight: "297mm", padding: "20mm", backgroundColor: "white" }}>
+          <div
+            id="pdf-content"
+            style={{
+              width: "794px",              // A4 width at 96 DPI
+              minHeight: "1123px",         // A4 height at 96 DPI
+              padding: "40px",
+              backgroundColor: "#ffffff",  // Ensure white background
+              fontFamily: "Arial, sans-serif", // Fallback font
+              boxSizing: "border-box",
+            }}
+          >
             <TemplateComponent data={cvData} />
-          </div>,
+          </div>
         )
-        setTimeout(resolve, 1000) // Wait for render
+        
+        setTimeout(resolve, 1000) // Give React time to render
       })
-
-      // Configure PDF options
-      const opt = {
-        margin: 0,
-        filename: `${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_Resume.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      }
-
-      // Generate and download PDF
-      await html2pdf().set(opt).from(tempDiv).save()
-
-      // Cleanup
+  
+      // 3. Convert to image
+      const html2canvas = (await import("html2canvas")).default
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+      })
+  
+      const imgData = canvas.toDataURL("image/png")
+  
+      // 4. Create PDF
+      const { jsPDF } = await import("jspdf")
+      const pdf = new jsPDF("p", "mm", "a4")
+  
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const pageHeight = pdf.internal.pageSize.getHeight()
+  
+      const imgProps = pdf.getImageProperties(imgData)
+      const ratio = imgProps.width / imgProps.height
+  
+      const pdfWidth = pageWidth
+      const pdfHeight = pageWidth / ratio
+  
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight)
+      pdf.save(`${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_Resume.pdf`)
+  
+      root.unmount()
       document.body.removeChild(tempDiv)
       setExportComplete(true)
-    } catch (error) {
-      console.error("Error exporting PDF:", error)
-      alert("Error exporting PDF. Please try again.")
+    } catch (err) {
+      console.error("Export to PDF failed:", err)
+      alert("Something went wrong. Please try again.")
     } finally {
       setIsExporting(false)
     }
   }
+  
 
   const exportToWord = async () => {
     setIsExporting(true)
     try {
       const response = await fetch("/api/export-word", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cvData,
-          template: selectedTemplate,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cvData, template: selectedTemplate }),
       })
 
       if (response.ok) {
@@ -117,13 +171,8 @@ export function ExportOptions({ cvData, selectedTemplate, onPrev }: ExportOption
     try {
       const response = await fetch("/api/share-resume", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cvData,
-          template: selectedTemplate,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cvData, template: selectedTemplate }),
       })
 
       if (response.ok) {
@@ -145,7 +194,6 @@ export function ExportOptions({ cvData, selectedTemplate, onPrev }: ExportOption
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">
-        {/* Export Options */}
         <div className="space-y-6">
           {exportComplete && (
             <Card className="border-green-200 bg-green-50">
@@ -195,7 +243,9 @@ export function ExportOptions({ cvData, selectedTemplate, onPrev }: ExportOption
                   <Share2 className="w-5 h-5 mr-2" />
                   Share Online Link
                 </Button>
-                <p className="text-xs text-gray-500 mt-2 text-center">Create a shareable link to your resume</p>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  Create a shareable link to your resume
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -216,7 +266,6 @@ export function ExportOptions({ cvData, selectedTemplate, onPrev }: ExportOption
           </Card>
         </div>
 
-        {/* Final Preview */}
         <div>
           <Card className="shadow-lg">
             <CardHeader>
@@ -233,7 +282,6 @@ export function ExportOptions({ cvData, selectedTemplate, onPrev }: ExportOption
         </div>
       </div>
 
-      {/* Navigation */}
       <div className="flex justify-between">
         <Button onClick={onPrev} variant="outline" size="lg">
           <ArrowLeft className="mr-2 h-5 w-5" />

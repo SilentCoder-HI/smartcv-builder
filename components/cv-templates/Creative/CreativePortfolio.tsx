@@ -18,7 +18,7 @@ export function CreativePortfolio({ data, isPreview = false, onEdit }: CreativeP
   }
 
   return (
-    <div className="bg-white min-h-[297mm] w-full p-10 font-mono text-gray-800">
+    <div className="bg-white h-full w-full p-10 font-mono text-gray-800">
       {/* Header */}
       <div className="text-left mb-8 border-l-4 border-purple-500 pl-4">
         <h1
@@ -105,13 +105,26 @@ export function CreativePortfolio({ data, isPreview = false, onEdit }: CreativeP
 
       {/* Skills */}
       {data.skills.length > 0 && (
-        <div className="mb-10">
-          <h2 className="text-lg font-bold mb-3 text-purple-700 uppercase">Skills</h2>
-          <div className="flex flex-wrap gap-3">
-            {data.skills.map((skill, i) => (
-              <span key={i} className="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
-                {skill}
-              </span>
+        <div>
+          <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-400">
+            Skills
+          </h2>
+          <div className="space-y-2">
+            {data.skills.map((skillCategory, i) => (
+              <div key={i}>
+                <div className="font-medium text-gray-800">{skillCategory.category}</div>
+                <ul className="flex flex-wrap gap-2 pl-0">
+                  {skillCategory.items.map((skill, j) => (
+                    <li
+                      key={j}
+                      className="bg-gray-100 rounded-full px-3 py-1 text-sm text-gray-700"
+                      style={{ listStyle: "none" }}
+                    >
+                      {skill}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
         </div>
@@ -133,19 +146,22 @@ export function CreativePortfolio({ data, isPreview = false, onEdit }: CreativeP
       )}
 
       {/* Languages and Hobbies */}
-      {(data.languages.length > 0 || data.hobbies.length > 0) && (
+      {(Array.isArray(data.languages) && data.languages.length > 0) || (Array.isArray(data.hobbies) && data.hobbies.length > 0) ? (
         <div className="grid grid-cols-2 gap-8">
-          {data.languages.length > 0 && (
+          {Array.isArray(data.languages) && data.languages.length > 0 && (
             <div>
               <h2 className="text-lg font-bold mb-3 text-purple-700 uppercase">Languages</h2>
               <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
                 {data.languages.map((lang, i) => (
-                  <li key={i}>{lang}</li>
+                  <li key={i}>
+                    {lang.language}
+                    {lang.proficiency ? ` – ${lang.proficiency}` : ""}
+                  </li>
                 ))}
               </ul>
             </div>
           )}
-          {data.hobbies.length > 0 && (
+          {Array.isArray(data.hobbies) && data.hobbies.length > 0 && (
             <div>
               <h2 className="text-lg font-bold mb-3 text-purple-700 uppercase">Hobbies</h2>
               <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
@@ -156,7 +172,7 @@ export function CreativePortfolio({ data, isPreview = false, onEdit }: CreativeP
             </div>
           )}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

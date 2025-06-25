@@ -18,7 +18,7 @@ export default function ModernGrid({ data, isPreview = false, onEdit }: Props) {
   }
 
   return (
-    <div className="bg-white min-h-[297mm] w-full p-10 font-sans text-gray-900">
+    <div className="bg-white h-full w-full p-10 font-sans text-gray-900">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left Column */}
         <div className="col-span-1 space-y-6 border-r border-gray-300 pr-6">
@@ -61,24 +61,35 @@ export default function ModernGrid({ data, isPreview = false, onEdit }: Props) {
           </div>
 
           {/* Skills */}
-          {data.skills.length > 0 && (
-            <div>
-              <h2 className="text-base font-semibold mb-2">Skills</h2>
-              <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                {data.skills.map((skill, index) => (
-                  <li key={index}>{skill}</li>
+          {Array.isArray(data.skills) && data.skills.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold">Skills:</h2>
+              <ul className="mt-2 space-y-2">
+                {data.skills.map((skillGroup, i) => (
+                  <li key={i}>
+                    <strong className="text-[15px]">
+                      {skillGroup.category}
+                    </strong>{" "}
+                    <span className="text-sm">
+                      {Array.isArray(skillGroup.items)
+                        ? skillGroup.items.join(", ")
+                        : String(skillGroup.items)}
+                    </span>
+                  </li>
                 ))}
               </ul>
             </div>
           )}
 
           {/* Languages */}
-          {data.languages.length > 0 && (
+          {data.languages && data.languages.length > 0 && (
             <div>
               <h2 className="text-base font-semibold mb-2">Languages</h2>
               <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                {data.languages.map((language, index) => (
-                  <li key={index}>{language}</li>
+                {data.languages.map((lang, index) => (
+                  <li key={index}>
+                    {lang.language} <span className="text-gray-600">({lang.proficiency})</span>
+                  </li>
                 ))}
               </ul>
             </div>

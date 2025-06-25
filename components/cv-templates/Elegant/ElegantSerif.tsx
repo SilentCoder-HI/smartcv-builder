@@ -119,11 +119,23 @@ export function ElegantSerif({ data, isPreview = false, onEdit }: ElegantSerifPr
         {data.skills.length > 0 && (
           <div>
             <h2 className="text-xl font-bold mb-2 border-b pb-1">Skills</h2>
-            <ul className="list-disc pl-5 text-sm text-gray-800">
-              {data.skills.map((skill, i) => (
-                <li key={i}>{skill}</li>
+            <div className="space-y-3">
+              {data.skills.map((skillCategory, i) => (
+                <div key={i}>
+                  <div className="font-semibold text-gray-900">{skillCategory.category}</div>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {skillCategory.items.map((skill, j) => (
+                      <span
+                        key={j}
+                        className="px-3 py-1 bg-gray-100 text-gray-800 text-xs rounded-full"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
@@ -138,12 +150,15 @@ export function ElegantSerif({ data, isPreview = false, onEdit }: ElegantSerifPr
           </div>
         )}
 
-        {data.languages.length > 0 && (
+        {Array.isArray(data.languages) && data.languages.length > 0 && (
           <div>
             <h2 className="text-xl font-bold mb-2 border-b pb-1">Languages</h2>
             <ul className="list-disc pl-5 text-sm text-gray-800">
               {data.languages.map((lang, i) => (
-                <li key={i}>{lang}</li>
+                <li key={i}>
+                  {lang.language}
+                  {lang.proficiency ? ` – ${lang.proficiency}` : ""}
+                </li>
               ))}
             </ul>
           </div>

@@ -4,9 +4,32 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, ArrowRight, Edit3, Save, Sparkles, FileText, CheckCircle } from "lucide-react"
 import type { CVData } from "@/types/cv-types"
-import { CVTemplateModern } from "@/components/cv-templates/modern"
-import { CVTemplateMinimal } from "@/components/cv-templates/minimal"
-import { CVTemplateClassic } from "@/components/cv-templates/classic"
+// Classic
+import ClassicBlack from "@/components/cv-templates/Classic/ClassicBlack"
+import ClassicBlue from "@/components/cv-templates/Classic/ClassicBlue"
+
+// Corporate
+import { CorporateModern } from "@/components/cv-templates/Corporate/CorporateModern"
+import { CorporateFormal } from "@/components/cv-templates/Corporate/CorporateFormal"
+
+// Creative
+import { CreativeColorful } from "@/components/cv-templates/Creative/CreativeColorful"
+import { CreativePortfolio } from "@/components/cv-templates/Creative/CreativePortfolio"
+
+// Elegant
+import { ElegantContrast } from "@/components/cv-templates/Elegant/ElegantContrast"
+import { ElegantSerif } from "@/components/cv-templates/Elegant/ElegantSerif"
+
+// Minimal
+import MinimalSerif from "@/components/cv-templates/Minimal/MinimalSerif"
+import MinimalWhite from "@/components/cv-templates/Minimal/MinimalWhite"
+
+// Modern
+import ModernGrid from "@/components/cv-templates/Modern/ModernGrid"
+import ModernDark from "@/components/cv-templates/Modern/ModernDark"
+import ModernLight from "@/components/cv-templates/Modern/ModernLight"
+import TemplatePreview from "./TemplatePreview"
+
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -17,15 +40,26 @@ interface CVPreviewProps {
   selectedTemplate: string
   onNext: () => void
   onPrev: () => void
+  scrollRef?: React.RefObject<HTMLDivElement>
 }
 
 const templates = {
-  modern: CVTemplateModern,
-  minimal: CVTemplateMinimal,
-  classic: CVTemplateClassic,
+  "classic-black": ClassicBlack,
+  "classic-blue": ClassicBlue,
+  "corporate-modern": CorporateModern,
+  "corporate-formal": CorporateFormal,
+  "creative-colorful": CreativeColorful,
+  "creative-portfolio": CreativePortfolio,
+  "elegant-contrast": ElegantContrast,
+  "elegant-serif": ElegantSerif,
+  "minimal-serif": MinimalSerif,
+  "minimal-white": MinimalWhite,
+  "modern-grid": ModernGrid,
+  "modern-dark": ModernDark,
+  "modern-light": ModernLight,
 }
 
-export function CVPreview({ cvData, setCvData, selectedTemplate, onNext, onPrev }: CVPreviewProps) {
+export function CVPreview({ cvData, setCvData, selectedTemplate, onNext, onPrev, scrollRef }: CVPreviewProps) {
   const [editingField, setEditingField] = useState<string | null>(null)
   const [editValue, setEditValue] = useState("")
 
@@ -35,7 +69,7 @@ export function CVPreview({ cvData, setCvData, selectedTemplate, onNext, onPrev 
   const [atsScore, setAtsScore] = useState<number | null>(null)
   const [atsRecommendations, setAtsRecommendations] = useState<string[] | null>(null)
 
-  const TemplateComponent = templates[selectedTemplate as keyof typeof templates] || CVTemplateModern
+  const TemplateComponent = templates[selectedTemplate as keyof typeof templates] || templates["classic-black"]
 
   const startEditing = (field: string, currentValue: string) => {
     setEditingField(field)
@@ -322,7 +356,7 @@ export function CVPreview({ cvData, setCvData, selectedTemplate, onNext, onPrev 
         <div className="lg:col-span-2">
           <Card className="shadow-lg">
             <CardContent className="p-8">
-              <div className="bg-white min-h-[800px]">
+              <div className="bg-white min-h-[800px] h-full">
                 <TemplateComponent data={cvData} onEdit={startEditing} editingField={editingField} />
               </div>
             </CardContent>

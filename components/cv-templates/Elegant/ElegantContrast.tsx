@@ -16,7 +16,7 @@ export function ElegantContrast({ data, isPreview = false, onEdit, editingField 
   };
 
   return (
-    <div className="bg-black text-white min-h-[297mm] w-full p-12 font-serif">
+    <div className="bg-black text-white min-h-full w-full p-12 font-serif">
       <div className="text-center mb-8 border-b-2 border-white pb-6">
         <h1
           className={`text-4xl font-bold mb-2 ${!isPreview ? "cursor-pointer hover:bg-white/10 p-2 rounded" : ""}`}
@@ -134,23 +134,33 @@ export function ElegantContrast({ data, isPreview = false, onEdit, editingField 
         {data.skills.length > 0 && (
           <div>
             <h2 className="text-lg font-bold mb-3 border-b border-white pb-1">SKILLS</h2>
-            <div className="grid grid-cols-2 gap-2">
-              {data.skills.map((skill, index) => (
-                <div key={index} className="text-sm">
-                  • {skill}
+            <div className="space-y-3">
+              {data.skills.map((skillCategory, i) => (
+                <div key={i}>
+                  <div className="font-semibold">{skillCategory.category}</div>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {skillCategory.items.map((skill, j) => (
+                      <span
+                        key={j}
+                        className="px-3 py-1 bg-white/10 rounded-full text-sm"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {data.certifications.length > 0 && (
+        {data.hobbies.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold mb-3 border-b border-white pb-1">CERTIFICATIONS</h2>
+            <h2 className="text-lg font-bold mb-3 border-b border-white pb-1">INTERESTS</h2>
             <div className="space-y-1">
-              {data.certifications.map((cert, index) => (
+              {data.hobbies.map((hobby, index) => (
                 <div key={index} className="text-sm">
-                  • {cert}
+                  • {hobby}
                 </div>
               ))}
             </div>
@@ -158,33 +168,17 @@ export function ElegantContrast({ data, isPreview = false, onEdit, editingField 
         )}
       </div>
 
-      {(data.languages.length > 0 || data.hobbies.length > 0) && (
-        <div className="grid md:grid-cols-2 gap-8 mt-8">
-          {data.languages.length > 0 && (
-            <div>
-              <h2 className="text-lg font-bold mb-3 border-b border-white pb-1">LANGUAGES</h2>
-              <div className="space-y-1">
-                {data.languages.map((language, index) => (
-                  <div key={index} className="text-sm">
-                    • {language}
-                  </div>
-                ))}
+      {Array.isArray(data.languages) && data.languages.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-lg font-bold mb-3 border-b border-white pb-1">LANGUAGES</h2>
+          <div className="space-y-1">
+            {data.languages.map((language, index) => (
+              <div key={index} className="text-sm">
+                • {language.language}
+                {language.proficiency ? ` – ${language.proficiency}` : ""}
               </div>
-            </div>
-          )}
-
-          {data.hobbies.length > 0 && (
-            <div>
-              <h2 className="text-lg font-bold mb-3 border-b border-white pb-1">INTERESTS</h2>
-              <div className="space-y-1">
-                {data.hobbies.map((hobby, index) => (
-                  <div key={index} className="text-sm">
-                    • {hobby}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       )}
     </div>

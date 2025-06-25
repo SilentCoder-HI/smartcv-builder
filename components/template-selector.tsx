@@ -3,33 +3,10 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react"
-import type { CVData } from "@/types/cv-types"
-import { useState } from "react"
-
-// Classic
-import ClassicBlack from "@/components/cv-templates/Classic/ClassicBlack"
-import ClassicBlue from "@/components/cv-templates/Classic/ClassicBlue"
-
-// Corporate
-import { CorporateModern } from "@/components/cv-templates/Corporate/CorporateModern"
-import { CorporateFormal } from "@/components/cv-templates/Corporate/Corporate Formal"
-
-// Creative
-import { CreativeColorful } from "@/components/cv-templates/Creative/Creative Colorful"
-import { CreativePortfolio } from "@/components/cv-templates/Creative/CreativePortfolio"
-
-// Elegant
-import { ElegantContrast } from "@/components/cv-templates/Elegant/ElegantContrast"
-import { ElegantSerif } from "@/components/cv-templates/Elegant/ElegantSerif"
-
-// Minimal
-import MinimalSerif from "@/components/cv-templates/Minimal/MinimalSerif"
-import MinimalWhite from "@/components/cv-templates/Minimal/MinimalWhite"
-
-// Modern
-import ModernGrid from "@/components/cv-templates/Modern/ModernGrid"
-import ModernDark from "@/components/cv-templates/Modern/ModernDark"
-import ModernLight from "@/components/cv-templates/Modern/ModernLight"
+import type { CVData, Template } from "@/types/cv-types"
+import { useEffect, useRef, useState } from "react"
+import TemplatePreview from "./TemplatePreview"
+import { templates } from "@/data/data"
 
 interface TemplateSelectorProps {
   selectedTemplate: string
@@ -37,99 +14,25 @@ interface TemplateSelectorProps {
   cvData: CVData
   onNext: () => void
   onPrev: () => void
+  scrollRef?: React.RefObject<HTMLDivElement>
+}
+const categorySortOrder = [
+  "Professional",
+  "Modern",
+  "Minimal",
+  "Classic",
+  "Creative",
+  "Elegant",
+]
+const categoryDisplayNames: { [key: string]: string } = {
+  Professional: "Professional",
+  Modern: "Modern",
+  Minimal: "Minimal",
+  Classic: "Classic",
+  Creative: "Creative",
+  Elegant: "Elegant",
 }
 
-const templates = [
-  // Classic
-  {
-    id: "classic-black",
-    name: "Classic Black",
-    description: "Traditional professional style",
-    component: ClassicBlack,
-  },
-  {
-    id: "classic-blue",
-    name: "Classic Blue",
-    description: "Traditional professional style",
-    component: ClassicBlue,
-  },
-
-  // Corporate
-  {
-    id: "corporate-modern",
-    name: "Corporate Modern",
-    description: "Formal layout for business professionals",
-    component: CorporateModern,
-  },
-  {
-    id: "corporate-formal",
-    name: "Corporate Formal",
-    description: "Formal layout for business professionals",
-    component: CorporateFormal,
-  },
-
-  // Creative
-  {
-    id: "creative-colorful",
-    name: "Creative Colorful",
-    description: "Stylish and bold format for creatives",
-    component: CreativeColorful,
-  },
-  {
-    id: "creative-portfolio",
-    name: "Creative Portfolio",
-    description: "Portfolio style for creative professionals",
-    component: CreativePortfolio,
-  },
-
-  // Elegant
-  {
-    id: "elegant-contrast",
-    name: "Elegant Contrast",
-    description: "Sleek design with refined typography",
-    component: ElegantContrast,
-  },
-  {
-    id: "elegant-serif",
-    name: "Elegant Serif",
-    description: "Elegant serif type and layout",
-    component: ElegantSerif,
-  },
-
-  // Minimal
-  {
-    id: "minimal-serif",
-    name: "Minimal Serif",
-    description: "Simple and elegant layout",
-    component: MinimalSerif,
-  },
-  {
-    id: "minimal-white",
-    name: "Minimal White",
-    description: "Clean and minimal white design",
-    component: MinimalWhite,
-  },
-
-  // Modern
-  {
-    id: "modern-grid",
-    name: "Modern Grid",
-    description: "Grid-based modern layout",
-    component: ModernGrid,
-  },
-  {
-    id: "modern-dark",
-    name: "Modern Dark",
-    description: "Dark modern style",
-    component: ModernDark,
-  },
-  {
-    id: "modern-light",
-    name: "Modern Light",
-    description: "Light modern style",
-    component: ModernLight,
-  },
-]
 
 export function TemplateSelector({
   selectedTemplate,
@@ -137,9 +40,33 @@ export function TemplateSelector({
   cvData,
   onNext,
   onPrev,
+  scrollRef,
 }: TemplateSelectorProps) {
   const [isGeneratingAI, setIsGeneratingAI] = useState(false)
   const [aiAnalysis, setAiAnalysis] = useState<any>(null)
+  const [shuffledTemplates, setShuffledTemplates] = useState<Template[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  function toKebabCase(str: string): string {
+    return str
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")        // spaces → hyphen
+      .replace(/[()]/g, "")        // remove brackets (optional for names like Modern Light (Modern))
+      .replace(/[^a-z0-9-]/g, "")  // remove special characters except hyphens
+      .replace(/-+/g, "-")         // collapse multiple hyphens
+  }
+
+  // Shuffle templates on mount
+  useEffect(() => {
+    const shuffled = templates.flat().sort(() => 0.5 - Math.random());
+    setShuffledTemplates(shuffled);
+
+  }, [])
+
+  // Filtered templates based on selected category
+  const displayedTemplates = selectedCategory
+    ? shuffledTemplates.filter((tpl) => tpl.type === selectedCategory)
+    : shuffledTemplates
 
   const generateAIAnalysis = async () => {
     setIsGeneratingAI(true)
@@ -151,6 +78,7 @@ export function TemplateSelector({
         },
         body: JSON.stringify({
           cvData,
+          templates,
         }),
       })
 
@@ -161,6 +89,11 @@ export function TemplateSelector({
         if (analysis.recommendedTemplate) {
           setSelectedTemplate(analysis.recommendedTemplate)
         }
+        if (analysis.recommendedTemplateId) {
+          const normalizedId = toKebabCase(analysis.recommendedTemplateId)
+          setSelectedTemplate(normalizedId)
+        }
+
       }
     } catch (error) {
       console.error("Error generating AI analysis:", error)
@@ -181,11 +114,15 @@ export function TemplateSelector({
           jobTitle: cvData.personalInfo.jobTitle,
           experience: cvData.experience,
           skills: cvData.skills,
+          education: cvData.education,
+          cvData,
+          templates, // ✅ Fixed line here
         }),
       })
 
       if (response.ok) {
         const aiTemplate = await response.json()
+
         // For now, we'll select the recommended template
         setSelectedTemplate(aiTemplate.recommendedTemplate || "modern")
       }
@@ -197,6 +134,7 @@ export function TemplateSelector({
       setIsGeneratingAI(false)
     }
   }
+  const templateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -225,7 +163,7 @@ export function TemplateSelector({
                     <div>
                       <span className="font-medium text-gray-700">Recommended Template:</span>
                       <span className="ml-2 px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs capitalize">
-                        {aiAnalysis.recommendedTemplate}
+                        {aiAnalysis.recommendedTemplateName}
                       </span>
                     </div>
                     <div>
@@ -258,14 +196,30 @@ export function TemplateSelector({
               <Button
                 onClick={generateAIAnalysis}
                 disabled={isGeneratingAI}
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-purple-600 hover:bg-purple-700 w-full"
               >
                 {isGeneratingAI ? "Analyzing..." : "AI Analysis"}
               </Button>
 
               {aiAnalysis && (
                 <Button
-                  onClick={() => setSelectedTemplate(aiAnalysis.recommendedTemplate)}
+                onClick={() => {
+                  const normalizedId = toKebabCase(aiAnalysis.recommendedTemplateId)
+                  setSelectedTemplate(normalizedId)
+                
+                  // Wait for the DOM to update
+                  setTimeout(() => {
+                    requestAnimationFrame(() => {
+                      const target = templateRefs.current[normalizedId]
+                      if (target) {
+                        target.scrollIntoView({ behavior: "smooth", block: "center" })
+                      } else {
+                        console.warn("Scroll target not found:", normalizedId)
+                        console.log("Available refs:", templateRefs.current)
+                      }
+                    })
+                  }, 150) // Optional: increase if needed
+                }}                
                   variant="outline"
                   className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 w-full"
                 >
@@ -277,31 +231,61 @@ export function TemplateSelector({
         </CardContent>
       </Card>
 
+      {/* Category Filter */}
+      <div className="flex justify-center mb-12">
+        <ul className="flex flex-wrap gap-3">
+          <li>
+            <button
+              className={`px-4 py-2 rounded-full border transition ${!selectedCategory ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+                }`}
+              onClick={() => setSelectedCategory(null)}
+            >
+              All
+            </button>
+          </li>
+          {categorySortOrder.map((type) => (
+            <li key={type}>
+              <button
+                className={`px-4 py-2 rounded-full border transition ${selectedCategory === type
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+                  }`}
+                onClick={() => setSelectedCategory(type)}
+              >
+                {categoryDisplayNames[type] || type}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
       {/* Template Grid */}
-      <div className="grid md:grid-cols-3 gap-8">
-        {templates.map((template) => {
-          const TemplateComponent = template.component
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        {displayedTemplates.map((template) => {
           return (
             <Card
               key={template.id}
-              className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${selectedTemplate === template.id ? "ring-2 ring-blue-500 shadow-lg" : "hover:shadow-md"
+              ref={(el) => {
+                templateRefs.current[template.id] = el
+              }}
+              className={`cursor-pointer w-full transition-all overflow-hidden duration-200 hover:shadow-lg ${selectedTemplate === template.id
+                  ? "ring-2 ring-blue-500 shadow-lg"
+                  : "hover:shadow-md"
                 }`}
               onClick={() => setSelectedTemplate(template.id)}
             >
-              <CardContent className="p-0">
+              <CardContent className="p-0 h-fit w-full mx-auto flex flex-col justify-center">
                 {/* Template Preview */}
-                <div className="h-96 overflow-hidden bg-white border-b">
-                  <div className="scale-[0.3] origin-top-left w-[300%] h-[300%]">
-                    <TemplateComponent data={cvData} isPreview={true} />
-                  </div>
-                </div>
+                <TemplatePreview cvData={cvData} selectedTemplate={template.id} />
 
                 {/* Template Info */}
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold">{template.name}</h3>
+                    <h3 className="text-base sm:text-lg font-semibold">
+                      {template.name}
+                    </h3>
                     {selectedTemplate === template.id && (
-                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-500 rounded-full flex items-center justify-center">
                         <div className="w-2 h-2 bg-white rounded-full" />
                       </div>
                     )}
@@ -310,7 +294,7 @@ export function TemplateSelector({
                 </div>
               </CardContent>
             </Card>
-          )
+          );
         })}
       </div>
 
@@ -325,6 +309,6 @@ export function TemplateSelector({
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
       </div>
-    </div>
+    </div >
   )
 }

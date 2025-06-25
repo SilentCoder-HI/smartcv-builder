@@ -1,54 +1,103 @@
-"use client"
+"use client";
 
-import type { CVData } from "@/types/cv-types"
-import { Mail, Phone, MapPin } from "lucide-react"
+import { Mail, Phone, MapPin } from "lucide-react";
+import type { CVData } from "@/types/cv-types";
 
 interface Props {
-  data: CVData
-  isPreview?: boolean
-  onEdit?: (field: string, value: string) => void
-  editingField?: string | null
+  data: CVData;
+  isPreview?: boolean;
+  onEdit?: (field: string, value: string) => void;
+  editingField?: string | null;
 }
 
 export default function ModernDark({ data, isPreview = false, onEdit }: Props) {
   const handleClick = (field: string, value: string) => {
     if (!isPreview && onEdit) {
-      onEdit(field, value)
+      onEdit(field, value);
     }
-  }
+  };
+
+  const textHoverStyle = !isPreview
+    ? {
+      cursor: "pointer",
+      backgroundColor: "#1f2937", // dark gray-800
+      padding: "4px",
+      borderRadius: "4px",
+    }
+    : {};
 
   return (
-    <div className="bg-gray-900 text-white min-h-[297mm] w-full p-10 font-sans">
+    <div
+      style={{
+        backgroundColor: "#111827", // gray-900
+        color: "#fff",
+        minHeight: "100%",
+        width: "100%",
+        padding: "40px",
+        fontFamily: "Arial, sans-serif",
+        boxSizing: "border-box",
+      }}
+    >
       {/* Header */}
-      <div className="border-b border-gray-700 pb-6 mb-6 text-center">
+      <div
+        style={{
+          borderBottom: "1px solid #374151", // gray-700
+          paddingBottom: "24px",
+          marginBottom: "24px",
+          textAlign: "center",
+        }}
+      >
         <h1
-          className={`text-4xl font-bold ${!isPreview ? "cursor-pointer hover:bg-gray-800 p-2 rounded" : ""}`}
-          onClick={() => handleClick("personalInfo.fullName", data.personalInfo.fullName)}
+          style={{
+            fontSize: "32px",
+            fontWeight: "bold",
+            marginBottom: "4px",
+            ...(textHoverStyle as React.CSSProperties),
+          }}
+          onClick={() =>
+            handleClick("personalInfo.fullName", data.personalInfo.fullName)
+          }
         >
           {data.personalInfo.fullName || "Your Name"}
         </h1>
         <p
-          className={`text-lg text-gray-300 ${!isPreview ? "cursor-pointer hover:bg-gray-800 p-1 rounded" : ""}`}
-          onClick={() => handleClick("personalInfo.jobTitle", data.personalInfo.jobTitle)}
+          style={{
+            fontSize: "18px",
+            color: "#D1D5DB", // gray-300
+            marginBottom: "12px",
+            ...(textHoverStyle as React.CSSProperties),
+          }}
+          onClick={() =>
+            handleClick("personalInfo.jobTitle", data.personalInfo.jobTitle)
+          }
         >
           {data.personalInfo.jobTitle || "Job Title"}
         </p>
-        <div className="mt-3 flex justify-center gap-6 text-sm text-gray-400">
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "24px",
+            color: "#9CA3AF", // gray-400
+            fontSize: "14px",
+          }}
+        >
           {data.personalInfo.email && (
-            <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4" />
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <Mail size={16} />
               <span>{data.personalInfo.email}</span>
             </div>
           )}
           {data.personalInfo.phone && (
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4" />
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <Phone size={16} />
               <span>{data.personalInfo.phone}</span>
             </div>
           )}
           {data.personalInfo.address && (
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <MapPin size={16} />
               <span>{data.personalInfo.address}</span>
             </div>
           )}
@@ -57,11 +106,19 @@ export default function ModernDark({ data, isPreview = false, onEdit }: Props) {
 
       {/* Summary */}
       {data.personalInfo.summary && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-2 text-white">Professional Summary</h2>
+        <div style={{ marginBottom: "32px" }}>
+          <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "8px" }}>
+            Professional Summary
+          </h2>
           <p
-            className={`text-gray-300 leading-relaxed ${!isPreview ? "cursor-pointer hover:bg-gray-800 p-2 rounded" : ""}`}
-            onClick={() => handleClick("personalInfo.summary", data.personalInfo.summary)}
+            style={{
+              color: "#D1D5DB",
+              lineHeight: "1.6",
+              ...(textHoverStyle as React.CSSProperties),
+            }}
+            onClick={() =>
+              handleClick("personalInfo.summary", data.personalInfo.summary)
+            }
           >
             {data.personalInfo.summary}
           </p>
@@ -70,68 +127,97 @@ export default function ModernDark({ data, isPreview = false, onEdit }: Props) {
 
       {/* Experience */}
       {data.experience.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-white">Experience</h2>
-          <div className="space-y-6">
-            {data.experience.map((exp) => (
-              <div key={exp.id}>
-                <h3
-                  className={`font-bold ${!isPreview ? "cursor-pointer hover:bg-gray-800 p-1 rounded" : ""}`}
-                  onClick={() => handleClick(`experience.position.${exp.id}`, exp.position)}
-                >
-                  {exp.position}
-                </h3>
+        <div style={{ marginBottom: "32px" }}>
+          <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "16px" }}>
+            Experience
+          </h2>
+          {data.experience.map((exp) => (
+            <div key={exp.id} style={{ marginBottom: "24px" }}>
+              <h3
+                style={{
+                  fontWeight: "bold",
+                  ...(textHoverStyle as React.CSSProperties),
+                }}
+                onClick={() =>
+                  handleClick(`experience.position.${exp.id}`, exp.position)
+                }
+              >
+                {exp.position}
+              </h3>
+              <p
+                style={{
+                  fontStyle: "italic",
+                  color: "#D1D5DB",
+                  ...(textHoverStyle as React.CSSProperties),
+                }}
+                onClick={() =>
+                  handleClick(`experience.company.${exp.id}`, exp.company)
+                }
+              >
+                {exp.company}
+              </p>
+              <p style={{ fontSize: "14px", color: "#6B7280" }}>
+                {exp.startDate} - {exp.current ? "Present" : exp.endDate}
+              </p>
+              {exp.description && (
                 <p
-                  className={`italic text-gray-300 ${!isPreview ? "cursor-pointer hover:bg-gray-800 p-1 rounded" : ""}`}
-                  onClick={() => handleClick(`experience.company.${exp.id}`, exp.company)}
+                  style={{
+                    marginTop: "8px",
+                    color: "#D1D5DB",
+                    fontSize: "14px",
+                    ...(textHoverStyle as React.CSSProperties),
+                  }}
+                  onClick={() =>
+                    handleClick(`experience.description.${exp.id}`, exp.description)
+                  }
                 >
-                  {exp.company}
+                  {exp.description}
                 </p>
-                <p className="text-sm text-gray-500">
-                  {exp.startDate} - {exp.current ? "Present" : exp.endDate}
-                </p>
-                {exp.description && (
-                  <p
-                    className={`text-sm mt-2 text-gray-300 ${!isPreview ? "cursor-pointer hover:bg-gray-800 p-1 rounded" : ""}`}
-                    onClick={() => handleClick(`experience.description.${exp.id}`, exp.description)}
-                  >
-                    {exp.description}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
 
       {/* Education */}
       {data.education.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-white">Education</h2>
-          <div className="space-y-4">
-            {data.education.map((edu) => (
-              <div key={edu.id}>
-                <h3 className="font-semibold">
-                  {edu.degree} {edu.field && `in ${edu.field}`}
-                </h3>
-                <p className="text-gray-300">{edu.institution}</p>
-                <p className="text-sm text-gray-500">
-                  {edu.startDate} - {edu.endDate}
-                </p>
-                {edu.gpa && <p className="text-sm text-gray-500">GPA: {edu.gpa}</p>}
-              </div>
-            ))}
-          </div>
+        <div style={{ marginBottom: "32px" }}>
+          <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "16px" }}>
+            Education
+          </h2>
+          {data.education.map((edu) => (
+            <div key={edu.id} style={{ marginBottom: "20px" }}>
+              <h3 style={{ fontWeight: "600" }}>
+                {edu.degree} {edu.field && `in ${edu.field}`}
+              </h3>
+              <p style={{ color: "#D1D5DB" }}>{edu.institution}</p>
+              <p style={{ fontSize: "14px", color: "#6B7280" }}>
+                {edu.startDate} - {edu.endDate}
+              </p>
+              {edu.gpa && (
+                <p style={{ fontSize: "14px", color: "#6B7280" }}>GPA: {edu.gpa}</p>
+              )}
+            </div>
+          ))}
         </div>
       )}
 
       {/* Skills */}
-      {data.skills.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-2 text-white">Skills</h2>
-          <ul className="flex flex-wrap gap-3 text-sm text-gray-300">
-            {data.skills.map((skill, i) => (
-              <li key={i} className="bg-gray-800 px-3 py-1 rounded">{skill}</li>
+      {Array.isArray(data.skills) && data.skills.length > 0 && (
+        <div style={{ marginBottom: "32px" }}>
+          <h2 style={{ fontSize: "20px", fontWeight: "600" }}>
+            Skills:
+          </h2>
+          <ul style={{ margin: 0 }}>
+            {data.skills.map((skillObj, i) => (
+              <li key={i} style={{ marginBottom: "8px" }}>
+                <strong style={{ fontSize: "15px" }}>
+                  {skillObj.category}:
+                </strong>{" "}
+                <span style={{ fontSize: "14px" }}>
+                  {Array.isArray(skillObj.items) ? skillObj.items.join(", ") : String(skillObj.items)}
+                </span>
+              </li>
             ))}
           </ul>
         </div>
@@ -139,9 +225,11 @@ export default function ModernDark({ data, isPreview = false, onEdit }: Props) {
 
       {/* Certifications */}
       {data.certifications.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-2 text-white">Certifications</h2>
-          <ul className="list-disc list-inside text-gray-300">
+        <div style={{ marginBottom: "32px" }}>
+          <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "12px" }}>
+            Certifications
+          </h2>
+          <ul style={{ paddingLeft: "20px", color: "#D1D5DB" }}>
             {data.certifications.map((cert, i) => (
               <li key={i}>{cert}</li>
             ))}
@@ -150,21 +238,28 @@ export default function ModernDark({ data, isPreview = false, onEdit }: Props) {
       )}
 
       {/* Languages & Hobbies */}
-      <div className="grid grid-cols-2 gap-8">
-        {data.languages.length > 0 && (
+      <div style={{ display: "flex", gap: "40px", flexWrap: "wrap" }}>
+        {data.languages && data.languages.length > 0 && (
           <div>
-            <h2 className="text-xl font-semibold mb-2 text-white">Languages</h2>
-            <ul className="list-disc list-inside text-gray-300">
+            <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "12px" }}>
+              Languages
+            </h2>
+            <ul style={{ paddingLeft: "20px", color: "#D1D5DB" }}>
               {data.languages.map((lang, i) => (
-                <li key={i}>{lang}</li>
+                <li key={i}>
+                  {lang.language}{" "}
+                  <span style={{ color: "#9CA3AF" }}>({lang.proficiency})</span>
+                </li>
               ))}
             </ul>
           </div>
         )}
         {data.hobbies.length > 0 && (
           <div>
-            <h2 className="text-xl font-semibold mb-2 text-white">Interests</h2>
-            <ul className="list-disc list-inside text-gray-300">
+            <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "12px" }}>
+              Interests
+            </h2>
+            <ul style={{ paddingLeft: "20px", color: "#D1D5DB" }}>
               {data.hobbies.map((hobby, i) => (
                 <li key={i}>{hobby}</li>
               ))}
@@ -173,5 +268,5 @@ export default function ModernDark({ data, isPreview = false, onEdit }: Props) {
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -18,7 +18,7 @@ export default function MinimalWhite({ data, isPreview = false, onEdit }: Props)
   }
 
   return (
-    <div className="bg-white min-h-[297mm] w-full p-12 font-sans text-gray-800">
+    <div className="bg-white h-full w-full p-12 font-sans text-gray-800">
       {/* Header */}
       <div className="text-center mb-10 border-b pb-6 border-gray-200">
         <h1
@@ -130,14 +130,32 @@ export default function MinimalWhite({ data, isPreview = false, onEdit }: Props)
       {/* Skills & Extras */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Skills */}
-        {data.skills.length > 0 && (
+        {Array.isArray(data.skills) && data.skills.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Skills</h2>
-            <div className="flex flex-wrap gap-2">
-              {data.skills.map((skill, index) => (
-                <span key={index} className="bg-gray-100 text-sm px-3 py-1 rounded-full text-gray-800">
-                  {skill}
-                </span>
+            <div className="space-y-4">
+              {data.skills.map((skillObj, index) => (
+                <div key={index}>
+                  <h3 className="font-semibold text-base text-gray-800">
+                    {skillObj.category}
+                  </h3>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {Array.isArray(skillObj.items) ? (
+                      skillObj.items.map((skill, skillIndex) => (
+                        <span
+                          key={skillIndex}
+                          className="bg-gray-100 text-sm px-3 py-1 rounded-full text-gray-800"
+                        >
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="bg-gray-100 text-sm px-3 py-1 rounded-full text-gray-800">
+                        {String(skillObj.items)}
+                      </span>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -156,12 +174,14 @@ export default function MinimalWhite({ data, isPreview = false, onEdit }: Props)
         )}
 
         {/* Languages */}
-        {data.languages.length > 0 && (
+        {data.languages && data.languages.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Languages</h2>
             <ul className="list-disc list-inside text-sm text-gray-700">
               {data.languages.map((lang, index) => (
-                <li key={index}>{lang}</li>
+                <li key={index}>
+                  {lang.language} <span className="text-gray-600">({lang.proficiency})</span>
+                </li>
               ))}
             </ul>
           </div>
