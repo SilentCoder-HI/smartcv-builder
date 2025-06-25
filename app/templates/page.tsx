@@ -72,17 +72,19 @@ const sampleCV = {
       current: false,
     },
   ],
-
   skills: [
-    "HTML5",
-    "CSS3",
-    "JavaScript",
-    "TypeScript",
-    "React",
-    "Next.js",
-    "Tailwind CSS",
-    "Git",
-    "REST APIs",
+    {
+      category: "Frontend",
+      items: ["React", "Next.js", "Tailwind CSS", "TypeScript", "Redux"],
+    },
+    {
+      category: "Backend",
+      items: ["Node.js", "Express", "PostgreSQL", "MongoDB", "REST APIs"],
+    },
+    {
+      category: "DevOps & Tools",
+      items: ["Docker", "Git", "GitHub Actions", "Vercel", "Jira"],
+    },
   ],
 
   certifications: [
@@ -90,7 +92,16 @@ const sampleCV = {
     "JavaScript Algorithms and Data Structures - Coursera",
   ],
 
-  languages: ["English (Native)", "Spanish (Intermediate)"],
+  languages: [
+    {
+      language: "English",
+      proficiency: "Fluent",
+    },
+    {
+      language: "Urdu",
+      proficiency: "Native",
+    },
+  ],
 
   hobbies: ["Photography", "Chess", "Blogging", "Traveling"],
 }
@@ -100,7 +111,20 @@ export default function TemplatesPage() {
   const [shuffledTemplates, setShuffledTemplates] = useState<Template[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [jobInput, setJobInput] = useState("")
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState<string>()
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false)
 
+
+  function toKebabCase(str: string): string {
+    return str
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")        // spaces → hyphen
+      .replace(/[()]/g, "")        // remove brackets (optional for names like Modern Light (Modern))
+      .replace(/[^a-z0-9-]/g, "")  // remove special characters except hyphens
+      .replace(/-+/g, "-")         // collapse multiple hyphens
+  }
   // Shuffle templates on mount
   useEffect(() => {
     const shuffled = [...templates].sort(() => 0.5 - Math.random())
@@ -115,10 +139,39 @@ export default function TemplatesPage() {
   // For showing category description in grid cards
   const getCategoryDescription = (tpl: Template) => tpl.description
 
-  const handleAISuggestion = () => {
-    alert(`🎯 AI Suggestion based on: "${jobInput}" (Connect with your backend here)`)
-  }
+  const generateAIAnalysis = async () => {
+    try {
+      const response = await fetch("/api/aisuggestion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          jobInput,
+          templates,
+        }),
+      })
 
+      if (response.ok) {
+        const analysis = await response.json()
+        setAiAnalysis(analysis)
+        // Auto-select recommended template
+        if (analysis.recommendedTemplate) {
+          setSelectedTemplate(analysis.recommendedTemplate)
+        }
+        if (analysis.recommendedTemplateId) {
+          const normalizedId = toKebabCase(analysis.recommendedTemplateId)
+          setSelectedTemplate(normalizedId)
+        }
+
+      }
+    } catch (error) {
+      console.error("Error generating AI analysis:", error)
+    } finally {
+      setIsGeneratingAI(false)
+    }
+  }
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <section className="py-20 px-4">
@@ -140,7 +193,7 @@ export default function TemplatesPage() {
               />
               <Sparkles className="absolute right-4 top-3.5 text-gray-400" />
             </div>
-            <Button className="flex gap-2 items-center" onClick={handleAISuggestion}>
+            <Button className="flex gap-2 items-center" onClick={generateAIAnalysis}>
               <Sparkles className="h-4 w-4" />
               AI Suggestion
             </Button>

@@ -43,7 +43,7 @@ export function Footer() {
                   <span className="text-white font-bold text-lg">SC</span>
                 </div>
                 <div>
-                  <p className="font-medium">SilentCoder-HI</p>
+                  <p className="font-medium">Hussnain Iftikhar</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Full-Stack Engineer</p>
                 </div>
               </div>
