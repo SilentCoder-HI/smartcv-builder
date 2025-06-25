@@ -29,9 +29,3 @@ Designed for modern job seekers. Powered by Open Source + Speed.
   Download your resume instantly in Word or PDF format.
 
 ---
-
-## 📊 Metadata Configuration (SEO & Social)
-
-Your app uses advanced metadata for SEO + social sharing, including:
-
-```
