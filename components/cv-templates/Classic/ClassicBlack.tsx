@@ -18,7 +18,18 @@ export default function ClassicBlack({ data, isPreview = false, onEdit }: Props)
   }
 
   return (
-    <div style={{ backgroundColor: "white", padding: "3rem", fontFamily: "serif", color: "black", width: "100%" }}>
+    <div
+      style={{
+        backgroundColor: "white",
+        padding: "40px",
+        fontFamily: "serif",
+        color: "black",
+        width: "100%",
+        minHeight: "297mm",
+        maxWidth: "210mm",
+        margin: "0 auto",
+      }}
+    >
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: "2.5rem", paddingBottom: "1.5rem", borderBottom: "1px solid #d1d5db" }}>
         <h1
@@ -62,7 +73,7 @@ export default function ClassicBlack({ data, isPreview = false, onEdit }: Props)
           <h2 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.75rem", borderBottom: "1px solid #d1d5db", paddingBottom: "0.25rem" }}>Professional Summary</h2>
           <p
             style={{ color: "#1f2937", lineHeight: 1.6, fontSize: "0.875rem", textAlign: "justify", cursor: isPreview ? "default" : "pointer" }}
-            onClick={() => handleClick("personalInfo.summary", data.personalInfo.summary)}
+            onClick={() => handleClick("personalInfo.summary", data.personalInfo.summary || "")}
           >
             {data.personalInfo.summary}
           </p>
@@ -151,10 +162,10 @@ export default function ClassicBlack({ data, isPreview = false, onEdit }: Props)
                   <div key={idx}>
                     <div
                       style={{
-                        fontWeight: 500,
+                        fontWeight: "bold",
                         color: "#374151",
                         fontSize: "0.95rem",
-                        marginBottom: "0.25rem",
+                        marginBottom: "0.25rem"
                       }}
                     >
                       {skillCategory.category}

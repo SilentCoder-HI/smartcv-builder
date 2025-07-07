@@ -1,6 +1,6 @@
 "use client"
 
-import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from "react"
+import { RefObject, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -67,7 +67,7 @@ interface CVFormProps {
   cvData: CVData
   setCvData: (data: CVData) => void
   onNext: () => void
-  scrollRef?: React.RefObject<HTMLDivElement>
+  scrollRef: RefObject<HTMLDivElement | null>
 }
 
 export function CVForm({ cvData, setCvData, onNext, scrollRef }: CVFormProps) {

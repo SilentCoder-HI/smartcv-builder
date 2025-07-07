@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Phone, MapPin } from "lucide-react";
+import React from "react";
 import type { CVData } from "@/types/cv-types";
 
 interface Props {
@@ -10,263 +10,203 @@ interface Props {
   editingField?: string | null;
 }
 
-export default function ModernDark({ data, isPreview = false, onEdit }: Props) {
+const ModernDark: React.FC<Props> = ({ data, isPreview = false, onEdit }: Props) => {
   const handleClick = (field: string, value: string) => {
     if (!isPreview && onEdit) {
       onEdit(field, value);
     }
   };
 
-  const textHoverStyle = !isPreview
-    ? {
-      cursor: "pointer",
-      backgroundColor: "#1f2937", // dark gray-800
-      padding: "4px",
-      borderRadius: "4px",
-    }
-    : {};
+  const {
+    personalInfo,
+    education,
+    experience,
+    skills,
+    certifications,
+    languages,
+    hobbies,
+  } = data;
+
+  const sectionStyle: React.CSSProperties = { marginBottom: "24px" };
+  const titleStyle: React.CSSProperties = {
+    fontSize: "20px",
+    fontWeight: "bold",
+    borderBottom: "1px solid #444",
+    paddingBottom: "4px",
+    marginBottom: "12px",
+    color: "#f0f0f0",
+  };
+  const labelStyle: React.CSSProperties = { fontWeight: "bold", color: "#e0e0e0" };
+  const listStyle: React.CSSProperties = { paddingLeft: "20px", margin: 0, color: "#ccc" };
+  const containerStyle: React.CSSProperties = {
+    maxWidth: "100%",
+    margin: "0 auto",
+    backgroundColor: "#1e1e1e",
+    padding: "40px",
+    minHeight: "100%",
+    fontFamily: "Arial, sans-serif",
+    color: "#ccc",
+  };
 
   return (
-    <div
-      style={{
-        backgroundColor: "#111827", // gray-900
-        color: "#fff",
-        minHeight: "100%",
-        width: "100%",
-        padding: "40px",
-        fontFamily: "Arial, sans-serif",
-        boxSizing: "border-box",
-      }}
-    >
+    <div style={containerStyle}>
       {/* Header */}
-      <div
-        style={{
-          borderBottom: "1px solid #374151", // gray-700
-          paddingBottom: "24px",
-          marginBottom: "24px",
-          textAlign: "center",
-        }}
-      >
+      <div style={{ textAlign: "center", marginBottom: "32px" }}>
         <h1
           style={{
-            fontSize: "32px",
-            fontWeight: "bold",
+            fontSize: "28px",
             marginBottom: "4px",
-            ...(textHoverStyle as React.CSSProperties),
+            cursor: !isPreview ? "pointer" : "default",
+            color: "#fff",
           }}
           onClick={() =>
-            handleClick("personalInfo.fullName", data.personalInfo.fullName)
+            handleClick("personalInfo.fullName", personalInfo.fullName)
           }
         >
-          {data.personalInfo.fullName || "Your Name"}
+          {personalInfo.fullName || "Your Name"}
         </h1>
         <p
           style={{
             fontSize: "18px",
-            color: "#D1D5DB", // gray-300
-            marginBottom: "12px",
-            ...(textHoverStyle as React.CSSProperties),
+            margin: "4px 0",
+            cursor: !isPreview ? "pointer" : "default",
+            color: "#ddd",
           }}
           onClick={() =>
-            handleClick("personalInfo.jobTitle", data.personalInfo.jobTitle)
+            handleClick("personalInfo.jobTitle", personalInfo.jobTitle)
           }
         >
-          {data.personalInfo.jobTitle || "Job Title"}
+          {personalInfo.jobTitle || "Job Title"}
         </p>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "24px",
-            color: "#9CA3AF", // gray-400
-            fontSize: "14px",
-          }}
-        >
-          {data.personalInfo.email && (
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <Mail size={16} />
-              <span>{data.personalInfo.email}</span>
-            </div>
-          )}
-          {data.personalInfo.phone && (
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <Phone size={16} />
-              <span>{data.personalInfo.phone}</span>
-            </div>
-          )}
-          {data.personalInfo.address && (
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <MapPin size={16} />
-              <span>{data.personalInfo.address}</span>
-            </div>
-          )}
-        </div>
+        <p style={{ margin: "4px 0" }}>
+          {personalInfo.email} | {personalInfo.phone}
+        </p>
+        <p style={{ margin: "4px 0" }}>{personalInfo.address}</p>
       </div>
 
       {/* Summary */}
-      {data.personalInfo.summary && (
-        <div style={{ marginBottom: "32px" }}>
-          <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "8px" }}>
-            Professional Summary
-          </h2>
-          <p
-            style={{
-              color: "#D1D5DB",
-              lineHeight: "1.6",
-              ...(textHoverStyle as React.CSSProperties),
-            }}
-            onClick={() =>
-              handleClick("personalInfo.summary", data.personalInfo.summary)
-            }
-          >
-            {data.personalInfo.summary}
-          </p>
-        </div>
+      {personalInfo.summary && (
+        <section style={sectionStyle}>
+          <h2 style={titleStyle}>Summary</h2>
+          <p>{personalInfo.summary}</p>
+        </section>
       )}
 
-      {/* Experience */}
-      {data.experience.length > 0 && (
-        <div style={{ marginBottom: "32px" }}>
-          <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "16px" }}>
-            Experience
-          </h2>
-          {data.experience.map((exp) => (
-            <div key={exp.id} style={{ marginBottom: "24px" }}>
-              <h3
-                style={{
-                  fontWeight: "bold",
-                  ...(textHoverStyle as React.CSSProperties),
-                }}
-                onClick={() =>
-                  handleClick(`experience.position.${exp.id}`, exp.position)
-                }
-              >
-                {exp.position}
-              </h3>
-              <p
-                style={{
-                  fontStyle: "italic",
-                  color: "#D1D5DB",
-                  ...(textHoverStyle as React.CSSProperties),
-                }}
-                onClick={() =>
-                  handleClick(`experience.company.${exp.id}`, exp.company)
-                }
-              >
-                {exp.company}
-              </p>
-              <p style={{ fontSize: "14px", color: "#6B7280" }}>
-                {exp.startDate} - {exp.current ? "Present" : exp.endDate}
-              </p>
-              {exp.description && (
-                <p
-                  style={{
-                    marginTop: "8px",
-                    color: "#D1D5DB",
-                    fontSize: "14px",
-                    ...(textHoverStyle as React.CSSProperties),
-                  }}
-                  onClick={() =>
-                    handleClick(`experience.description.${exp.id}`, exp.description)
-                  }
-                >
-                  {exp.description}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Education */}
-      {data.education.length > 0 && (
-        <div style={{ marginBottom: "32px" }}>
-          <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "16px" }}>
-            Education
-          </h2>
-          {data.education.map((edu) => (
-            <div key={edu.id} style={{ marginBottom: "20px" }}>
-              <h3 style={{ fontWeight: "600" }}>
-                {edu.degree} {edu.field && `in ${edu.field}`}
-              </h3>
-              <p style={{ color: "#D1D5DB" }}>{edu.institution}</p>
-              <p style={{ fontSize: "14px", color: "#6B7280" }}>
-                {edu.startDate} - {edu.endDate}
-              </p>
-              {edu.gpa && (
-                <p style={{ fontSize: "14px", color: "#6B7280" }}>GPA: {edu.gpa}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Skills */}
-      {Array.isArray(data.skills) && data.skills.length > 0 && (
-        <div style={{ marginBottom: "32px" }}>
-          <h2 style={{ fontSize: "20px", fontWeight: "600" }}>
-            Skills:
-          </h2>
-          <ul style={{ margin: 0 }}>
-            {data.skills.map((skillObj, i) => (
-              <li key={i} style={{ marginBottom: "8px" }}>
-                <strong style={{ fontSize: "15px" }}>
-                  {skillObj.category}:
-                </strong>{" "}
-                <span style={{ fontSize: "14px" }}>
-                  {Array.isArray(skillObj.items) ? skillObj.items.join(", ") : String(skillObj.items)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Certifications */}
-      {data.certifications.length > 0 && (
-        <div style={{ marginBottom: "32px" }}>
-          <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "12px" }}>
-            Certifications
-          </h2>
-          <ul style={{ paddingLeft: "20px", color: "#D1D5DB" }}>
-            {data.certifications.map((cert, i) => (
-              <li key={i}>{cert}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Languages & Hobbies */}
       <div style={{ display: "flex", gap: "40px", flexWrap: "wrap" }}>
-        {data.languages && data.languages.length > 0 && (
-          <div>
-            <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "12px" }}>
-              Languages
-            </h2>
-            <ul style={{ paddingLeft: "20px", color: "#D1D5DB" }}>
-              {data.languages.map((lang, i) => (
-                <li key={i}>
-                  {lang.language}{" "}
-                  <span style={{ color: "#9CA3AF" }}>({lang.proficiency})</span>
-                </li>
+        {/* Left Column */}
+        <div style={{ flex: "1", minWidth: "260px" }}>
+          {/* Skills */}
+          {skills?.length > 0 && (
+            <section style={sectionStyle}>
+              <h3 style={titleStyle}>Skills</h3>
+              <ul style={listStyle}>
+                {skills.map((skillObj, i) => (
+                  <li key={i}>
+                    <strong style={{ color: "#f0f0f0" }}>{
+                      skillObj.category.charAt(0).toUpperCase() + skillObj.category.slice(1)
+                    }:</strong>{" "}
+                    {Array.isArray(skillObj.items) ? skillObj.items.join(", ") : String(skillObj.items)}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Certifications */}
+          {certifications?.length > 0 && (
+            <section style={sectionStyle}>
+              <h3 style={titleStyle}>Certifications</h3>
+              <ul style={listStyle}>
+                {certifications.map((cert, i) => (
+                  <li key={i}>{cert}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Languages */}
+          {Array.isArray(languages) && languages.length > 0 && (
+            <section style={sectionStyle}>
+              <h3 style={titleStyle}>Languages</h3>
+              <ul style={listStyle}>
+                {languages.map((lang, i) => {
+                  if (
+                    typeof lang === "object" &&
+                    lang !== null &&
+                    "language" in lang &&
+                    "proficiency" in lang
+                  ) {
+                    return (
+                      <li key={i}>
+                        {lang.language} – {lang.proficiency}
+                      </li>
+                    );
+                  }
+                  return <li key={i}>{String(lang)}</li>;
+                })}
+              </ul>
+            </section>
+          )}
+
+          {/* Hobbies */}
+          {hobbies?.length > 0 && (
+            <section style={sectionStyle}>
+              <h3 style={titleStyle}>Hobbies</h3>
+              <ul style={listStyle}>
+                {hobbies.map((hobby, i) => (
+                  <li key={i}>{hobby}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+
+        {/* Right Column */}
+        <div style={{ flex: "2", minWidth: "300px" }}>
+          {/* Experience */}
+          {experience?.length > 0 && (
+            <section style={sectionStyle}>
+              <h2 style={titleStyle}>Experience</h2>
+              {experience.map((exp) => (
+                <div key={exp.id} style={{ marginBottom: "16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <div style={labelStyle}>
+                      {exp.position} – {exp.company}
+                    </div>
+                    <div>
+                      {exp.startDate} – {exp.current ? "Present" : exp.endDate}
+                    </div>
+                  </div>
+                  <p>{exp.description}</p>
+                </div>
               ))}
-            </ul>
-          </div>
-        )}
-        {data.hobbies.length > 0 && (
-          <div>
-            <h2 style={{ fontSize: "20px", fontWeight: "600", marginBottom: "12px" }}>
-              Interests
-            </h2>
-            <ul style={{ paddingLeft: "20px", color: "#D1D5DB" }}>
-              {data.hobbies.map((hobby, i) => (
-                <li key={i}>{hobby}</li>
+            </section>
+          )}
+
+          {/* Education */}
+          {education?.length > 0 && (
+            <section style={sectionStyle}>
+              <h2 style={titleStyle}>Education</h2>
+              {education.map((edu) => (
+                <div key={edu.id} style={{ marginBottom: "16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <div style={labelStyle}>
+                      {edu.degree} in {edu.field}
+                    </div>
+                    <div>
+                      {edu.startDate} – {edu.endDate}
+                    </div>
+                  </div>
+                  <p>{edu.institution}</p>
+                  {edu.gpa && <p>GPA: {edu.gpa}</p>}
+                </div>
               ))}
-            </ul>
-          </div>
-        )}
+            </section>
+          )}
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default ModernDark;

@@ -28,9 +28,8 @@ import MinimalWhite from "@/components/cv-templates/Minimal/MinimalWhite"
 import ModernGrid from "@/components/cv-templates/Modern/ModernGrid"
 import ModernDark from "@/components/cv-templates/Modern/ModernDark"
 import ModernLight from "@/components/cv-templates/Modern/ModernLight"
-import TemplatePreview from "./TemplatePreview"
 
-import { useState } from "react"
+import { RefObject, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -40,7 +39,7 @@ interface CVPreviewProps {
   selectedTemplate: string
   onNext: () => void
   onPrev: () => void
-  scrollRef?: React.RefObject<HTMLDivElement>
+  scrollRef: RefObject<HTMLDivElement | null>
 }
 
 const templates = {
@@ -370,7 +369,10 @@ export function CVPreview({ cvData, setCvData, selectedTemplate, onNext, onPrev,
           <ArrowLeft className="mr-2 h-5 w-5" />
           Back to Templates
         </Button>
-        <Button onClick={onNext} size="lg" className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={() => {
+          onNext()
+          scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+        }} size="lg" className="bg-blue-600 hover:bg-blue-700">
           Export Resume
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>

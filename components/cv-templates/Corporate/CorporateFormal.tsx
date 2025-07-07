@@ -1,34 +1,33 @@
-"use client"
+"use client";
 
-import type { CVData } from "@/types/cv-types"
-import { Mail, Phone, MapPin } from "lucide-react"
+import type { CVData } from "@/types/cv-types";
+import { Mail, Phone, MapPin } from "lucide-react";
 
 interface CorporateFormalProps {
-  data: CVData
-  isPreview?: boolean
-  onEdit?: (field: string, value: string) => void
-  editingField?: string | null
+  data: CVData;
+  isPreview?: boolean;
+  onEdit?: (field: string, value: string) => void;
+  editingField?: string | null;
 }
 
 export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFormalProps) {
   const handleClick = (field: string, value: string) => {
     if (!isPreview && onEdit) {
-      onEdit(field, value)
+      onEdit(field, value);
     }
-  }
+  };
 
   return (
-    <div className="h-full w-full p-12 bg-white font-serif text-gray-800 border border-gray-300 shadow-sm">
-      {/* Header */}
+    <div className="h-full w-full p-12 bg-white font-serif text-gray-800 border border-gray-300 text-left">
       <div className="border-b-2 border-gray-500 pb-6 mb-8">
         <h1
-          className={`text-4xl font-bold text-gray-900 uppercase tracking-wider ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-2 rounded" : ""}`}
+          className={`text-4xl font-bold text-gray-900 uppercase tracking-wider ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-2 rounded-sm" : ""}`}
           onClick={() => handleClick("personalInfo.fullName", data.personalInfo.fullName)}
         >
           {data.personalInfo.fullName || "Your Name"}
         </h1>
         <p
-          className={`text-xl text-gray-700 mt-2 italic ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-1 rounded" : ""}`}
+          className={`text-xl text-gray-700 mt-2 italic ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-1 rounded-sm" : ""}`}
           onClick={() => handleClick("personalInfo.jobTitle", data.personalInfo.jobTitle)}
         >
           {data.personalInfo.jobTitle || "Job Title"}
@@ -55,21 +54,19 @@ export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFo
         </div>
       </div>
 
-      {/* Summary */}
       {data.personalInfo.summary && (
         <div className="mb-8">
           <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-400">Summary</h2>
           <p
-            className={`text-gray-700 text-justify leading-relaxed ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-2 rounded" : ""}`}
-            onClick={() => handleClick("personalInfo.summary", data.personalInfo.summary)}
+            className={`text-gray-700 text-justify leading-relaxed ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-2 rounded-sm" : ""}`}
+            onClick={() => handleClick("personalInfo.summary", data.personalInfo.summary ?? "")}
           >
             {data.personalInfo.summary}
           </p>
         </div>
       )}
 
-      {/* Experience */}
-      {data.experience.length > 0 && (
+      {data.experience?.length > 0 && (
         <div className="mb-8">
           <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-400">Professional Experience</h2>
           <div className="space-y-6">
@@ -78,13 +75,13 @@ export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFo
                 <div className="flex justify-between items-start">
                   <div>
                     <h3
-                      className={`font-bold text-gray-900 ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-1 rounded" : ""}`}
+                      className={`font-bold text-gray-900 ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-1 rounded-sm" : ""}`}
                       onClick={() => handleClick(`experience.position.${exp.id}`, exp.position)}
                     >
                       {exp.position}
                     </h3>
                     <p
-                      className={`italic text-gray-700 ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-1 rounded" : ""}`}
+                      className={`italic text-gray-700 ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-1 rounded-sm" : ""}`}
                       onClick={() => handleClick(`experience.company.${exp.id}`, exp.company)}
                     >
                       {exp.company}
@@ -96,7 +93,7 @@ export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFo
                 </div>
                 {exp.description && (
                   <p
-                    className={`text-sm text-gray-700 mt-1 ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-2 rounded" : ""}`}
+                    className={`text-sm text-gray-700 mt-1 ${!isPreview ? "cursor-pointer hover:bg-gray-100 p-2 rounded-sm" : ""}`}
                     onClick={() => handleClick(`experience.description.${exp.id}`, exp.description)}
                   >
                     {exp.description}
@@ -108,8 +105,7 @@ export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFo
         </div>
       )}
 
-      {/* Education */}
-      {data.education.length > 0 && (
+      {data.education?.length > 0 && (
         <div className="mb-8">
           <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-400">Education</h2>
           <div className="space-y-4">
@@ -129,22 +125,19 @@ export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFo
         </div>
       )}
 
-      {/* Skills, Certifications, Languages, Hobbies */}
       <div className="grid md:grid-cols-2 gap-8">
-        {data.skills.length > 0 && (
+        {data.skills?.length > 0 && (
           <div>
-            <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-400">
-              Skills
-            </h2>
+            <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-400">Skills</h2>
             <div className="space-y-2">
               {data.skills.map((skillCategory, i) => (
                 <div key={i}>
-                  <div className="font-medium text-gray-800">{skillCategory.category}</div>
+                  <div className="font-bold text-gray-800">{skillCategory.category}</div>
                   <ul className="flex flex-wrap gap-2 pl-0">
                     {skillCategory.items.map((skill, j) => (
                       <li
                         key={j}
-                        className="bg-gray-100 rounded-full px-3 py-1 text-sm text-gray-700"
+                        className="bg-gray-100 rounded-sm px-3 py-1 text-sm text-gray-700"
                         style={{ listStyle: "none" }}
                       >
                         {skill}
@@ -157,7 +150,7 @@ export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFo
           </div>
         )}
 
-        {data.certifications.length > 0 && (
+        {data.certifications?.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-400">Certifications</h2>
             <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
@@ -168,7 +161,7 @@ export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFo
           </div>
         )}
 
-        {Array.isArray(data.languages) && data.languages.length > 0 && (
+        {data.languages && data.languages.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-400">Languages</h2>
             <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
@@ -182,7 +175,7 @@ export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFo
           </div>
         )}
 
-        {data.hobbies.length > 0 && (
+        {data.hobbies?.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold uppercase text-gray-800 mb-2 border-b border-gray-400">Hobbies</h2>
             <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
@@ -194,5 +187,5 @@ export function CorporateFormal({ data, isPreview = false, onEdit }: CorporateFo
         )}
       </div>
     </div>
-  )
+  );
 }

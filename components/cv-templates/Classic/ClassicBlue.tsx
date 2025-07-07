@@ -62,7 +62,7 @@ export default function ClassicBlue({ data, isPreview = false, onEdit }: Props) 
           <h2 className="text-xl font-semibold mb-3 border-b border-blue-300 pb-1">Professional Summary</h2>
           <p
             className={`text-blue-800 leading-relaxed text-sm text-justify ${!isPreview ? "cursor-pointer hover:bg-blue-100 p-2 rounded" : ""}`}
-            onClick={() => handleClick("personalInfo.summary", data.personalInfo.summary)}
+            onClick={() => handleClick("personalInfo.summary", data.personalInfo.summary ?? "")}
           >
             {data.personalInfo.summary}
           </p>

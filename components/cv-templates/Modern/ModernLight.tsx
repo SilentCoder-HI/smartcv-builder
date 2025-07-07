@@ -98,16 +98,13 @@ const ModernLight: React.FC<Props> = ({ data, isPreview = false, onEdit }: Props
             <section style={sectionStyle}>
               <h3 style={titleStyle}>Skills</h3>
               <ul style={listStyle}>
-                {skills.map((skillObj, i) => {
-                  // Each skillObj is an object with category: string[] pairs
-                  // e.g. { "strategy development": [...], "data analysis": [...] }
-                  return Object.entries(skillObj).map(([category, items], j) => (
-                    <li key={`${i}-${j}`}>
-                      <strong>{category.charAt(0).toUpperCase() + category.slice(1)}:</strong>{" "}
-                      {Array.isArray(items) ? items.join(", ") : String(items)}
-                    </li>
-                  ));
-                })}
+                {skills.map((skillObj, i) => (
+                  <li key={i}>
+                    <strong>{skillObj.category.charAt(0).toUpperCase() + skillObj.category.slice(1)}:</strong>{" "}
+                    
+                    {Array.isArray(skillObj.items) ? skillObj.items.join(", ") : String(skillObj.items)}
+                  </li>
+                ))}
               </ul>
             </section>
           )}

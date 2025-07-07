@@ -9,79 +9,138 @@ import { templates } from "@/data/data"
 export default function HomePage() {
   const mockCVData: CVData = {
     personalInfo: {
-      fullName: "Ayaan Mirza",
-      email: "ayaan.mirza@example.com",
-      phone: "+1 (646) 555-0198",
-      address: "Brooklyn, NY, United States",
-      jobTitle: "Full Stack Developer",
-      summary:
-        "Results-driven Full Stack Developer with 3+ years of experience designing and implementing scalable web applications. Adept in modern JavaScript frameworks, cloud infrastructure, and RESTful API development. Passionate about writing clean, efficient code and solving complex problems.",
+      fullName: "Jonathan E. Blake",
+      email: "jonathan.blake@techmail.com",
+      phone: "+1 (415) 987-6543",
+      address: "500 Mission Street, San Francisco, CA",
+      jobTitle: "Senior Frontend Architect",
+      summary: `Innovative and performance-driven Senior Frontend Architect with 13+ years of progressive experience in designing, developing, and optimizing complex web platforms for enterprise and consumer-grade products. Adept at translating business goals into functional, elegant, and responsive user interfaces using modern JavaScript frameworks such as React, Next.js, and Vue. Experienced in leading frontend teams, mentoring junior developers, and collaborating with cross-functional stakeholders to ensure cohesive design and functionality. Proficient in architecting reusable component libraries, implementing scalable design systems, and ensuring accessibility (WCAG) compliance. Passionate about code quality, system performance, and delivering exceptional digital experiences that delight users and drive growth.`,
     },
+
     education: [
       {
-        id: "edu1",
-        institution: "New York Institute of Technology",
+        id: "edu-1",
+        institution: "Massachusetts Institute of Technology (MIT)",
+        degree: "Master of Science",
+        field: "Human-Computer Interaction",
+        startDate: "2010-09-01",
+        endDate: "2012-06-01",
+        gpa: "3.9",
+      },
+      {
+        id: "edu-2",
+        institution: "University of California, Berkeley",
         degree: "Bachelor of Science",
-        field: "Information Technology",
-        startDate: "2019-09",
-        endDate: "2023-06",
-        gpa: "3.6",
+        field: "Computer Science",
+        startDate: "2006-09-01",
+        endDate: "2010-06-01",
+        gpa: "3.8",
       },
     ],
+
     experience: [
       {
-        id: "exp1",
-        company: "TechNova Solutions",
-        position: "Frontend Developer",
-        startDate: "2023-07",
-        endDate: "2025-03",
-        description:
-          "Developed responsive interfaces using React and Tailwind CSS. Collaborated with designers to improve UI/UX. Implemented dynamic components and handled state management with Redux Toolkit.",
+        id: "exp-1",
+        company: "NextSphere Technologies",
+        position: "Senior Frontend Architect",
+        startDate: "2018-05-01",
+        endDate: "Present",
+        description: `Architected and led the development of enterprise-grade SPAs using React, TypeScript, and GraphQL. Collaborated with product teams and designers to develop component libraries and design systems that reduced dev time by 40%. Migrated legacy AngularJS apps to modern React/Next.js stack, significantly improving performance and user satisfaction. Mentored 8+ junior developers and established code review standards and frontend best practices.`,
+        current: true,
+      },
+      {
+        id: "exp-2",
+        company: "BlueWave Solutions",
+        position: "Lead Frontend Engineer",
+        startDate: "2015-02-01",
+        endDate: "2018-04-30",
+        description: `Led the development of an internal CMS and B2B dashboard used by over 10,000 clients. Introduced TypeScript and modern testing frameworks (Jest, Cypress) into the development pipeline. Coordinated with backend teams to integrate REST and GraphQL APIs, improving data sync and frontend reliability.`,
         current: false,
       },
       {
-        id: "exp2",
-        company: "CloudStack Innovations",
-        position: "Full Stack Developer",
-        startDate: "2025-04",
-        endDate: "",
-        description:
-          "Building and maintaining scalable web apps using Next.js, Node.js, and PostgreSQL. Leading frontend integration and contributing to backend API development. Actively involved in code reviews and DevOps practices.",
-        current: true,
+        id: "exp-3",
+        company: "BrightApps Inc.",
+        position: "Frontend Developer",
+        startDate: "2012-06-01",
+        endDate: "2015-01-31",
+        description: `Built responsive web applications using HTML5, CSS3, JavaScript, and jQuery. Participated in Agile sprints and collaborated with UX teams to implement mobile-first designs. Improved page load times by 30% through smart bundling and lazy loading strategies.`,
+        current: false,
       },
     ],
+
     skills: [
       {
         category: "Frontend",
-        items: ["React", "Next.js", "Tailwind CSS", "TypeScript", "Redux"],
+        items: [
+          "React",
+          "Next.js",
+          "Vue.js",
+          "TypeScript",
+          "Redux Toolkit",
+          "Tailwind CSS",
+          "Storybook",
+        ],
       },
       {
-        category: "Backend",
-        items: ["Node.js", "Express", "PostgreSQL", "MongoDB", "REST APIs"],
+        category: "Backend & APIs",
+        items: ["Node.js", "Express", "GraphQL", "REST APIs", "Firebase"],
       },
       {
         category: "DevOps & Tools",
-        items: ["Docker", "Git", "GitHub Actions", "Vercel", "Jira"],
+        items: [
+          "Docker",
+          "Git",
+          "GitHub Actions",
+          "Vercel",
+          "Webpack",
+          "Jenkins",
+          "CI/CD",
+        ],
+      },
+      {
+        category: "Testing & QA",
+        items: ["Jest", "Cypress", "React Testing Library", "Playwright"],
+      },
+      {
+        category: "Architecture & Design",
+        items: [
+          "Component Libraries",
+          "Design Systems",
+          "Atomic Design",
+          "Accessibility (WCAG)",
+          "Performance Optimization",
+        ],
       },
     ],
+
     certifications: [
-      "Certified JavaScript Developer – HackerRank",
-      "AWS Cloud Practitioner – Amazon Web Services",
-      "Frontend Developer Certification – freeCodeCamp",
+      "Google UX Design Professional Certificate – Coursera",
+      "React & Redux Advanced – Udemy",
+      "Frontend Architect Nanodegree – Udacity",
+      "JavaScript Algorithms and Data Structures – freeCodeCamp",
+      "Advanced TypeScript – Pluralsight",
     ],
-    hobbies: ["Open-source contribution", "Reading tech blogs", "Photography"],
+
     languages: [
       {
         language: "English",
-        proficiency: "Fluent",
-      },
-      {
-        language: "Urdu",
         proficiency: "Native",
       },
+      {
+        language: "Spanish",
+        proficiency: "Professional Working Proficiency",
+      },
     ],
-  };
-  
+
+    hobbies: [
+      "Photography (Street and Landscape)",
+      "Chess (Online Blitz Rated ~2100)",
+      "Tech Blogging (Medium & Dev.to)",
+      "UI/UX Podcast Host",
+      "Mentoring Junior Developers on GitHub",
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Hero Section */}

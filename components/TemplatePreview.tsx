@@ -26,7 +26,6 @@ import MinimalWhite from "@/components/cv-templates/Minimal/MinimalWhite";
 import ModernGrid from "@/components/cv-templates/Modern/ModernGrid";
 import ModernDark from "@/components/cv-templates/Modern/ModernDark";
 import ModernLight from "@/components/cv-templates/Modern/ModernLight";
-import { FC } from "react";
 
 const templates: Record<string, React.FC<{ data: CVData; isPreview: boolean }>> = {
     "classic-black": ClassicBlack,

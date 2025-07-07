@@ -4,9 +4,9 @@ export interface PersonalInfo {
   fullName: string
   email: string
   phone: string
-  address: string
+  address?: string
   jobTitle: string
-  summary: string
+  summary?: string
 }
 
 export interface Education {

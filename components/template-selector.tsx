@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react"
 import type { CVData, Template } from "@/types/cv-types"
-import { useEffect, useRef, useState } from "react"
+import { RefObject, useEffect, useRef, useState } from "react"
 import TemplatePreview from "./TemplatePreview"
 import { templates } from "@/data/data"
 
@@ -14,7 +14,7 @@ interface TemplateSelectorProps {
   cvData: CVData
   onNext: () => void
   onPrev: () => void
-  scrollRef?: React.RefObject<HTMLDivElement>
+  scrollRef: RefObject<HTMLDivElement | null>
 }
 const categorySortOrder = [
   "Professional",

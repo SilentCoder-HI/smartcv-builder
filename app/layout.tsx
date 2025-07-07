@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 import Header from '@/components/header'
 import Footer from '@/components/Footer'
+import ReduxProvider from '@/components/providers/ReduxProvider'
+import ClientInitializer from '@/components/providers/ClientInitializer'
 
 export const metadata: Metadata = {
   title: 'SmartCV Builder | AI-Powered Resume Builder',
@@ -32,9 +34,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Header />
-        {children}
-        <Footer/>
+        <ReduxProvider>
+          <ClientInitializer>
+            <Header />
+            {children}
+            <Footer />
+          </ClientInitializer>
+        </ReduxProvider>
       </body>
     </html>
   )

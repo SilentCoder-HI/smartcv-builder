@@ -29,82 +29,138 @@ const categoryDisplayNames: { [key: string]: string } = {
 }
 const sampleCV = {
   personalInfo: {
-    fullName: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Main Street, New York, NY",
-    jobTitle: "Frontend Developer",
-    summary:
-      "Creative and detail-oriented Frontend Developer with 3+ years of experience building scalable, responsive web applications using React, TypeScript, and modern UI libraries.",
+    fullName: "Jonathan E. Blake",
+    email: "jonathan.blake@techmail.com",
+    phone: "+1 (415) 987-6543",
+    address: "500 Mission Street, San Francisco, CA",
+    jobTitle: "Senior Frontend Architect",
+    summary: `Innovative and performance-driven Senior Frontend Architect with 13+ years of progressive experience in designing, developing, and optimizing complex web platforms for enterprise and consumer-grade products. Adept at translating business goals into functional, elegant, and responsive user interfaces using modern JavaScript frameworks such as React, Next.js, and Vue. Experienced in leading frontend teams, mentoring junior developers, and collaborating with cross-functional stakeholders to ensure cohesive design and functionality. Proficient in architecting reusable component libraries, implementing scalable design systems, and ensuring accessibility (WCAG) compliance. Passionate about code quality, system performance, and delivering exceptional digital experiences that delight users and drive growth.`,
   },
 
   education: [
     {
       id: "edu-1",
-      institution: "New York University",
+      institution: "Massachusetts Institute of Technology (MIT)",
+      degree: "Master of Science",
+      field: "Human-Computer Interaction",
+      startDate: "2010-09-01",
+      endDate: "2012-06-01",
+      gpa: "3.9",
+    },
+    {
+      id: "edu-2",
+      institution: "University of California, Berkeley",
       degree: "Bachelor of Science",
       field: "Computer Science",
-      startDate: "2016-09-01",
-      endDate: "2020-06-01",
-      gpa: "3.7",
+      startDate: "2006-09-01",
+      endDate: "2010-06-01",
+      gpa: "3.8",
     },
   ],
 
   experience: [
     {
       id: "exp-1",
-      company: "TechNova Inc.",
-      position: "Frontend Developer",
-      startDate: "2022-01-01",
+      company: "NextSphere Technologies",
+      position: "Senior Frontend Architect",
+      startDate: "2018-05-01",
       endDate: "Present",
-      description:
-        "Built and maintained user-facing features using React and Next.js. Collaborated with designers and backend developers to create high-quality UI/UX experiences.",
+      description: `Architected and led the development of enterprise-grade SPAs using React, TypeScript, and GraphQL. Collaborated with product teams and designers to develop component libraries and design systems that reduced dev time by 40%. Migrated legacy AngularJS apps to modern React/Next.js stack, significantly improving performance and user satisfaction. Mentored 8+ junior developers and established code review standards and frontend best practices.`,
       current: true,
     },
     {
       id: "exp-2",
-      company: "WebWorks Studio",
-      position: "Junior Web Developer",
-      startDate: "2020-07-01",
-      endDate: "2021-12-01",
-      description:
-        "Assisted in designing and developing responsive websites. Maintained internal CMS and worked with clients to update site content.",
+      company: "BlueWave Solutions",
+      position: "Lead Frontend Engineer",
+      startDate: "2015-02-01",
+      endDate: "2018-04-30",
+      description: `Led the development of an internal CMS and B2B dashboard used by over 10,000 clients. Introduced TypeScript and modern testing frameworks (Jest, Cypress) into the development pipeline. Coordinated with backend teams to integrate REST and GraphQL APIs, improving data sync and frontend reliability.`,
+      current: false,
+    },
+    {
+      id: "exp-3",
+      company: "BrightApps Inc.",
+      position: "Frontend Developer",
+      startDate: "2012-06-01",
+      endDate: "2015-01-31",
+      description: `Built responsive web applications using HTML5, CSS3, JavaScript, and jQuery. Participated in Agile sprints and collaborated with UX teams to implement mobile-first designs. Improved page load times by 30% through smart bundling and lazy loading strategies.`,
       current: false,
     },
   ],
+
   skills: [
     {
       category: "Frontend",
-      items: ["React", "Next.js", "Tailwind CSS", "TypeScript", "Redux"],
+      items: [
+        "React",
+        "Next.js",
+        "Vue.js",
+        "TypeScript",
+        "Redux Toolkit",
+        "Tailwind CSS",
+        "Storybook",
+      ],
     },
     {
-      category: "Backend",
-      items: ["Node.js", "Express", "PostgreSQL", "MongoDB", "REST APIs"],
+      category: "Backend & APIs",
+      items: ["Node.js", "Express", "GraphQL", "REST APIs", "Firebase"],
     },
     {
       category: "DevOps & Tools",
-      items: ["Docker", "Git", "GitHub Actions", "Vercel", "Jira"],
+      items: [
+        "Docker",
+        "Git",
+        "GitHub Actions",
+        "Vercel",
+        "Webpack",
+        "Jenkins",
+        "CI/CD",
+      ],
+    },
+    {
+      category: "Testing & QA",
+      items: ["Jest", "Cypress", "React Testing Library", "Playwright"],
+    },
+    {
+      category: "Architecture & Design",
+      items: [
+        "Component Libraries",
+        "Design Systems",
+        "Atomic Design",
+        "Accessibility (WCAG)",
+        "Performance Optimization",
+      ],
     },
   ],
 
   certifications: [
-    "Frontend Developer Certification - freeCodeCamp",
-    "JavaScript Algorithms and Data Structures - Coursera",
+    "Google UX Design Professional Certificate – Coursera",
+    "React & Redux Advanced – Udemy",
+    "Frontend Architect Nanodegree – Udacity",
+    "JavaScript Algorithms and Data Structures – freeCodeCamp",
+    "Advanced TypeScript – Pluralsight",
   ],
 
   languages: [
     {
       language: "English",
-      proficiency: "Fluent",
+      proficiency: "Native",
     },
     {
-      language: "Urdu",
-      proficiency: "Native",
+      language: "Spanish",
+      proficiency: "Professional Working Proficiency",
     },
   ],
 
-  hobbies: ["Photography", "Chess", "Blogging", "Traveling"],
+  hobbies: [
+    "Photography (Street and Landscape)",
+    "Chess (Online Blitz Rated ~2100)",
+    "Tech Blogging (Medium & Dev.to)",
+    "UI/UX Podcast Host",
+    "Mentoring Junior Developers on GitHub",
+  ],
 }
+
 
 
 export default function TemplatesPage() {
