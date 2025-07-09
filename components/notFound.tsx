@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-full bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <section className="py-20 px-4">
         <div className="container mx-auto text-center max-w-4xl">
           <div className="mb-8">

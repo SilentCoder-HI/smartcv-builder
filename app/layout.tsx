@@ -4,6 +4,7 @@ import Header from '@/components/header'
 import Footer from '@/components/Footer'
 import ReduxProvider from '@/components/providers/ReduxProvider'
 import ClientInitializer from '@/components/providers/ClientInitializer'
+import Providers from '@/components/providers/nextauth'
 
 export const metadata: Metadata = {
   title: 'SmartCV Builder | AI-Powered Resume Builder',
@@ -34,13 +35,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ReduxProvider>
-          <ClientInitializer>
-            <Header />
-            {children}
-            <Footer />
-          </ClientInitializer>
-        </ReduxProvider>
+        <Providers>          
+          <ReduxProvider>
+            <ClientInitializer>
+              <Header />
+              {children}
+              <Footer />
+            </ClientInitializer>
+          </ReduxProvider>
+        </Providers>
       </body>
     </html>
   )
