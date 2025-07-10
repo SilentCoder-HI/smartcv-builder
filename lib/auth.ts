@@ -39,6 +39,7 @@ export const getAuthOptions = async (): Promise<NextAuthOptions> => {
     ],
     callbacks: {
       async jwt({ token, user }) {
+        // Attach user fields to token for session callback
         if (user) {
           token.id = typeof user.id === 'string' ? user.id : String(user.id);
           token.name = user.name ?? undefined;
@@ -47,6 +48,7 @@ export const getAuthOptions = async (): Promise<NextAuthOptions> => {
         return token as JWT;
       },
       async session({ session, token }) {
+        // Attach token fields to session.user
         if (session.user) {
           session.user.id = typeof token.id === 'string' ? token.id : '';
           session.user.name = token.name || session.user.name;
@@ -54,6 +56,13 @@ export const getAuthOptions = async (): Promise<NextAuthOptions> => {
         }
         return session;
       },
+    },
+    session: {
+      strategy: 'jwt',
+    },
+    pages: {
+      signIn: '/auth/signin',
+      error: '/auth/error',
     },
   };
 };

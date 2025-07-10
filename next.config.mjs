@@ -11,10 +11,26 @@ const nextConfig = {
     },
   },
   webpack(config) {
+    // Exclude .svg from default asset handling
+    const fileLoaderRule = config.module.rules.find((rule) =>
+      rule.test?.test?.('.svg')
+    );
+    if (fileLoaderRule) {
+      fileLoaderRule.exclude = /\.svg$/;
+    }
+
+    // Ignore .map files
     config.module.rules.push({
       test: /\.map$/,
-      use: 'ignore-loader', // <- ignore .map files
+      use: 'ignore-loader',
     });
+
+    // Add SVGR loader for SVGs
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack'],
+    });
+
     return config;
   },
 };

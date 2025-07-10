@@ -43,15 +43,15 @@ const Header = () => {
               >
                 Dashboard
               </Link>
-            </>
-          ) : (
-            <>
               <button
                 onClick={() => signOut()}
                 className="text-sm text-gray-600 hover:text-red-600 transition"
               >
                 Sign Out
               </button>
+            </>
+          ) : (
+            <>
               <Link
                 href={"/auth?mode=signin"}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
