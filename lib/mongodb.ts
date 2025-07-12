@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient } from "mongodb";
 
 const uri = process.env.MONGODB_URI!;
 const options = {};
@@ -17,6 +17,5 @@ if (!global._mongoClientPromise) {
 
 clientPromise = global._mongoClientPromise;
 
-export default async function getMongoClient() {
-  return clientPromise;
-}
+// ✅ Export the actual promise, NOT a function
+export default clientPromise;
