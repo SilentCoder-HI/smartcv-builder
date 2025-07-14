@@ -1,3 +1,4 @@
+"use client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -5,8 +6,8 @@ import { FileText, Zap, Download, Sparkles } from "lucide-react"
 import TemplatePreview from "@/components/TemplatePreview"
 import { CVData } from "@/types/cv-types"
 import { templates } from "@/data/data"
-
 export default function HomePage() {
+
   const mockCVData: CVData = {
     personalInfo: {
       fullName: "Jonathan E. Blake",

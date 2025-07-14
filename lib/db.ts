@@ -1,30 +1,34 @@
-// lib/db.ts
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI || "";
+const MONGODB_URI: string = process.env.MONGODB_URI || "";
 
 if (!MONGODB_URI) {
   throw new Error("⚠️ Please define the MONGODB_URI environment variable in .env.local");
 }
 
-let cached = (global as any).mongoose;
-
-if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
+declare global {
+  var mongoose: {
+    conn: Mongoose | null;
+    promise: Promise<Mongoose> | null;
+  };
 }
 
-async function connectDB() {
-  if (cached.conn) {
-    return cached.conn;
-  }
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function connectDB(): Promise<Mongoose> {
+  if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
     cached.promise = mongoose.connect(MONGODB_URI, {
-      dbName: "SmartCvBuilder", // Optional: your DB name
+      dbName: "SmartCvBuilder",
       bufferCommands: false,
-    }).then((mongoose) => {
+    }).then((mongooseInstance) => {
       console.log("✅ MongoDB Connected");
-      return mongoose;
+      return mongooseInstance;
     });
   }
 

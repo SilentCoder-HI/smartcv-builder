@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import UserAddressCard from "./user-profile/UserAddressCard";
 import UserInfoCard from "./user-profile/UserInfoCard";
 import UserMetaCard from "./user-profile/UserMetaCard";
 
@@ -90,7 +89,6 @@ export default function SettingsPage() {
         <>
         <UserMetaCard/>
         <UserInfoCard/>
-        <UserAddressCard/>
         </>
       )}
 

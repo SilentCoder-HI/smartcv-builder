@@ -7,16 +7,18 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   profilePic: { type: String },
   provider: {
-    type: String,   // 👈 You had a full object here before, which caused the cast error
+    type: String,
     default: 'credentials',
     required: false,
   },
   password: {
     type: String,
-    required: false, // ✅ Make password optional for OAuth users
+    required: false,
     default: 'credentials',
   },
+  plan: { type: String, required: true }
 });
 
-const User = mongoose.models.User || mongoose.model("user", userSchema);
+// Prevent OverwriteModelError by checking for existing model
+const User = mongoose.models.Users || mongoose.model("Users", userSchema);
 export default User;
