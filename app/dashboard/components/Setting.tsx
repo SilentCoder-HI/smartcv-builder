@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Trash2,
   ExternalLink,
@@ -20,9 +20,15 @@ import UserMetaCard from "./user-profile/UserMetaCard";
 
 type SectionType = "menu" | "account" | "usage" | "links" | "other";
 
-export default function SettingsPage() {
-  const [view, setView] = useState<SectionType>("menu");
+type SettingsPageProps = {
+  sub?: string;
+  onNavigate?: (view: string, sub?: string) => void;
+};
+
+export default function SettingsPage({ sub, onNavigate }: SettingsPageProps) {
   const [loading, setLoading] = useState(false);
+
+  const section = (sub as SectionType) || "menu";
 
   const handleDeleteAccount = () => {
     setLoading(true);
@@ -37,7 +43,7 @@ export default function SettingsPage() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setView("menu")}
+        onClick={() => onNavigate?.("/settings", "menu")}
         className="rounded-full"
       >
         <ArrowLeft />
@@ -48,12 +54,12 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto p-6 min-h-screen">
-      {view === "menu" && (
+      {section === "menu" && (
         <div className="grid gap-4">
           <Button
             variant="outline"
             className="flex justify-start gap-3"
-            onClick={() => setView("account")}
+            onClick={() => onNavigate?.("/settings", "account")}
           >
             <User size={18} />
             Account
@@ -61,7 +67,7 @@ export default function SettingsPage() {
           <Button
             variant="outline"
             className="flex justify-start gap-3"
-            onClick={() => setView("usage")}
+            onClick={() => onNavigate?.("/settings", "usage")}
           >
             <PieChart size={18} />
             Usage
@@ -69,7 +75,7 @@ export default function SettingsPage() {
           <Button
             variant="outline"
             className="flex justify-start gap-3"
-            onClick={() => setView("links")}
+            onClick={() => onNavigate?.("/settings", "links")}
           >
             <Link size={18} />
             Links
@@ -77,7 +83,7 @@ export default function SettingsPage() {
           <Button
             variant="outline"
             className="flex justify-start gap-3"
-            onClick={() => setView("other")}
+            onClick={() => onNavigate?.("/settings", "other")}
           >
             <Settings2 size={18} />
             Other
@@ -85,17 +91,16 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {view === "account" && (
+      {section === "account" && (
         <>
-        <UserMetaCard/>
-        <UserInfoCard/>
+          <UserMetaCard />
+          <UserInfoCard />
         </>
       )}
 
-      {view === "usage" && (
+      {section === "usage" && (
         <div className="space-y-6">
           {renderHeader("Usage")}
-
           <div>
             <p className="mb-1 text-sm font-medium">📄 CVs Created (3 / 5)</p>
             <Progress value={(3 / 5) * 100} />
@@ -108,12 +113,11 @@ export default function SettingsPage() {
             <p className="mb-1 text-sm font-medium">📤 Exports (5 / 10)</p>
             <Progress value={(5 / 10) * 100} />
           </div>
-
           <Button variant="outline">Upgrade to Pro</Button>
         </div>
       )}
 
-      {view === "links" && (
+      {section === "links" && (
         <div className="space-y-4">
           {renderHeader("Links")}
           <div>
@@ -132,7 +136,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {view === "other" && (
+      {section === "other" && (
         <div className="space-y-4">
           {renderHeader("Other")}
           <Button variant="ghost" size="sm" className="flex items-center gap-2">

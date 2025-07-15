@@ -25,7 +25,7 @@ export default function AdminLayout({
     <SessionProvider>
       <div className="min-h-screen xl:flex">
         {/* Sidebar and Backdrop */}
-        <AppSidebar />
+        {/* <AppSidebar /> */}
         <Backdrop />
         {/* Main Content Area */}
         <div
@@ -34,7 +34,7 @@ export default function AdminLayout({
           {/* Header */}
           <AppHeader />
           {/* Page Content */}
-          <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">{children}</div>
+          <div className="mx-auto">{children}</div>
         </div>
       </div>
     </SessionProvider>
