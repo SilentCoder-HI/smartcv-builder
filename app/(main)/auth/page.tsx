@@ -1,4 +1,4 @@
-'use client';
+'use client'; // 👈 MUST be the first line — even before imports
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
