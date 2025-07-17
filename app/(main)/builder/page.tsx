@@ -119,7 +119,7 @@ export default function BuilderPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Progress Bar */}
-      <div className="bg-white border-b">
+      <div className="bg-white border-b" ref={mainRef}>
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             {steps.map((step, index) => (
@@ -170,7 +170,7 @@ export default function BuilderPage() {
       </div>
 
       {/* Main Content */}
-      <main ref={mainRef} className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8">
         {renderStepContent()}
       </main>
     </div>

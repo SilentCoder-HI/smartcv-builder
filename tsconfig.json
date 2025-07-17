@@ -28,6 +28,9 @@
       ],
       "@dashboard/*": [
         "./app/dashboard/*"
+      ],
+      "@demo/*": [
+        "./app/demo/*"
       ]
     }
   },

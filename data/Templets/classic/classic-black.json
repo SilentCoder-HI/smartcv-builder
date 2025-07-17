@@ -1,0 +1,314 @@
+{
+    "templateId": "classic-black",
+    "templateName": "Classic Black",
+    "description": "A professional black and white resume template with clean typography",
+    "templateType": "classic",
+    "version": "1.1",
+    "plan": "free",
+    "demo": true,
+    "styles": {
+        "root": {
+            "backgroundColor": "white",
+            "padding": "40px",
+            "fontFamily": "serif",
+            "color": "black",
+            "width": "100%",
+            "minHeight": "297mm",
+            "maxWidth": "210mm",
+            "margin": "0 auto"
+        },
+        "header": {
+            "wrapper": {
+                "textAlign": "center",
+                "marginBottom": "2.5rem",
+                "paddingBottom": "1.5rem",
+                "borderBottom": "1px solid #d1d5db"
+            },
+            "h1": {
+                "fontSize": "2.25rem",
+                "fontWeight": "bold",
+                "marginBottom": "0.25rem"
+            },
+            "jobTitle": {
+                "fontSize": "1.125rem",
+                "fontStyle": "italic",
+                "marginBottom": "1rem",
+                "color": "#4b5563"
+            },
+            "contact": {
+                "container": {
+                    "display": "flex",
+                    "justifyContent": "center",
+                    "gap": "1.5rem",
+                    "fontSize": "0.875rem",
+                    "color": "#4b5563"
+                },
+                "item": {
+                    "display": "flex",
+                    "alignItems": "center"
+                },
+                "icon": {
+                    "width": "1rem",
+                    "height": "1rem",
+                    "marginRight": "0.25rem"
+                }
+            }
+        },
+        "summary": {
+            "sectionTitle": {
+                "fontSize": "1.25rem",
+                "fontWeight": 600,
+                "marginBottom": "0.75rem",
+                "borderBottom": "1px solid #d1d5db",
+                "paddingBottom": "0.25rem"
+            },
+            "summaryText": {
+                "color": "#1f2937",
+                "lineHeight": 1.6,
+                "fontSize": "0.875rem",
+                "textAlign": "justify"
+            }
+        },
+        "layout": {
+            "twoColumn": {
+                "display": "grid",
+                "gridTemplateColumns": "repeat(auto-fit, minmax(300px, 1fr))",
+                "gap": "3rem"
+            },
+            "leftColumn": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "2.5rem"
+            },
+            "rightColumn": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "2.5rem"
+            },
+            "experienceList": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "1.5rem"
+            },
+            "educationList": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "1.5rem"
+            },
+            "skillsList": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "1.5rem"
+            },
+            "skillsContainer": {
+                "display": "flex",
+                "flexWrap": "wrap",
+                "gap": "0.5rem"
+            }
+        },
+        "experience": {
+            "h3": {
+                "fontSize": "1rem",
+                "fontWeight": "bold",
+                "color": "black"
+            },
+            "h4": {
+                "fontSize": "0.875rem",
+                "fontStyle": "italic",
+                "color": "#4b5563"
+            },
+            "dateText": {
+                "fontSize": "0.75rem",
+                "color": "#6b7280"
+            },
+            "summaryText": {
+                "fontSize": "0.875rem",
+                "marginTop": "0.5rem",
+                "color": "#1f2937",
+                "lineHeight": 1.6
+            },
+            "sectionTitle": {
+                "fontSize": "1.25rem",
+                "fontWeight": 600,
+                "marginBottom": "0.75rem",
+                "borderBottom": "1px solid #d1d5db",
+                "paddingBottom": "0.25rem"
+            }
+        },
+        "education": {
+            "h3": {
+                "fontSize": "1rem",
+                "fontWeight": "bold",
+                "color": "black"
+            },
+            "h4": {
+                "fontSize": "0.875rem",
+                "color": "#4b5563"
+            },
+            "dateText": {
+                "fontSize": "0.75rem",
+                "color": "#6b7280"
+            },
+            "gpaText": {
+                "fontSize": "0.75rem",
+                "color": "#6b7280"
+            },
+            "sectionTitle": {
+                "fontSize": "1.25rem",
+                "fontWeight": 600,
+                "marginBottom": "0.75rem",
+                "borderBottom": "1px solid #d1d5db",
+                "paddingBottom": "0.25rem"
+            }
+        },
+        "skills": {
+            "skillCategory": {
+                "fontWeight": "bold",
+                "color": "#374151",
+                "fontSize": "0.95rem",
+                "marginBottom": "0.25rem"
+            },
+            "skillItem": {
+                "backgroundColor": "#f3f4f6",
+                "fontSize": "0.875rem",
+                "padding": "0.25rem 0.75rem",
+                "borderRadius": "9999px",
+                "color": "#1f2937"
+            },
+            "container": {
+                "display": "flex",
+                "flexWrap": "wrap",
+                "gap": "0.5rem"
+            },
+            "sectionTitle": {
+                "fontSize": "1.25rem",
+                "fontWeight": 600,
+                "marginBottom": "0.75rem",
+                "borderBottom": "1px solid #d1d5db",
+                "paddingBottom": "0.25rem"
+            }
+        },
+        "certifications": {
+            "sectionTitle": {
+                "fontSize": "1.25rem",
+                "fontWeight": 600,
+                "marginBottom": "0.75rem",
+                "borderBottom": "1px solid #d1d5db",
+                "paddingBottom": "0.25rem"
+            },
+            "list": {
+                "listStyle": "disc",
+                "paddingLeft": "1rem",
+                "fontSize": "0.875rem",
+                "color": "#1f2937"
+            }
+        },
+        "languages": {
+            "sectionTitle": {
+                "fontSize": "1.25rem",
+                "fontWeight": 600,
+                "marginBottom": "0.75rem",
+                "borderBottom": "1px solid #d1d5db",
+                "paddingBottom": "0.25rem"
+            },
+            "list": {
+                "listStyle": "disc",
+                "paddingLeft": "1rem",
+                "fontSize": "0.875rem",
+                "color": "#1f2937"
+            }
+        },
+        "hobbies": {
+            "sectionTitle": {
+                "fontSize": "1.25rem",
+                "fontWeight": 600,
+                "marginBottom": "0.75rem",
+                "borderBottom": "1px solid #d1d5db",
+                "paddingBottom": "0.25rem"
+            },
+            "list": {
+                "listStyle": "disc",
+                "paddingLeft": "1rem",
+                "fontSize": "0.875rem",
+                "color": "#1f2937"
+            }
+        }
+    },
+    "structure": {
+        "layout": "two-column",
+        "sections": [
+            {
+                "id": "header",
+                "title": "Header",
+                "fields": [
+                    "fullName",
+                    "jobTitle",
+                    "email",
+                    "phone",
+                    "address"
+                ]
+            },
+            {
+                "id": "summary",
+                "title": "Professional Summary",
+                "fields": [
+                    "summary"
+                ]
+            },
+            {
+                "id": "experience",
+                "title": "Experience",
+                "fields": [
+                    "position",
+                    "company",
+                    "startDate",
+                    "endDate",
+                    "current",
+                    "description"
+                ]
+            },
+            {
+                "id": "education",
+                "title": "Education",
+                "fields": [
+                    "degree",
+                    "field",
+                    "institution",
+                    "startDate",
+                    "endDate",
+                    "gpa"
+                ]
+            },
+            {
+                "id": "skills",
+                "title": "Skills",
+                "fields": [
+                    "category",
+                    "items"
+                ]
+            },
+            {
+                "id": "certifications",
+                "title": "Certifications",
+                "fields": [
+                    "certifications"
+                ]
+            },
+            {
+                "id": "languages",
+                "title": "Languages",
+                "fields": [
+                    "language",
+                    "proficiency"
+                ]
+            },
+            {
+                "id": "hobbies",
+                "title": "Hobbies",
+                "fields": [
+                    "hobbies"
+                ]
+            }
+        ]
+    }
+}

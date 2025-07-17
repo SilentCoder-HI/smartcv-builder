@@ -248,7 +248,7 @@ export default function HomePage() {
           transition={{ ...fadeIn.transition, delay: 0.4 }}
           className="flex flex-col sm:flex-row justify-center gap-6 max-w-md mx-auto"
         >
-          <Link href="/builder">
+          <Link href="/auth?mode=signin">
             <Button
               size="lg"
               className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-12 py-5 rounded-lg shadow-lg transition transform hover:scale-105"
@@ -256,13 +256,13 @@ export default function HomePage() {
               Create My Resume <Zap className="ml-3 h-6 w-6 animate-bounce" />
             </Button>
           </Link>
-          <Link href="/templates">
+          <Link href="/demo">
             <Button
               size="lg"
               variant="outline"
               className="text-xl px-12 py-5 rounded-lg bg-white text-gray-800 border border-gray-300 hover:bg-gray-100 shadow"
             >
-              View Templates
+              Try Demo
             </Button>
           </Link>
         </motion.div>

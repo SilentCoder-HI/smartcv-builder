@@ -11,6 +11,7 @@ interface ToastProps {
   message: string
   type?: ToastType
   duration?: number // in ms
+  className?: string
 }
 
 const icons = {
@@ -20,7 +21,12 @@ const icons = {
   confirm: <AlertCircle className="w-5 h-5" />,
 }
 
-export const Toast = ({ message, type = "info", duration = 3000 }: ToastProps) => {
+export const Toast = ({
+  message,
+  type = "info",
+  duration = 3000,
+  className = "",
+}: ToastProps) => {
   const [show, setShow] = useState(true)
 
   useEffect(() => {
@@ -31,15 +37,18 @@ export const Toast = ({ message, type = "info", duration = 3000 }: ToastProps) =
   if (!show) return null
 
   return (
-    <div className={clsx(
-      "fixed top-4 right-4 flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity",
-      {
-        "bg-blue-600": type === "info",
-        "bg-green-600": type === "success",
-        "bg-red-600": type === "error",
-        "bg-yellow-600": type === "confirm",
-      }
-    )}>
+    <div
+      className={clsx(
+        "fixed top-4 right-4 flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity",
+        {
+          "bg-blue-600": type === "info",
+          "bg-green-600": type === "success",
+          "bg-red-600": type === "error",
+          "bg-yellow-600": type === "confirm",
+        },
+        className
+      )}
+    >
       {icons[type]}
       <span>{message}</span>
     </div>
