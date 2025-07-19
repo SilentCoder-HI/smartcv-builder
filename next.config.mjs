@@ -9,6 +9,8 @@ const nextConfig = {
         "html-docx-js": "html-docx-js-typescript",
       },
     },
+    // ✅ Add this to allow mobile devices on your local network
+    allowedDevOrigins: ['http://192.168.100.4:3000'], // Replace with your PC's current IP if different
   },
   webpack(config) {
     // Exclude .svg from default asset handling

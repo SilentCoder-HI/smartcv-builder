@@ -1,6 +1,7 @@
 import { TemplateMeta } from "@/types/template-types"
 import classicBlack from "./Templets/classic/classic-black.json"
 import classicBlue from "./Templets/classic/classic-blue.json"
+import corporateFormal from "./Templets/corporate/CorporateFormal.json"
 // import elegantContrast from "./elegant-contrast.json"
 // import colorfulCreative from "./colorful-creative.json"
 // import modernMinimal from "./modern-minimal.json"
@@ -14,6 +15,8 @@ export const templates: TemplateMeta[] = [
     classicBlack,
     // @ts-expect-error - textAlign type mismatch from raw JSON
     classicBlue,
+    // @ts-expect-error - textAlign type mismatch from raw JSON
+    corporateFormal,
     //   elegantContrast,
     //   colorfulCreative,
     //   modernMinimal,

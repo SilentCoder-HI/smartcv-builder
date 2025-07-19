@@ -1,0 +1,289 @@
+{
+    "templateId": "corporate-formal",
+    "templateName": "Corporate Formal",
+    "description": "A clean, formal corporate resume template with modern serif typography and subtle gray accents.",
+    "templateType": "corporate",
+    "version": "1.0",
+    "plan": "free",
+    "demo": true,
+    "styles": {
+        "root": {
+            "backgroundColor": "white",
+            "padding": "48px",
+            "fontFamily": "serif",
+            "color": "#374151",
+            "width": "100%",
+            "minHeight": "297mm",
+            "maxWidth": "210mm",
+            "margin": "0 auto",
+            "border": "1px solid #d1d5db",
+            "textAlign": "left"
+        },
+        "header": {
+            "wrapper": {
+                "borderBottom": "2px solid #6b7280",
+                "paddingBottom": "1.5rem",
+                "marginBottom": "2rem"
+            },
+            "h1": {
+                "fontSize": "2.25rem",
+                "fontWeight": "bold",
+                "textTransform": "uppercase",
+                "letterSpacing": "0.1em",
+                "color": "#111827"
+            },
+            "jobTitle": {
+                "fontSize": "1.25rem",
+                "fontStyle": "italic",
+                "marginTop": "0.5rem",
+                "color": "#374151"
+            },
+            "contact": {
+                "container": {
+                    "display": "flex",
+                    "gap": "1.5rem",
+                    "marginTop": "1rem",
+                    "fontSize": "0.95rem",
+                    "color": "#4b5563"
+                },
+                "item": {
+                    "display": "flex",
+                    "alignItems": "center",
+                    "gap": "0.25rem"
+                },
+                "icon": {
+                    "width": "1rem",
+                    "height": "1rem"
+                }
+            }
+        },
+        "summary": {
+            "sectionTitle": {
+                "fontSize": "1.1rem",
+                "fontWeight": 600,
+                "textTransform": "uppercase",
+                "color": "#1f2937",
+                "marginBottom": "0.5rem",
+                "borderBottom": "1px solid #9ca3af"
+            },
+            "summaryText": {
+                "color": "#374151",
+                "fontSize": "0.98rem",
+                "lineHeight": 1.7,
+                "textAlign": "justify"
+            }
+        },
+        "experience": {
+            "sectionTitle": {
+                "fontSize": "1.1rem",
+                "fontWeight": 600,
+                "textTransform": "uppercase",
+                "color": "#1f2937",
+                "marginBottom": "0.5rem",
+                "borderBottom": "1px solid #9ca3af"
+            },
+            "h3": {
+                "fontWeight": "bold",
+                "color": "#111827"
+            },
+            "company": {
+                "fontStyle": "italic",
+                "color": "#374151"
+            },
+            "dateText": {
+                "fontSize": "0.9rem",
+                "color": "#6b7280"
+            },
+            "description": {
+                "fontSize": "0.95rem",
+                "color": "#374151",
+                "marginTop": "0.5rem"
+            }
+        },
+        "education": {
+            "sectionTitle": {
+                "fontSize": "1.1rem",
+                "fontWeight": 600,
+                "textTransform": "uppercase",
+                "color": "#1f2937",
+                "marginBottom": "0.5rem",
+                "borderBottom": "1px solid #9ca3af"
+            },
+            "h3": {
+                "fontWeight": "bold",
+                "color": "#111827"
+            },
+            "institution": {
+                "fontStyle": "italic",
+                "color": "#374151"
+            },
+            "dateText": {
+                "fontSize": "0.9rem",
+                "color": "#6b7280"
+            },
+            "gpaText": {
+                "fontSize": "0.9rem",
+                "color": "#6b7280"
+            }
+        },
+        "skills": {
+            "sectionTitle": {
+                "fontSize": "1.1rem",
+                "fontWeight": 600,
+                "textTransform": "uppercase",
+                "color": "#1f2937",
+                "marginBottom": "0.5rem",
+                "borderBottom": "1px solid #9ca3af"
+            },
+            "skillCategory": {
+                "fontWeight": "bold",
+                "color": "#374151",
+                "fontSize": "1rem"
+            },
+            "skillItem": {
+                "backgroundColor": "#f3f4f6",
+                "fontSize": "0.95rem",
+                "padding": "0.25rem 0.75rem",
+                "borderRadius": "0.25rem",
+                "color": "#374151"
+            },
+            "container": {
+                "display": "flex",
+                "flexWrap": "wrap",
+                "gap": "0.5rem"
+            }
+        },
+        "certifications": {
+            "sectionTitle": {
+                "fontSize": "1.1rem",
+                "fontWeight": 600,
+                "textTransform": "uppercase",
+                "color": "#1f2937",
+                "marginBottom": "0.5rem",
+                "borderBottom": "1px solid #9ca3af"
+            },
+            "list": {
+                "listStyle": "disc",
+                "paddingLeft": "1rem",
+                "fontSize": "0.95rem",
+                "color": "#374151"
+            }
+        },
+        "languages": {
+            "sectionTitle": {
+                "fontSize": "1.1rem",
+                "fontWeight": 600,
+                "textTransform": "uppercase",
+                "color": "#1f2937",
+                "marginBottom": "0.5rem",
+                "borderBottom": "1px solid #9ca3af"
+            },
+            "list": {
+                "listStyle": "disc",
+                "paddingLeft": "1rem",
+                "fontSize": "0.95rem",
+                "color": "#374151"
+            }
+        },
+        "hobbies": {
+            "sectionTitle": {
+                "fontSize": "1.1rem",
+                "fontWeight": 600,
+                "textTransform": "uppercase",
+                "color": "#1f2937",
+                "marginBottom": "0.5rem",
+                "borderBottom": "1px solid #9ca3af"
+            },
+            "list": {
+                "listStyle": "disc",
+                "paddingLeft": "1rem",
+                "fontSize": "0.95rem",
+                "color": "#374151"
+            }
+        },
+        "layout": {
+            "twoColumn": {
+                "display": "grid",
+                "gridTemplateColumns": "repeat(auto-fit, minmax(320px, 1fr))",
+                "gap": "2.5rem"
+            }
+        }
+    },
+    "structure": {
+        "layout": "two-column",
+        "sections": [
+            {
+                "id": "header",
+                "title": "Header",
+                "fields": [
+                    "fullName",
+                    "jobTitle",
+                    "email",
+                    "phone",
+                    "address"
+                ]
+            },
+            {
+                "id": "summary",
+                "title": "Summary",
+                "fields": [
+                    "summary"
+                ]
+            },
+            {
+                "id": "experience",
+                "title": "Professional Experience",
+                "fields": [
+                    "position",
+                    "company",
+                    "startDate",
+                    "endDate",
+                    "current",
+                    "description"
+                ]
+            },
+            {
+                "id": "education",
+                "title": "Education",
+                "fields": [
+                    "degree",
+                    "field",
+                    "institution",
+                    "startDate",
+                    "endDate",
+                    "gpa"
+                ]
+            },
+            {
+                "id": "skills",
+                "title": "Skills",
+                "fields": [
+                    "category",
+                    "items"
+                ]
+            },
+            {
+                "id": "certifications",
+                "title": "Certifications",
+                "fields": [
+                    "certifications"
+                ]
+            },
+            {
+                "id": "languages",
+                "title": "Languages",
+                "fields": [
+                    "language",
+                    "proficiency"
+                ]
+            },
+            {
+                "id": "hobbies",
+                "title": "Hobbies",
+                "fields": [
+                    "hobbies"
+                ]
+            }
+        ]
+    }
+}

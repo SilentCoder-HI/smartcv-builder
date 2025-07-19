@@ -15,6 +15,7 @@ interface TemplateRendererProps {
     backgroundColor?: string;
     skillItemBg?: string;
   };
+  onTextClick?: (path: string, value: string) => void;
 }
 
 const TemplateRenderer: React.FC<TemplateRendererProps> = ({
@@ -23,6 +24,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
   width,
   height,
   customColors = {},
+  onTextClick,
 }) => {
   const styles = template.styles;
 
@@ -35,6 +37,12 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
     backgroundColor,
     skillItemBg,
   } = customColors;
+
+  const handleTextClick = (path: string, value: string) => {
+    if (onTextClick) {
+      onTextClick(path, value);
+    }
+  };
 
   return (
     <div
@@ -53,6 +61,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
             ...styles.header.h1,
             color: mainHeadingColor ?? styles.header.h1?.color,
           }}
+          onClick={() => handleTextClick('personalInfo.fullName', cvData.personalInfo.fullName)}
+          className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
         >
           {cvData.personalInfo.fullName}
         </h1>
@@ -63,6 +73,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
             ...styles.header.jobTitle,
             color: secmainHeadingColor ?? styles.header.jobTitle?.color,
           }}
+          onClick={() => handleTextClick('personalInfo.jobTitle', cvData.personalInfo.jobTitle)}
+          className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
         >
           {cvData.personalInfo.jobTitle}
         </div>
@@ -75,6 +87,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
               ...styles.header.contact.item,
               color: secsubHeadingColor ?? styles.header.contact.item?.color,
             }}
+            onClick={() => handleTextClick('personalInfo.email', cvData.personalInfo.email)}
+            className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
           >
             <span style={styles.header.contact.icon}>📧</span>
             {cvData.personalInfo.email}
@@ -86,6 +100,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
               ...styles.header.contact.item,
               color: secsubHeadingColor ?? styles.header.contact.item?.color,
             }}
+            onClick={() => handleTextClick('personalInfo.phone', cvData.personalInfo.phone)}
+            className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
           >
             <span style={styles.header.contact.icon}>📞</span>
             {cvData.personalInfo.phone}
@@ -97,6 +113,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
               ...styles.header.contact.item,
               color: secsubHeadingColor ?? styles.header.contact.item?.color,
             }}
+            onClick={() => handleTextClick('personalInfo.address', cvData.personalInfo.address)}
+            className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
           >
             <span style={styles.header.contact.icon}>📍</span>
             {cvData.personalInfo.address}
@@ -119,6 +137,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
             ...styles.summary.summaryText,
             color: textColor ?? styles.summary.summaryText?.color,
           }}
+          onClick={() => handleTextClick('personalInfo.summary', cvData.personalInfo.summary)}
+          className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
         >
           {cvData.personalInfo.summary}
         </div>
@@ -143,6 +163,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
                   ...styles.experience.h3,
                   color: secsubHeadingColor ?? styles.experience.h3?.color,
                 }}
+                onClick={() => handleTextClick(`experience.${exp.id}.position`, exp.position)}
+                className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
               >
                 {exp.position} - {exp.company}
               </h3>
@@ -166,6 +188,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
                   ...styles.experience.summaryText,
                   color: textColor ?? styles.experience.summaryText?.color,
                 }}
+                onClick={() => handleTextClick(`experience.${exp.id}.description`, exp.description)}
+                className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
               >
                 {exp.description}
               </div>
@@ -193,6 +217,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
                   ...styles.education.h3,
                   color: secsubHeadingColor ?? styles.education.h3?.color,
                 }}
+                onClick={() => handleTextClick(`education.${edu.id}.degree`, edu.degree)}
+                className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
               >
                 {edu.degree} in {edu.field}
               </h3>
@@ -203,6 +229,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
                   ...styles.education.h4,
                   color: secsubHeadingColor ?? styles.education.h4?.color,
                 }}
+                onClick={() => handleTextClick(`education.${edu.id}.institution`, edu.institution)}
+                className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
               >
                 {edu.institution}
               </h4>
@@ -224,6 +252,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
                   ...styles.education.gpaText,
                   color: textColor ?? styles.education.gpaText?.color,
                 }}
+                onClick={() => handleTextClick(`education.${edu.id}.gpa`, edu.gpa)}
+                className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
               >
                 GPA: {edu.gpa}
               </div>
@@ -250,6 +280,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
                 ...styles.skills.skillCategory,
                 color: secsubHeadingColor ?? styles.skills.skillCategory?.color,
               }}
+              onClick={() => handleTextClick(`skills.${i}.category`, group.category)}
+              className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
             >
               {group.category}
             </div>
@@ -265,6 +297,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
                       skillItemBg ?? styles.skills.skillItem?.backgroundColor,
                     color: textColor ?? styles.skills.skillItem?.color,
                   }}
+                  onClick={() => handleTextClick(`skills.${i}.items.${j}`, skill)}
+                  className={onTextClick ? 'cursor-pointer hover:bg-gray-200' : ''}
                 >
                   {skill}
                 </span>
@@ -289,6 +323,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
             <li
               key={i}
               style={{ color: textColor ?? styles.certifications.list?.color }}
+              onClick={() => handleTextClick(`certifications.${i}`, cert)}
+              className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
             >
               {cert}
             </li>
@@ -311,6 +347,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
             <li
               key={i}
               style={{ color: textColor ?? styles.languages.list?.color }}
+              onClick={() => handleTextClick(`languages.${i}.language`, lang.language)}
+              className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
             >
               {lang.language} — {lang.proficiency}
             </li>
@@ -333,6 +371,8 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
             <li
               key={i}
               style={{ color: textColor ?? styles.hobbies.list?.color }}
+              onClick={() => handleTextClick(`hobbies.${i}`, hobby)}
+              className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
             >
               {hobby}
             </li>
