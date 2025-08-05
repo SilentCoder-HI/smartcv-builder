@@ -65,17 +65,17 @@ export default function AuthComp({ mode }: AuthPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4">
-      <div className="container mx-auto max-w-4xl bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 flex items-center justify-center py-12 px-4">
+      <div className="container mx-auto max-w-4xl bg-white dark:bg-gray-900 rounded-xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-800">
         {/* Mobile Tabs */}
-        <div className="flex md:hidden border-b border-gray-200">
+        <div className="flex md:hidden border-b border-gray-200 dark:border-gray-800">
           {(['signin', 'signup'] as const).map((tab) => (
             <button
               key={tab}
               className={`flex-1 py-4 text-lg font-semibold transition-colors duration-300 ${
                 activeTab === tab
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-500 hover:text-blue-500'
+                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400'
               }`}
               onClick={() => handleTabChange(tab)}
             >
@@ -89,17 +89,17 @@ export default function AuthComp({ mode }: AuthPageProps) {
             <motion.div
               key={activeTab}
               className={`w-full md:w-1/2 p-8 md:p-12 ${
-                activeTab === 'signup' ? 'bg-gray-50' : ''
+                activeTab === 'signup' ? 'bg-gray-50 dark:bg-gray-800' : ''
               }`}
               variants={formVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
             >
-              <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 text-center">
                 {activeTab === 'signin' ? 'Sign In' : 'Sign Up'}
               </h2>
-              <p className="text-gray-600 text-center mb-6">
+              <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
                 {activeTab === 'signin'
                   ? 'Access your SmartCV account'
                   : 'Create your SmartCV account'}
@@ -112,19 +112,19 @@ export default function AuthComp({ mode }: AuthPageProps) {
                     name: 'Google',
                     icon: <FcGoogle className="w-5 h-5" />,
                     style:
-                      'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100',
+                      'bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800',
                   },
                   {
                     id: 'github',
                     name: 'GitHub',
                     icon: <Github className="w-5 h-5" />,
-                    style: 'bg-gray-800 text-white hover:bg-gray-900',
+                    style: 'bg-gray-800 dark:bg-gray-800 text-white hover:bg-gray-900 dark:hover:bg-gray-900',
                   },
                   {
                     id: 'linkedin',
                     name: 'LinkedIn',
                     icon: <Linkedin className="w-5 h-5" />,
-                    style: 'bg-blue-700 text-white hover:bg-blue-800',
+                    style: 'bg-blue-700 dark:bg-blue-700 text-white hover:bg-blue-800 dark:hover:bg-blue-800',
                   },
                 ].map(({ id, name, icon, style }) => (
                   <button
@@ -143,39 +143,39 @@ export default function AuthComp({ mode }: AuthPageProps) {
                 ))}
 
                 <div className="flex items-center justify-center gap-2 my-6">
-                  <hr className="w-full border-gray-300" />
-                  <span className="text-gray-400 text-sm">OR</span>
-                  <hr className="w-full border-gray-300" />
+                  <hr className="w-full border-gray-300 dark:border-gray-700" />
+                  <span className="text-gray-400 dark:text-gray-500 text-sm">OR</span>
+                  <hr className="w-full border-gray-300 dark:border-gray-700" />
                 </div>
 
                 <form className="space-y-4" onSubmit={handleFormSubmit}>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                       Email
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                       <input
                         id="email"
                         type="email"
                         placeholder="your.email@example.com"
-                        className="w-full h-11 pl-10 rounded-md border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        className="w-full h-11 pl-10 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                       Password
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                       <input
                         id="password"
                         type="password"
                         placeholder="••••••••"
-                        className="w-full h-11 pl-10 rounded-md border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        className="w-full h-11 pl-10 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500"
                         required
                       />
                     </div>
@@ -183,16 +183,16 @@ export default function AuthComp({ mode }: AuthPageProps) {
 
                   {activeTab === 'signup' && (
                     <div>
-                      <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                         Confirm Password
                       </label>
                       <div className="relative">
-                        <EyeOff className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <EyeOff className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                         <input
                           id="confirm-password"
                           type="password"
                           placeholder="••••••••"
-                          className="w-full h-11 pl-10 rounded-md border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                          className="w-full h-11 pl-10 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-4 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500"
                           required
                         />
                       </div>
@@ -201,7 +201,7 @@ export default function AuthComp({ mode }: AuthPageProps) {
 
                   {activeTab === 'signin' && (
                     <div className="flex justify-between items-center">
-                      <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                      <Link href="/forgot-password" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
                         Forgot Password?
                       </Link>
                     </div>
@@ -210,7 +210,7 @@ export default function AuthComp({ mode }: AuthPageProps) {
                   <button
                     type="submit"
                     disabled={formLoading}
-                    className="w-full h-11 rounded-md bg-blue-600 text-white hover:bg-blue-700 font-semibold text-lg transition-colors inline-flex justify-center items-center gap-2"
+                    className="w-full h-11 rounded-md bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-800 font-semibold text-lg transition-colors inline-flex justify-center items-center gap-2"
                   >
                     {formLoading ? 'Processing...' : (
                       <>
@@ -221,13 +221,13 @@ export default function AuthComp({ mode }: AuthPageProps) {
                   </button>
                 </form>
 
-                <p className="text-center text-sm text-gray-600 mt-6">
+                <p className="text-center text-sm text-gray-600 dark:text-gray-300 mt-6">
                   {activeTab === 'signin'
                     ? "Don't have an account?"
                     : 'Already have an account?'}{' '}
                   <button
                     onClick={() => handleTabChange(activeTab === 'signin' ? 'signup' : 'signin')}
-                    className="text-blue-600 hover:underline"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     {activeTab === 'signin' ? 'Sign Up' : 'Sign In'}
                   </button>
@@ -237,15 +237,15 @@ export default function AuthComp({ mode }: AuthPageProps) {
           </AnimatePresence>
 
           {/* Side Banner */}
-          <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 to-purple-600 text-white p-12 flex-col justify-center items-center gap-4">
+          <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 to-purple-600 dark:from-blue-900 dark:to-purple-900 text-white p-12 flex-col justify-center items-center gap-4">
             <h3 className="text-3xl font-bold">Welcome to SmartCV</h3>
             <p className="text-lg text-center">
               Build professional resumes effortlessly and get noticed faster.
             </p>
             <div className="flex gap-2 mt-4">
-              <span className="bg-white text-blue-600 text-xs px-3 py-1 rounded-full">Secure</span>
-              <span className="bg-white text-blue-600 text-xs px-3 py-1 rounded-full">Modern UI</span>
-              <span className="bg-white text-blue-600 text-xs px-3 py-1 rounded-full">100% Free</span>
+              <span className="bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-300 text-xs px-3 py-1 rounded-full">Secure</span>
+              <span className="bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-300 text-xs px-3 py-1 rounded-full">Modern UI</span>
+              <span className="bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-300 text-xs px-3 py-1 rounded-full">100% Free</span>
             </div>
           </div>
         </div>

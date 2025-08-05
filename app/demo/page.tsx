@@ -114,6 +114,7 @@ const DemoPage = () => {
   // Handle text editing
   const handleTextClick = (path: string, value: string) => {
     setEditingField({ path, value });
+    setSelectedTab("Customize")
   };
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -189,7 +190,7 @@ const DemoPage = () => {
           </div>
         </div>
 
-        <div className="flex flex-row gap-4 overflow-hidden">
+        <div className="flex flex-row gap-4 overflow-hidden p-2 h-screen">
           {/* Sidebar Section */}
           <div className="w-full hidden lg:block">
             <div
@@ -248,7 +249,30 @@ const DemoPage = () => {
                     >
                       Reset
                     </button>
-
+                    {editingField && (
+                      <div className="flex flex-col gap-2">
+                        <label className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                          Edit
+                        </label>
+                        {/* Fixed Edit Input Bar */}
+                        <div className=" top-0 left-0 right-0 bg-white dark:bg-gray-950 py-3 shadow-lg z-50 flex items-center gap-2">
+                          <input
+                            ref={editInputRef}
+                            type="text"
+                            value={editingField.value}
+                            onChange={handleEditChange}
+                            onKeyDown={(e) => e.key === "Enter" && handleEditSave()}
+                            className="flex-1 p-2 border rounded"
+                          />
+                          <Button onClick={handleEditSave} size="sm">
+                            <FaSave className="mr-1" /> Save
+                          </Button>
+                          <Button onClick={() => setEditingField(null)} variant="ghost" size="sm">
+                            <FaTimes />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                     {/* CV Selection */}
                     <div className="flex flex-col gap-2">
                       <label className="text-sm font-semibold text-gray-800 dark:text-gray-200">
@@ -407,32 +431,11 @@ const DemoPage = () => {
           </div>
 
           {/* Preview Section */}
-          <div className="w-full relative overflow-x-auto px-2 sm:px-4 md:px-6">
+          <div className="w-full relative overflow-hidden px-2 sm:px-4 md:px-6">
             <div className="flex flex-col items-center gap-4">
-
-              {/* Fixed Edit Input Bar */}
-              {editingField && (
-                <div className="fixed top-0 left-0 right-0 bg-white dark:bg-black p-4 shadow-lg z-50 flex items-center gap-2">
-                  <input
-                    ref={editInputRef}
-                    type="text"
-                    value={editingField.value}
-                    onChange={handleEditChange}
-                    onKeyDown={(e) => e.key === "Enter" && handleEditSave()}
-                    className="flex-1 p-2 border rounded"
-                  />
-                  <Button onClick={handleEditSave} size="sm">
-                    <FaSave className="mr-1" /> Save
-                  </Button>
-                  <Button onClick={() => setEditingField(null)} variant="ghost" size="sm">
-                    <FaTimes />
-                  </Button>
-                </div>
-              )}
-
               {/* Scrollable CV Preview Section with Responsive Scaling */}
               <div
-                className="rounded border overflow-hidden transition-all scale-[0.85] sm:scale-[0.95] md:scale-100"
+                className="rounded border overflow-hidden h-screen transition-all scale-[0.85] sm:scale-[0.95] md:scale-100"
                 style={{
                   marginTop: editingField ? "80px" : "0",
                   width: "100%",
