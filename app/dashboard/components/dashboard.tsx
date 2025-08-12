@@ -10,15 +10,21 @@ import {
   Rocket,
   ExternalLink,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Overview } from "./Overview";
+
 // Types
 type Resume = {
-  id: number;
+  id: string;
   title: string;
   description: string;
   image: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  lastUsedAt: string;
+  views: number;
 };
 
 type Job = {
@@ -37,27 +43,95 @@ type Activity = {
   time: string;
 };
 
-const mockResumes: Resume[] = [
+// Sample mock CV data for demonstration
+const sampleCVs: Resume[] = [
   {
-    id: 1,
-    title: "Modern Blue",
-    description: "A clean and modern template with blue accents, perfect for tech and creative roles.",
-    image: "https://storage.googleapis.com/a1aa/image/a4995430-eb2d-4380-0552-eb60b74e5eeb.jpg",
+    id: "1",
+    title: "Software Engineer Resume",
+    description: "A detailed resume for software engineering roles.",
+    image: "/images/cv1.png",
+    status: "active",
+    createdAt: "2024-01-01T12:00:00Z",
+    updatedAt: "2024-07-01T15:00:00Z",
+    lastUsedAt: "2024-08-10T08:30:00Z",
+    views: 120,
   },
   {
-    id: 2,
-    title: "Minimalist Black & White",
-    description: "A minimalist template with black and white colors, ideal for corporate and formal applications.",
-    image: "https://storage.googleapis.com/a1aa/image/4c6f2729-521d-4b24-35cf-c506f23c6315.jpg",
+    id: "2",
+    title: "Product Manager Resume",
+    description: "Resume tailored for product management positions.",
+    image: "/images/cv2.png",
+    status: "draft",
+    createdAt: "2023-12-10T10:00:00Z",
+    updatedAt: "2024-06-15T09:30:00Z",
+    lastUsedAt: "2024-07-20T11:00:00Z",
+    views: 80,
   },
   {
-    id: 3,
-    title: "Creative Colorful",
-    description: "A creative and colorful template with sidebars and icons, great for designers and marketers.",
-    image: "https://storage.googleapis.com/a1aa/image/8336152f-f46a-464c-b17b-0bee48048976.jpg",
+    id: "3",
+    title: "Graphic Designer Resume",
+    description: "Creative resume for graphic design roles.",
+    image: "/images/cv3.png",
+    status: "active",
+    createdAt: "2024-02-05T14:20:00Z",
+    updatedAt: "2024-08-05T10:00:00Z",
+    lastUsedAt: "2024-08-10T12:00:00Z",
+    views: 95,
   },
 ];
 
+// Helper: get the N most recent CVs
+const getRecentCVs = (cvs: Resume[], count = 3): Resume[] => {
+  return [...cvs]
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, count);
+};
+
+// Helper: get metrics from CVs
+function getMetricsFromCVs(cvs: Resume[]) {
+  const totalCVs = cvs.length;
+  const avgViews = totalCVs
+    ? Math.round(
+        cvs.reduce((sum, cv) => sum + (typeof cv.views === "number" ? cv.views : 0), 0) / totalCVs
+      )
+    : 0;
+  const applications = cvs.reduce((sum, cv) => sum + (typeof cv.views === "number" ? cv.views : 0), 0);
+
+  return [
+    {
+      label: "Total CVs",
+      value: totalCVs.toString(),
+      icon: FileText,
+      trend: "up",
+      change: totalCVs > 1 ? `+${totalCVs - 1} from last month` : "+0 from last month",
+      badgeColor: "success",
+      iconClass: "h-5 w-5 text-[#3b82f6]",
+    },
+    {
+      label: "Avg Match Score",
+      value: avgViews + "%",
+      icon: Sparkles,
+      trend: "up",
+      change: avgViews > 0 ? `+${Math.round(avgViews * 0.1)} from last week` : "+0 from last week",
+      badgeColor: "success",
+      iconClass: "h-5 w-5 text-[#f59e42]",
+    },
+    {
+      label: "Jobs Saved",
+      value: applications.toString(),
+      icon: Briefcase,
+      trend: "up",
+      change: applications > 0 ? `+${Math.round(applications * 0.2)} this week` : "+0 this week",
+      badgeColor: "success",
+      iconClass: "h-5 w-5 text-[#10b981]",
+    },
+  ];
+}
+
+// Use sampleCVs for resumes - get 3 most recent
+const recentResumes = getRecentCVs(sampleCVs, 3);
+
+// Mock Jobs data
 const mockJobs: Job[] = [
   {
     id: 1,
@@ -85,114 +159,204 @@ const mockJobs: Job[] = [
   },
 ];
 
-const mockActivities: Activity[] = [
-  { id: 1, type: "created", description: 'Created new resume "Modern Blue"', time: "2 hours ago" },
-  { id: 2, type: "exported", description: 'Exported resume "Minimalist Black & White" as PDF', time: "1 day ago" },
-  { id: 3, type: "ai", description: "Used AI to improve summary section", time: "3 days ago" },
-  { id: 4, type: "matched", description: "Matched resume with 3 new jobs", time: "5 days ago" },
-];
+// Mock Activities based on recent resumes
+const mockActivities: Activity[] = recentResumes.map((cv, idx) => ({
+  id: idx + 1,
+  type: idx === 0 ? "created" : idx === 1 ? "exported" : "matched",
+  description:
+    idx === 0
+      ? `Created new resume "${cv.title}"`
+      : idx === 1
+      ? `Exported resume "${cv.title}" as PDF`
+      : `Matched resume "${cv.title}" with ${Math.floor(Math.random() * 5) + 1} new jobs`,
+  time: idx === 0 ? "2 hours ago" : idx === 1 ? "1 day ago" : "3 days ago",
+}));
+
+const metricsData = getMetricsFromCVs(sampleCVs);
 
 export default function Dashboard({ onNavigate }: { onNavigate: (path: string) => void }) {
+  const aiSuggestionsUsed = 1; // This can be dynamic
+
   return (
-    <div className="max-w-7xl py-5 px-6 sm:px-5 bg-white dark:bg-gray-950">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Dashboard Overview</h1>
-        <p className="text-muted-foreground mt-1 text-gray-600 dark:text-gray-400">
-          Welcome to your Smart CV Builder dashboard. Here’s a quick overview of your activity and stats.
+    <div className="max-w-7xl py-8 px-6 sm:px-8 min-h-screen">
+      <div className="mb-8">
+        <h1 className="text-4xl font-extrabold text-[#22223b] dark:text-white mb-2 tracking-tight">
+          Dashboard
+        </h1>
+        <p className="text-lg text-[#64748b] dark:text-gray-400">
+          Welcome back! Here’s a summary of your Smart CV Builder activity.
         </p>
       </div>
-      <Overview/>
 
-      {/* Resume Templates */}
-      <section className="mb-10">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your Resumes</h3>
-          <Button
-            onClick={() => onNavigate("/my-cvs")}
-            className="flex items-center gap-2 justify-center"
-            variant="secondary"
-          >
-            View All
-            <ChevronRight size={16} />
-          </Button>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockResumes.map((resume) => (
-            <article
-              key={resume.id}
-              className="bg-white dark:bg-gray-900 rounded-lg shadow flex flex-col border border-gray-100 dark:border-gray-800"
+      {/* Metrics */}
+      <div className="flex flex-col sm:flex-row gap-6 mb-10">
+        {metricsData.map((metric, idx) => {
+          const Icon = metric.icon;
+          return (
+            <div
+              key={metric.label}
+              className={`flex-1 rounded-2xl bg-white dark:bg-gray-900 border-0 shadow-lg px-6 py-5 flex items-center gap-5 transition-all hover:scale-[1.025] hover:shadow-xl duration-200 ${
+                idx === 0
+                  ? "border-l-4 border-[#3b82f6]"
+                  : idx === 1
+                  ? "border-l-4 border-[#f59e42]"
+                  : "border-l-4 border-[#10b981]"
+              }`}
             >
-              <img
-                src={resume.image}
-                alt={resume.title}
-                className="rounded-t-lg object-cover w-full h-48"
-                style={{ backgroundColor: "#f3f4f6" }}
-              />
-              <div className="p-4 flex flex-col flex-grow">
-                <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-2">{resume.title}</h4>
-                <p className="text-gray-600 dark:text-gray-400 flex-grow">{resume.description}</p>
-                <div className="mt-4 flex justify-between items-center">
-                  <button className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold transition-colors">
-                    Edit
-                  </button>
-                  <div className="flex gap-2 items-center">
-                    <button className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-                      <Trash2 size={20} />
-                    </button>
-                  </div>
+              <div
+                className={`rounded-xl p-3 flex items-center justify-center ${
+                  idx === 0 ? "bg-[#e0edfd]" : idx === 1 ? "bg-[#fff7e6]" : "bg-[#e6f9f3]"
+                } dark:bg-gray-800`}
+              >
+                <Icon className={metric.iconClass} />
+              </div>
+              <div>
+                <div
+                  className={`text-xs font-bold uppercase tracking-wider ${
+                    idx === 0 ? "text-[#3b82f6]" : idx === 1 ? "text-[#f59e42]" : "text-[#10b981]"
+                  }`}
+                >
+                  {metric.label}
+                </div>
+                <div className="text-3xl font-extrabold text-[#22223b] dark:text-white leading-tight">
+                  {metric.value}
+                </div>
+                <div className="text-xs text-[#64748b] dark:text-gray-400 font-medium">
+                  {metric.change}
                 </div>
               </div>
-            </article>
-          ))}
-        </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Resume Templates */}
+      <section className="mb-12">
+        {recentResumes.length === 0 ? (
+          <div className="text-center text-[#8a8fa3] dark:text-gray-400 py-16 text-lg font-medium select-none">
+            No CVs found for the selected filters.
+            <button
+              onClick={() => onNavigate("/my-cvs")}
+              className="mt-4 block mx-auto text-[#1a73e8] dark:text-[#60a5fa] hover:underline"
+            >
+              Reset filters
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-2xl font-bold text-[#22223b] dark:text-white">Your Resumes</h3>
+              <Button
+                onClick={() => onNavigate("/my-cvs")}
+                className="flex items-center gap-2 justify-center bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold px-5 py-2 rounded-lg shadow"
+                variant="secondary"
+              >
+                View All
+                <ChevronRight size={18} />
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+              {recentResumes.map((resume) => (
+                <article
+                  key={resume.id}
+                  className={`bg-white dark:bg-gray-900 rounded-2xl shadow-lg flex flex-col border-0 hover:shadow-xl transition-all duration-200 ${
+                    resume.status === "draft"
+                      ? "border-l-4 border-[#f59e42]"
+                      : "border-l-4 border-[#10b981]"
+                  }`}
+                >
+                  <div className="p-5 flex flex-col flex-grow">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-bold text-xl text-[#22223b] dark:text-white line-clamp-1">
+                        {resume.title}
+                      </h4>
+                      <div className="rounded-xl p-2 flex items-center justify-center bg-[#e0edfd] dark:bg-gray-800">
+                        <FileText className="w-6 h-6 text-[#1a73e8] dark:text-[#60a5fa]" />
+                      </div>
+                    </div>
+                    <div className="text-[#64748b] dark:text-gray-400 text-sm mb-2 line-clamp-2">
+                      {resume.description}
+                    </div>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="text-xs px-3 py-1 bg-[#f1f5f9] dark:bg-gray-800 text-[#22223b] dark:text-gray-300 rounded-lg font-semibold">
+                        {resume.status.charAt(0).toUpperCase() + resume.status.slice(1)}
+                      </span>
+                      <span className="text-xs text-[#94a3b8] dark:text-gray-400">
+                        Last used: {new Date(resume.lastUsedAt).toLocaleDateString()}
+                      </span>
+                      <span className="text-xs text-[#94a3b8] dark:text-gray-400">
+                        Views: {resume.views}
+                      </span>
+                    </div>
+                    <div className="mt-auto flex gap-2 border-t border-[#e0e7ef] dark:border-gray-800 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => alert(`Editing: ${resume.title}`)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-md text-[#10b981] dark:text-[#4ade80] hover:bg-[#e6fbe6] dark:hover:bg-green-900 text-xs font-semibold transition hover:scale-105 transform"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => alert(`Deleting: ${resume.title}`)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-md text-[#ea4335] dark:text-[#f87171] hover:bg-[#fdeaea] dark:hover:bg-red-900 text-xs font-semibold transition hover:scale-105 transform"
+                      >
+                        <Trash2 className="w-4 h-4" /> Delete
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
+        )}
       </section>
 
       {/* AI Assistant Section */}
-      <section className="mb-10 bg-white dark:bg-gray-900 rounded-lg shadow p-6 border border-gray-100 dark:border-gray-800">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <p className="text-gray-700 dark:text-gray-300">
-            You have used <span className="text-blue-600 dark:text-blue-400 font-semibold">{1}</span> AI suggestions this month. Upgrade for unlimited assistance.
-          </p>
-          <button className="px-5 py-2 bg-blue-600 dark:bg-blue-700 text-white font-semibold rounded hover:bg-blue-700 dark:hover:bg-blue-800 flex items-center transition-colors">
-            <Rocket className="inline-block mr-2" size={18} /> Upgrade
-          </button>
-        </div>
+      <section className="mb-12 bg-gradient-to-r from-[#e0edfd] via-[#f8fafc] to-[#fff7e6] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-2xl shadow-lg p-7 border-0 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+        <p className="text-[#22223b] dark:text-white text-lg font-medium">
+          You have used <span className="text-[#3b82f6] font-bold">{aiSuggestionsUsed}</span> AI suggestions this month.{" "}
+          <span className="text-[#64748b] dark:text-gray-400">Upgrade for unlimited assistance.</span>
+        </p>
+        <button className="px-7 py-2 bg-gradient-to-r from-[#3b82f6] to-[#2563eb] text-white font-bold rounded-lg shadow flex items-center gap-2 hover:scale-105 transition-transform">
+          <Rocket className="inline-block" size={20} /> Upgrade
+        </button>
       </section>
 
       {/* Job Matches */}
-      <section className="mb-10">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Job Matches</h3>
+      <section className="mb-12">
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="text-2xl font-bold text-[#22223b] dark:text-white">Job Matches</h3>
           <Button
             onClick={() => onNavigate("/resume-matches")}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-[#10b981] hover:bg-[#059669] text-white font-semibold px-5 py-2 rounded-lg shadow"
             variant="secondary"
           >
-            View All <ChevronRight size={16} />
+            View All <ChevronRight size={18} />
           </Button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
           {mockJobs.map((job) => (
             <article
               key={job.id}
-              className="bg-white dark:bg-gray-900 rounded-lg shadow p-5 border border-gray-100 dark:border-gray-800"
+              className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 border-0 flex flex-col justify-between hover:shadow-xl transition-all duration-200"
             >
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{job.title}</h4>
-                <p className="text-gray-600 dark:text-gray-400">{job.company}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Location: {job.location}</p>
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">Salary: {job.salary}</p>
+                <h4 className="text-xl font-bold text-[#22223b] dark:text-white mb-1">{job.title}</h4>
+                <p className="text-[#64748b] dark:text-gray-400">{job.company}</p>
+                <p className="text-sm text-[#94a3b8] dark:text-gray-400 mb-1">Location: {job.location}</p>
+                <p className="text-sm font-semibold text-[#10b981] dark:text-[#34d399]">Salary: {job.salary}</p>
               </div>
-              <div className="mt-4 flex justify-between items-center">
-                <span className="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 font-semibold rounded">
+              <div className="mt-5 flex justify-between items-center">
+                <span className="text-xs px-3 py-1 bg-[#e6f9f3] dark:bg-gray-800 text-[#10b981] dark:text-[#34d399] font-bold rounded-lg">
                   Match Score: {job.matchScore}%
                 </span>
                 <div className="flex items-center gap-2">
                   <a
                     href="#"
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold flex items-center transition-colors"
+                    className="text-[#3b82f6] hover:text-[#2563eb] font-semibold flex items-center transition-colors"
                   >
-                    View Job <ExternalLink className="ml-1 text-xs" size={16} />
+                    View Job <ExternalLink className="ml-1 text-xs" size={18} />
                   </a>
                 </div>
               </div>
@@ -202,36 +366,36 @@ export default function Dashboard({ onNavigate }: { onNavigate: (path: string) =
       </section>
 
       {/* Recent Activity */}
-      <section className="mb-10 bg-white dark:bg-gray-900 rounded-lg shadow p-6 border border-gray-100 dark:border-gray-800">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Recent Activity</h3>
-        <ul className="divide-y divide-gray-200 dark:divide-gray-800">
+      <section className="mb-12 bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-7 border-0">
+        <h3 className="text-2xl font-bold text-[#22223b] dark:text-white mb-5">Recent Activity</h3>
+        <ul className="divide-y divide-[#e0e7ef] dark:divide-gray-800">
           {mockActivities.map((activity) => (
-            <li key={activity.id} className="py-3 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+            <li key={activity.id} className="py-4 flex items-center justify-between">
+              <div className="flex items-center space-x-4">
                 <div
-                  className={`p-3 rounded-full
+                  className={`p-3 rounded-xl flex items-center justify-center text-white
                     ${
                       activity.type === "created"
-                        ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                        ? "bg-gradient-to-br from-[#3b82f6] to-[#2563eb]"
                         : activity.type === "exported"
-                        ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300"
+                        ? "bg-gradient-to-br from-[#10b981] to-[#059669]"
                         : activity.type === "ai"
-                        ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-300"
-                        : "bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300"
+                        ? "bg-gradient-to-br from-[#f59e42] to-[#fbbf24]"
+                        : "bg-gradient-to-br from-[#a78bfa] to-[#6366f1]"
                     }`}
                 >
-                  {activity.type === "created" && <FileText size={20} />}
-                  {activity.type === "exported" && <Download size={20} />}
-                  {activity.type === "ai" && <Bot size={20} />}
-                  {activity.type === "matched" && <Briefcase size={20} />}
+                  {activity.type === "created" && <FileText size={22} />}
+                  {activity.type === "exported" && <Download size={22} />}
+                  {activity.type === "ai" && <Bot size={22} />}
+                  {activity.type === "matched" && <Briefcase size={22} />}
                 </div>
                 <div>
-                  <p className="text-gray-800 dark:text-gray-100 font-semibold">{activity.description}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{activity.time}</p>
+                  <p className="text-[#22223b] dark:text-white font-semibold">{activity.description}</p>
+                  <p className="text-sm text-[#94a3b8] dark:text-gray-400">{activity.time}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold transition-colors">
+                <button className="text-[#3b82f6] hover:text-[#2563eb] font-semibold transition-colors px-3 py-1 rounded-lg bg-[#e0edfd] dark:bg-gray-800">
                   {activity.type === "ai" ? "View AI Suggestions" : "Edit"}
                 </button>
               </div>

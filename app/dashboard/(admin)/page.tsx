@@ -9,6 +9,9 @@ import MyCVs from "../components/MyCVs";
 import JobsPage from "../components/jobSearch";
 import AppHeader from "../layout/AppHeader";
 import LoadingSpinner from "../components/loading/loading";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
+import { sampleCVs } from "../data/data";
 
 // Helper to parse the current view/subview from the query string
 function getViewFromSearch(search: string | null) {
@@ -50,7 +53,7 @@ const PATH_COMPONENTS: Record<
 
 export default function DashboardPage() {
   const pathname = usePathname();
-
+  const cvs = useSelector((state: RootState) => state.cv);
   const [selectedView, setSelectedView] = useState<string>("/overview");
   const [selectedSub, setSelectedSub] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
@@ -100,7 +103,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
+    <div className="flex h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-950">
       <AppSidebar
         onNavigate={handleNavigate}
         selectedView={selectedView}

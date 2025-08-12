@@ -97,7 +97,7 @@ export default function AppSidebar({
     "fixed", // not flex, use fixed for sidebar
     "top-0",
     "left-0",
-    "z-50",
+    "z-30",
     "h-screen",
     "border-r",
     "border-gray-200",
