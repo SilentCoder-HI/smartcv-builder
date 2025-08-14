@@ -56,9 +56,8 @@ export interface JobAnalysisResults {
 }
 
 export interface Template {
-  name: string
-  previewUrl: string
-  category: string
+  templateId: string;
+  templateType: string
   description: string
   id: string
   component: FC<any>; // or FC<Props> if defined

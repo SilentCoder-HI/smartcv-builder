@@ -95,7 +95,6 @@ function getMetricsFromCVs(cvs: Resume[]) {
         cvs.reduce((sum, cv) => sum + (typeof cv.views === "number" ? cv.views : 0), 0) / totalCVs
       )
     : 0;
-  const applications = cvs.reduce((sum, cv) => sum + (typeof cv.views === "number" ? cv.views : 0), 0);
 
   return [
     {
@@ -118,10 +117,10 @@ function getMetricsFromCVs(cvs: Resume[]) {
     },
     {
       label: "Jobs Saved",
-      value: applications.toString(),
+      value: "25",
       icon: Briefcase,
       trend: "up",
-      change: applications > 0 ? `+${Math.round(applications * 0.2)} this week` : "+0 this week",
+      change: 5 > 0 ? `+${Math.round(5 * 0.2)} this week` : "+0 this week",
       badgeColor: "success",
       iconClass: "h-5 w-5 text-[#10b981]",
     },

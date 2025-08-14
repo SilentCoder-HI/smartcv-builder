@@ -1,5 +1,4 @@
 export interface TemplateMeta {
-    id: any;
     templateId: string;
     templateName: string;
     description: string;

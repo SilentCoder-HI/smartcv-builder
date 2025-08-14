@@ -361,7 +361,7 @@ const DemoPage = () => {
                       {currentTemplates.map((tpl: any, index: number) => (
                         <div
                           key={tpl?.id || tpl?.templateName || index}
-                          className={`p-3 border rounded-lg shadow-sm cursor-pointer overflow-hidden transition flex flex-col items-center ${selectedTemplate?.id === tpl?.id
+                          className={`p-3 border rounded-lg shadow-sm cursor-pointer overflow-hidden transition flex flex-col items-center ${selectedTemplate?.templateId === tpl?.id
                             ? "border-blue-500 bg-blue-50 dark:bg-blue-900"
                             : "bg-white border-gray-200 dark:bg-gray-800"
                             }`}
@@ -607,7 +607,7 @@ const DemoPage = () => {
                     {currentTemplates.map((tpl: any, index: number) => (
                       <div
                         key={tpl?.id || tpl?.templateName || index}
-                        className={`p-3 border rounded-lg shadow-sm cursor-pointer overflow-hidden transition flex flex-col items-center min-w-[180px] max-w-[220px] ${selectedTemplate?.id === tpl?.id
+                        className={`p-3 border rounded-lg shadow-sm cursor-pointer overflow-hidden transition flex flex-col items-center min-w-[180px] max-w-[220px] ${selectedTemplate?.templateId === tpl?.id
                           ? "border-blue-500 bg-blue-50 dark:bg-blue-900"
                           : "bg-white border-gray-200 dark:bg-gray-800"
                           }`}

@@ -442,7 +442,7 @@ export default function JobsPage() {
       )}
 
       {loading && allJobs.length === 0 ? (
-        <div className="flex justify-center mt-10">
+        <div className="flex items-center justify-center mt-10 min-h-screen w-full mx-auto">
           <LoadingSpinner />
         </div>
       ) : pagedJobs.length === 0 ? (

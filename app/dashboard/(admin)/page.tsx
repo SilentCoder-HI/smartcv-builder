@@ -11,7 +11,6 @@ import AppHeader from "../layout/AppHeader";
 import LoadingSpinner from "../components/loading/loading";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
-import { sampleCVs } from "../data/data";
 
 // Helper to parse the current view/subview from the query string
 function getViewFromSearch(search: string | null) {

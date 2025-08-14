@@ -68,10 +68,11 @@ interface CVFormProps {
   setCvData: (data: CVData) => void
   scrollRef: RefObject<HTMLDivElement | null>
   onSave: (data: CVData) => void
+  onNext: () => void
   show: ()=> void
 }
 
-export function CVForm({ cvData, setCvData, show, onSave }: CVFormProps) {
+export function CVForm({ cvData, setCvData, onNext, show, onSave }: CVFormProps) {
   const [isGeneratingContent, setIsGeneratingContent] = useState(false)
   const [jobDescription, setJobDescription] = useState("")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
@@ -376,7 +377,7 @@ export function CVForm({ cvData, setCvData, show, onSave }: CVFormProps) {
 
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl h-full mx-auto space-y-8 my-5 overflow-auto no-scrollbar">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Let's Build Your Resume</h1>
         <p className="text-gray-600">Fill in your information to get started</p>
@@ -928,11 +929,11 @@ export function CVForm({ cvData, setCvData, show, onSave }: CVFormProps) {
           Cancel
         </Button>
         <Button
-          // disabled={!isFormValid()}
           className="bg-blue-600 text-white hover:bg-blue-700"
-          onClick={handleSave}
+          onClick={onNext}
+          disabled={!isFormValid()}
         >
-          Save Resume
+          Next          
         </Button>
       </div>
     </div>
