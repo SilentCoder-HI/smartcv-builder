@@ -1,6 +1,23 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+/**
+ * MyCVs Component
+ * ----------------
+ * This is the main dashboard component for managing user CVs.
+ * Features:
+ *   - List, filter, add, edit, preview, and delete CVs
+ *   - Pagination, statistics, and theme toggle
+ *   - Step-based CV creation/editing with template selection and preview
+ *   - Well-commented and logically sorted for clarity and maintainability
+ */
+
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  ChangeEvent,
+} from "react";
 import {
   Eye,
   Edit,
@@ -13,32 +30,41 @@ import {
   Download,
   CheckCircle2,
   FileText,
-  Link,
+  Moon,
+  Sun,
 } from "lucide-react";
-import { FaBars } from "react-icons/fa";
-import { Moon, Sun } from "lucide-react";
-import { CV } from "../data/data";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
+import html2canvas from "html2canvas";
+import { CV } from "../data/data";
 import { CVData, CVForm } from "@dashboard/components/CV/cv-form";
 import { TemplateSelector } from "./CV/template-selector";
 import PreviewEditor from "./CV/preview-editor";
-import { useTheme } from "next-themes";
-import html2canvas from "html2canvas";
 import TemplateRenderer from "@/components/TemplateRenderer";
 import { TemplateMeta } from "@/types/template-types";
 import { templates } from "@/data/TempleteIndex";
 
+// --- Types ---
 type CVStatus = "draft" | "published";
 
-// Helper: get unique values from array of objects
+// --- Constants ---
+const CVS_PER_PAGE = 9;
+
+// --- Helper Functions ---
+
+/**
+ * Get unique values from an array of objects by key.
+ */
 function getUnique<T>(arr: T[], key: keyof T): string[] {
   return Array.from(new Set(arr.map((item) => String(item[key]))));
 }
 
-// Helper: Format date consistently
-const formatDate = (dateString: string) => {
+/**
+ * Format a date string to a readable format.
+ */
+function formatDate(dateString: string): string {
   if (!dateString) return "Unknown date";
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return "Invalid date";
@@ -49,26 +75,21 @@ const formatDate = (dateString: string) => {
     hour: "2-digit",
     minute: "2-digit",
   });
-};
+}
 
-const CVS_PER_PAGE = 9;
-
+// --- Main Component ---
 export default function MyCVs() {
+  // --- Theme and Routing ---
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // --- Refs ---
   const templateRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
 
-  // Main CVs array state
+  // --- State: CVs and Form Data ---
   const [cvs, setCvs] = useState<CV[]>([]);
-
-  // Form data for controlled form inputs
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    profileId: "",
-    createdAt: "",
-    status: "draft" as CVStatus,
-  });
-
   const [cvData, setCvData] = useState<CVData>({
     personalInfo: {
       fullName: "",
@@ -82,106 +103,192 @@ export default function MyCVs() {
     certifications: [],
     hobbies: [],
   });
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    profileId: "",
+    createdAt: "",
+    status: "draft" as CVStatus,
+  });
 
+  // --- State: UI/UX Controls ---
   const [showAddForm, setShowAddForm] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [showPreview, setShowPreview] = useState(false);
   const [previewCV, setPreviewCV] = useState<CV | null>(null);
   const [editCV, setEditCV] = useState<CV | null>(null);
 
-  const mainRef = useRef<HTMLDivElement>(null);
-
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  // Pagination and filter states
+  // --- State: Pagination and Filters ---
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedProfileId, setSelectedProfileId] = useState<string>("All");
   const [selectedStatus, setSelectedStatus] = useState<string>("All");
   const [selectedCreatedAt, setSelectedCreatedAt] = useState<string>("All");
 
-  // Synchronize page state with URL query parameter
+  // --- State: Template Selection ---
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+  const [previewTemplate, setPreviewTemplate] = useState<TemplateMeta>();
+
+  // --- Memoized Data ---
+  const allTemplates: TemplateMeta[] = useMemo(
+    () => templates.filter((t) => t.styles),
+    []
+  );
+  const selectedCVTemplate = useMemo(
+    () => templates.find((t) => t.templateId === selectedTemplate),
+    [selectedTemplate]
+  );
+  const profileOptions = useMemo(() => getUnique(cvs, "profileId"), [cvs]);
+  const uniqueDates = useMemo(() => {
+    const dates = cvs.map((cv) => cv.createdAt);
+    const unique = Array.from(new Set(dates));
+    return unique.sort(
+      (a, b) =>
+        new Date(b || "").getTime() - new Date(a || "").getTime()
+    );
+  }, [cvs]);
+
+  // --- Derived Data ---
+  const totalCVs = cvs.length;
+  const draftCount = cvs.filter((cv) => cv.status === "draft").length;
+  const publishedCount = cvs.filter((cv) => cv.status === "published").length;
+
+  // --- Filtering and Pagination ---
+  const filteredCVs = useMemo(() => {
+    return cvs.filter((cv) => {
+      const profileMatch =
+        selectedProfileId === "All" || cv.profileId === selectedProfileId;
+      const createdAtMatch =
+        selectedCreatedAt === "All" || cv.createdAt === selectedCreatedAt;
+      const statusMatch =
+        selectedStatus === "All" || cv.status === selectedStatus;
+      return profileMatch && createdAtMatch && statusMatch;
+    });
+  }, [cvs, selectedProfileId, selectedCreatedAt, selectedStatus]);
+
+  const totalPages = Math.ceil(filteredCVs.length / CVS_PER_PAGE);
+  const paginatedCVs = useMemo(
+    () =>
+      filteredCVs.slice(
+        (currentPage - 1) * CVS_PER_PAGE,
+        currentPage * CVS_PER_PAGE
+      ),
+    [filteredCVs, currentPage]
+  );
+
+  // --- Effects ---
+
+  // Sync page state with URL query parameter
   useEffect(() => {
     const pageParam = parseInt(searchParams.get("page") || "1", 10);
     if (!isNaN(pageParam)) setCurrentPage(pageParam);
   }, [searchParams]);
 
-  // Get unique filter options
-  const profileOptions = useMemo(() => getUnique(cvs, "profileId"), [cvs]);
-  const uniqueDates = useMemo(() => {
-    const dates = cvs.map((cv) => cv.createdAt);
-    const unique = Array.from(new Set(dates));
-    return unique.sort((a, b) => new Date(b || "").getTime() - new Date(a || "").getTime());
-  }, [cvs]);
+  // Fetch CVs on mount (simulate userId for demo)
+  useEffect(() => {
+    fetchUserCVs("user_12345");
+  }, []);
 
-  // Counts
-  const totalCVs = cvs.length;
-  const draftCount = cvs.filter((cv) => cv.status === "draft").length;
-  const publishedCount = cvs.filter((cv) => cv.status === "published").length;
+  // --- API: Fetch User CVs ---
+  async function fetchUserCVs(userId?: string) {
+    const url = userId
+      ? `/dashboard/api/usersCV?userId=${encodeURIComponent(userId)}`
+      : "/dashboard/api/usersCV";
+    try {
+      const res = await fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) throw new Error(`Failed to fetch CVs: ${res.statusText}`);
+      const data = await res.json();
+      setCvs(data);
+    } catch (error) {
+      console.error("Error fetching CVs:", error);
+      toast.error("Failed to load CVs");
+    }
+  }
 
-  // Filtering based on selections
-  const filteredCVs = cvs.filter((cv) => {
-    const profileMatch = selectedProfileId === "All" || cv.profileId === selectedProfileId;
-    const createdAtMatch = selectedCreatedAt === "All" || cv.createdAt === selectedCreatedAt;
-    const statusMatch = selectedStatus === "All" || cv.status === selectedStatus;
-    return profileMatch && createdAtMatch && statusMatch;
-  });
-
-  const totalPages = Math.ceil(filteredCVs.length / CVS_PER_PAGE);
-  const paginatedCVs = filteredCVs.slice(
-    (currentPage - 1) * CVS_PER_PAGE,
-    currentPage * CVS_PER_PAGE
-  );
-
-  const resetFilters = () => {
+  // --- Filter Handlers ---
+  function handleProfileChange(e: ChangeEvent<HTMLSelectElement>) {
+    setSelectedProfileId(e.target.value);
+    setCurrentPage(1);
+  }
+  function handleCreatedAtChange(e: ChangeEvent<HTMLSelectElement>) {
+    setSelectedCreatedAt(e.target.value);
+    setCurrentPage(1);
+  }
+  function handleStatusChange(e: ChangeEvent<HTMLSelectElement>) {
+    setSelectedStatus(e.target.value);
+    setCurrentPage(1);
+  }
+  function resetFilters() {
     setSelectedProfileId("All");
     setSelectedCreatedAt("All");
     setSelectedStatus("All");
     setCurrentPage(1);
-  };
+  }
 
-  // Handlers for filters
-  const handleProfileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedProfileId(e.target.value);
-    setCurrentPage(1);
-  };
-  const handleCreatedAtChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCreatedAt(e.target.value);
-    setCurrentPage(1);
-  };
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedStatus(e.target.value);
-    setCurrentPage(1);
-  };
+  // --- Step Navigation ---
+  const steps = [
+    { id: 1, title: "Personal Information", description: "Enter your details" },
+    { id: 2, title: "Choose Template", description: "Select your style" },
+    { id: 3, title: "Preview & Save", description: "Finalize your CV" },
+  ];
+  function nextStep() {
+    if (currentStep < steps.length) setCurrentStep((prev) => prev + 1);
+    mainRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function prevStep() {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1);
+      requestAnimationFrame(() => {
+        mainRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }
 
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+  // --- Theme Toggle ---
+  function toggleTheme() {
+    setTheme(theme === "dark" ? "light" : "dark");
+  }
 
-  // Get all templates with styles
-  const allTemplates: TemplateMeta[] = useMemo(() => templates.filter((t) => t.styles), [templates]);
+  // --- Export as Image ---
+  async function exportAsImage() {
+    if (!templateRef.current) return;
+    const canvas = await html2canvas(templateRef.current, {
+      scale: 2,
+      backgroundColor: "#fff",
+    });
+    const imgData = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = imgData;
+    link.download = "cv.png";
+    link.click();
+  }
 
-
-  // Find the template object that matches the selectedTemplate id
-  const selectedCVTemplate = templates.find(t => t.templateId === selectedTemplate);
-  // Save CV (add or update)
-  const saveCVFromForm = (newCVData: CVData, publish: boolean = false) => {
+  // --- Save CV (Add or Update) ---
+  function saveCVFromForm(newCVData: CVData, publish: boolean = false) {
     if (editCV) {
       // Update existing CV
       setCvs((prev) =>
         prev.map((cv) =>
           cv.id === editCV.id
             ? {
-              ...cv,
-              content: newCVData,
-              title: newCVData.personalInfo.jobTitle || "Untitled CV",
-              description: `CV for ${newCVData.personalInfo.fullName || "Unknown"}`,
-              updatedAt: new Date().toISOString(),
-              templateId: selectedTemplate,
-              status: publish ? "published" : cv.status,
-            }
+                ...cv,
+                content: newCVData,
+                title: newCVData.personalInfo.jobTitle || "Untitled CV",
+                description: `CV for ${
+                  newCVData.personalInfo.fullName || "Unknown"
+                }`,
+                updatedAt: new Date().toISOString(),
+                templateId: selectedTemplate,
+                status: publish ? "published" : cv.status,
+              }
             : cv
         )
       );
-      toast.success(`CV "${newCVData.personalInfo.jobTitle || "Untitled CV"}" updated!`);
+      toast.success(
+        `CV "${newCVData.personalInfo.jobTitle || "Untitled CV"}" updated!`
+      );
       setEditCV(null);
       setShowAddForm(false);
       setCurrentStep(1);
@@ -189,12 +296,15 @@ export default function MyCVs() {
       // Add new CV
       const newCV: CV = {
         id: Date.now(),
-        userId: undefined,
+        userId: "",
         profileId: newCVData.personalInfo.fullName || "Unknown",
         role: "",
         templateId: selectedTemplate,
         title: newCVData.personalInfo.jobTitle || "Untitled CV",
-        description: `CV for ${newCVData.personalInfo.fullName || "Unknown"}`,
+        description: `CV for ${
+          newCVData.personalInfo.fullName || "Unknown"
+        }`,
+        export: false,
         content: newCVData,
         status: publish ? "published" : "draft",
         createdAt: new Date().toISOString(),
@@ -202,56 +312,16 @@ export default function MyCVs() {
         lastUsedAt: undefined,
       };
       setCvs((prev) => [...prev, newCV]);
-      toast.success(`CV "${newCV.title}" saved${publish ? " & published" : ""}!`);
+      toast.success(
+        `CV "${newCV.title}" saved${publish ? " & published" : ""}!`
+      );
       setShowAddForm(false);
       setCurrentStep(1);
     }
-  };
+  }
 
-  // Step navigation
-  const nextStep = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep((prev) => prev + 1);
-    }
-    mainRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep((prev) => prev - 1);
-      requestAnimationFrame(() => {
-        mainRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    }
-  };
-
-  const steps = [
-    { id: 1, title: "Personal Information", description: "Enter your details" },
-    { id: 2, title: "Choose Template", description: "Select your style" },
-    { id: 3, title: "Preview & Save", description: "Finalize your CV" },
-  ];
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-
-  const exportAsImage = async () => {
-    if (!templateRef.current) return;
-
-    const canvas = await html2canvas(templateRef.current, {
-      scale: 2,
-      backgroundColor: "#fff",
-    });
-
-    const imgData = canvas.toDataURL("image/png");
-
-    const link = document.createElement("a");
-    link.href = imgData;
-    link.download = "cv.png";
-    link.click();
-  };
-
-  // Render step content for add/edit CV
-  const renderStepContent = () => {
+  // --- Render Step Content for Add/Edit Modal ---
+  function renderStepContent() {
     switch (currentStep) {
       case 1:
         return (
@@ -281,7 +351,7 @@ export default function MyCVs() {
       case 3:
         return (
           <div className="max-w-full mx-auto space-y-8">
-            {/* Top Bar with Important Actions */}
+            {/* Top Bar with Actions */}
             <div className="sticky top-0 left-0 z-40 w-full bg-gradient-to-r from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 py-3 shadow-md rounded-b-xl transition-all duration-300 gap-3">
               <div className="flex gap-3 items-center">
                 <Button
@@ -291,25 +361,26 @@ export default function MyCVs() {
                   aria-label="Toggle theme"
                   className="rounded-full hover:bg-blue-100 dark:hover:bg-gray-800 transition"
                 >
-                  {theme === "dark" ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+                  {theme === "dark" ? (
+                    <Sun className="w-6 h-6" />
+                  ) : (
+                    <Moon className="w-6 h-6" />
+                  )}
                 </Button>
                 <Button
-                  onClick={() => {
-                    saveCVFromForm(cvData, false);
-                  }}
+                  onClick={() => saveCVFromForm(cvData, false)}
                   className="flex items-center gap-2 bg-[#1a73e8] hover:bg-[#1760c4] text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition-all duration-200"
                 >
                   <CheckCircle2 className="w-5 h-5" /> Save as Draft
                 </Button>
                 <Button
-                  onClick={() => {
-                    saveCVFromForm(cvData, true);
-                  }}
+                  onClick={() => saveCVFromForm(cvData, true)}
                   className="flex items-center gap-2 bg-[#10b981] hover:bg-[#059669] text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition-all duration-200"
                 >
                   <FileText className="w-5 h-5" /> Publish
                 </Button>
                 <Button
+                  // Uncomment to enable export as image
                   // onClick={exportAsImage}
                   className="flex items-center gap-2 bg-[#f59e42] hover:bg-[#ea580c] text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition-all duration-200"
                 >
@@ -325,13 +396,13 @@ export default function MyCVs() {
               </Button>
             </div>
             <div ref={templateRef}>
-              {/* Preview Section */}
+              {/* CV Preview Section */}
               <PreviewEditor
                 UserCV={cvData}
                 userTemplate={selectedTemplate}
                 onCVChange={setCvData}
-              // onTemplateChange={}
-              // showOnlyPreview
+                // onTemplateChange={}
+                // showOnlyPreview
               />
             </div>
           </div>
@@ -339,60 +410,77 @@ export default function MyCVs() {
       default:
         return null;
     }
-  };
+  }
 
-  // Delete CV by id
-  const handleDeleteCV = (id: number, title: string) => {
-    if (confirm(`Are you sure you want to delete "${title}"?`)) {
+  // --- CV Actions ---
+
+  /**
+   * Delete a CV by id, with confirmation and page adjustment.
+   */
+  function handleDeleteCV(id: number, title: string) {
+    if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
       setCvs((prev) => prev.filter((cv) => cv.id !== id));
       toast.success(`CV "${title}" deleted!`);
-      // Adjust page if needed
+      // Adjust page if needed after deletion
       setTimeout(() => {
         const newFiltered = cvs
           .filter((cv) => cv.id !== id)
           .filter((cv) => {
-            const profileMatch = selectedProfileId === "All" || cv.profileId === selectedProfileId;
-            const createdAtMatch = selectedCreatedAt === "All" || cv.createdAt === selectedCreatedAt;
-            const statusMatch = selectedStatus === "All" || cv.status === selectedStatus;
+            const profileMatch =
+              selectedProfileId === "All" ||
+              cv.profileId === selectedProfileId;
+            const createdAtMatch =
+              selectedCreatedAt === "All" ||
+              cv.createdAt === selectedCreatedAt;
+            const statusMatch =
+              selectedStatus === "All" || cv.status === selectedStatus;
             return profileMatch && createdAtMatch && statusMatch;
           });
-
         const newTotalPages = Math.ceil(newFiltered.length / CVS_PER_PAGE);
         if (currentPage > newTotalPages && newTotalPages > 0) {
           setCurrentPage(newTotalPages);
         }
       }, 0);
     }
-  };
+  }
 
-  // Pagination navigation
-  const goToPage = (page: number) => {
+  /**
+   * Go to a specific page in pagination.
+   */
+  function goToPage(page: number) {
     if (page < 1 || page > totalPages) return;
-
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", page.toString());
     params.set("view", "my-cvs");
-
     router.push(`/dashboard?${params.toString()}`);
     setCurrentPage(page);
-  };
+  }
 
-  // Handle preview
-  const handlePreviewCV = (cv: CV) => {
+  /**
+   * Show preview modal for a CV.
+   */
+  function handlePreviewCV(cv: CV) {
+    // Find the template for this CV
+    const userTemplateObj = allTemplates.find(
+      (tpl) => tpl.templateId === cv.templateId
+    );
+    setPreviewTemplate(userTemplateObj);
     setPreviewCV(cv);
     setShowPreview(true);
-  };
+  }
 
-  // Handle edit
-  const handleEditCV = (cv: CV) => {
+  /**
+   * Start editing a CV.
+   */
+  function handleEditCV(cv: CV) {
     setEditCV(cv);
-    // setCvData(cv.content);
+    // Optionally: setCvData(cv.content);
     setSelectedTemplate(cv.templateId || "");
     setShowAddForm(true);
     setCurrentStep(1);
-  };
+  }
 
-  // --- UI/UX Template Style (like dashboard.tsx) ---
+  // --- Render ---
   return (
     <div className="max-w-7xl py-8 px-6 sm:px-8 min-h-screen">
       {/* Header */}
@@ -423,10 +511,11 @@ export default function MyCVs() {
             setSelectedTemplate("");
             setCurrentStep(1);
           }}
-          className={`flex items-center gap-2 justify-center font-semibold px-5 py-2 rounded-lg shadow transition-all duration-200 ${showAddForm
-            ? "bg-gray-400 hover:bg-gray-500 dark:bg-gray-900 dark:hover:bg-gray-800 text-white"
-            : "bg-[#1a73e8] hover:bg-[#1760c4] dark:bg-[#2563eb] dark:hover:bg-[#1e40af] text-white"
-            }`}
+          className={`flex items-center gap-2 justify-center font-semibold px-5 py-2 rounded-lg shadow transition-all duration-200 ${
+            showAddForm
+              ? "bg-gray-400 hover:bg-gray-500 dark:bg-gray-900 dark:hover:bg-gray-800 text-white"
+              : "bg-[#1a73e8] hover:bg-[#1760c4] dark:bg-[#2563eb] dark:hover:bg-[#1e40af] text-white"
+          }`}
           variant="secondary"
         >
           <Plus className="w-5 h-5" /> Add CV
@@ -435,34 +524,43 @@ export default function MyCVs() {
 
       {/* Statistics */}
       <div className="flex flex-col sm:flex-row gap-6 mb-10">
+        {/* Total CVs */}
         <div className="flex-1 rounded-2xl bg-white dark:bg-gray-900 border-0 shadow-lg px-6 py-5 flex items-center gap-5 transition-all hover:scale-[1.025] hover:shadow-xl duration-200 border-l-4 border-[#3b82f6]">
           <div className="rounded-xl p-3 flex items-center justify-center bg-[#e0edfd] dark:bg-transparent">
             <FileText className="h-5 w-5 text-[#3b82f6] dark:text-[#60a5fa]" />
           </div>
           <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] dark:text-[#60a5fa]">Total CVs</div>
+            <div className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] dark:text-[#60a5fa]">
+              Total CVs
+            </div>
             <div className="text-3xl font-extrabold text-[#22223b] dark:text-white leading-tight">
               {totalCVs}
             </div>
           </div>
         </div>
+        {/* Drafts */}
         <div className="flex-1 rounded-2xl bg-white dark:bg-gray-900 border-0 shadow-lg px-6 py-5 flex items-center gap-5 transition-all hover:scale-[1.025] hover:shadow-xl duration-200 border-l-4 border-[#f59e42]">
           <div className="rounded-xl p-3 flex items-center justify-center bg-[#fff7e6] dark:bg-transparent">
             <Edit className="h-5 w-5 text-[#f59e42] dark:text-[#fbbf24]" />
           </div>
           <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-[#f59e42] dark:text-[#fbbf24]">Drafts</div>
+            <div className="text-xs font-bold uppercase tracking-wider text-[#f59e42] dark:text-[#fbbf24]">
+              Drafts
+            </div>
             <div className="text-3xl font-extrabold text-[#22223b] dark:text-white leading-tight">
               {draftCount}
             </div>
           </div>
         </div>
+        {/* Published */}
         <div className="flex-1 rounded-2xl bg-white dark:bg-gray-900 border-0 shadow-lg px-6 py-5 flex items-center gap-5 transition-all hover:scale-[1.025] hover:shadow-xl duration-200 border-l-4 border-[#10b981]">
           <div className="rounded-xl p-3 flex items-center justify-center bg-[#e6f9f3] dark:bg-transparent">
             <FileText className="h-5 w-5 text-[#10b981] dark:text-[#34d399]" />
           </div>
           <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">Published</div>
+            <div className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
+              Published
+            </div>
             <div className="text-3xl font-extrabold text-[#22223b] dark:text-white leading-tight">
               {publishedCount}
             </div>
@@ -487,9 +585,9 @@ export default function MyCVs() {
               onChange={handleProfileChange}
               className="rounded-md border border-[#e0e7ef] dark:border-[#23262f] py-2 px-3 text-[#22223b] dark:text-white bg-white dark:bg-[#181a20] focus:border-[#1a73e8] focus:ring-1 focus:ring-[#1a73e8] dark:focus:border-[#60a5fa] dark:focus:ring-[#60a5fa] text-sm transition"
             >
-              <option value="All" >All Profiles</option>
+              <option value="All">All Profiles</option>
               {profileOptions.map((profile) => (
-                <option key={profile} value={profile} >
+                <option key={profile} value={profile}>
                   {profile}
                 </option>
               ))}
@@ -554,7 +652,7 @@ export default function MyCVs() {
         </form>
       </section>
 
-      {/* Add/Edit CV Form */}
+      {/* Add/Edit CV Modal */}
       {showAddForm && (
         <div
           className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm"
@@ -588,14 +686,16 @@ export default function MyCVs() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Preview: {previewCV.title}</h2>
+              <h2 className="text-2xl font-bold">
+                Preview: {previewCV.title}
+              </h2>
               <Button variant="ghost" onClick={() => setShowPreview(false)}>
                 <X className="w-5 h-5" />
               </Button>
             </div>
             <TemplateRenderer
-              cvData={cvData}
-              template={selectedCVTemplate}
+              cvData={previewCV.content}
+              template={previewTemplate}
             />
           </div>
         </div>
@@ -605,6 +705,7 @@ export default function MyCVs() {
       <section className="mb-12">
         {filteredCVs.length === 0 ? (
           cvs.length === 0 ? (
+            // No CVs at all
             <div className="text-center text-[#8a8fa3] dark:text-[#a3aed6] py-16 text-lg font-medium select-none">
               No CVs found. Add a new one to get started.
               <button
@@ -633,6 +734,7 @@ export default function MyCVs() {
               </button>
             </div>
           ) : (
+            // No CVs for current filters
             <div className="text-center text-[#8a8fa3] dark:text-[#a3aed6] py-16 text-lg font-medium select-none">
               No CVs found for the selected filters.
               <button
@@ -644,16 +746,19 @@ export default function MyCVs() {
             </div>
           )
         ) : (
+          // CVs Grid
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
             {paginatedCVs.map((cv) => (
               <article
                 key={cv.id}
-                className={`bg-white dark:bg-gray-900 rounded-2xl shadow-lg flex flex-col border-0 hover:shadow-xl transition-all duration-200 ${cv.status === "draft"
-                  ? "border-l-4 border-[#f59e42] dark:border-[#fbbf24]"
-                  : "border-l-4 border-[#10b981] dark:border-[#34d399]"
-                  }`}
+                className={`bg-white dark:bg-gray-900 rounded-2xl shadow-lg flex flex-col border-0 hover:shadow-xl transition-all duration-200 ${
+                  cv.status === "draft"
+                    ? "border-l-4 border-[#f59e42] dark:border-[#fbbf24]"
+                    : "border-l-4 border-[#10b981] dark:border-[#34d399]"
+                }`}
               >
                 <div className="p-5 flex flex-col flex-grow">
+                  {/* Title and Icon */}
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-bold text-xl text-[#22223b] dark:text-white line-clamp-1">
                       {cv.title}
@@ -662,23 +767,22 @@ export default function MyCVs() {
                       <FileText className="w-6 h-6 text-[#1a73e8] dark:text-[#60a5fa]" />
                     </div>
                   </div>
+                  {/* Description */}
                   <div className="text-[#64748b] dark:text-[#a3aed6] text-sm mb-2 line-clamp-2">
                     {cv.description}
                   </div>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <span className="text-xs px-3 py-1 bg-[#f1f5f9] dark:bg-transparent text-[#22223b] dark:text-[#a3aed6] rounded-lg font-semibold">
-                      {cv.status.charAt(0).toUpperCase() + cv.status.slice(1)}
+                  {/* Dates */}
+                  <div className="flex flex-col gap-2 mb-3">
+                    <span className="text-xs text-[#64748b] dark:text-[#a3aed6] flex items-center gap-1">
+                      <svg className="w-3 h-3 text-[#94a3b8] dark:text-[#64748b]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 20 20"><path d="M6 2a1 1 0 00-1 1v1H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 00-1-1H6zm0 2V3h8v1H6zm-1 2h10v10H5V6z"></path></svg>
+                      <span>{formatDate(cv.createdAt || "")}</span>
                     </span>
-                    <span className="text-xs text-[#94a3b8] dark:text-[#64748b]">
-                      Profile: <span className="text-[#1a73e8] dark:text-[#60a5fa]">{cv.profileId}</span>
-                    </span>
-                    <span className="text-xs text-[#94a3b8] dark:text-[#64748b]">
-                      Created: {formatDate(cv.createdAt || "")}
-                    </span>
-                    <span className="text-xs text-[#94a3b8] dark:text-[#64748b]">
-                      Updated: {formatDate(cv.updatedAt)}
+                    <span className="text-xs text-[#94a3b8] dark:text-[#64748b] flex items-center gap-1">
+                      <svg className="w-3 h-3 text-[#94a3b8] dark:text-[#64748b]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 20 20"><path d="M12 8v4l3 1m5-5a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      <span>{formatDate(cv.updatedAt)}</span>
                     </span>
                   </div>
+                  {/* Action Buttons */}
                   <div className="mt-auto flex gap-2 border-t border-[#e0e7ef] dark:border-[#23262f] pt-3">
                     <button
                       type="button"
@@ -703,9 +807,19 @@ export default function MyCVs() {
                     </button>
                     <button
                       type="button"
+                      disabled
                       onClick={() => {
                         // Download as JSON for demo
-                        const blob = new Blob([JSON.stringify({ ...cv.content, template: cv.templateId }, null, 2)], { type: "application/json" });
+                        const blob = new Blob(
+                          [
+                            JSON.stringify(
+                              { ...cv.content, template: cv.templateId },
+                              null,
+                              2
+                            ),
+                          ],
+                          { type: "application/json" }
+                        );
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement("a");
                         a.href = url;

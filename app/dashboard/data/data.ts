@@ -1,4 +1,5 @@
 // types.ts
+import { CVData } from "@/types/cv-types"
 export type CVStatus = "draft" | "published";
 export interface User {
   id: string;
@@ -21,14 +22,15 @@ export interface CVProfile {
 
 export interface CV {
   id: string | number;
-  userId?: string;
+  userId: string;
   profileId: string;
   role: string; // Added role field
-  templateId?: string;
+  templateId: string;
   title: string;
   description: string;
-  content?: object;
+  content: CVData;
   status: CVStatus;
+  export: boolean;
   createdAt?: string;
   updatedAt: string;
   lastUsedAt?: string;
