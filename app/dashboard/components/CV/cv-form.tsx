@@ -69,7 +69,7 @@ interface CVFormProps {
   scrollRef: RefObject<HTMLDivElement | null>
   onSave: (data: CVData) => void
   onNext: () => void
-  show: ()=> void
+  show: () => void
 }
 
 export function CVForm({ cvData, setCvData, onNext, show, onSave }: CVFormProps) {
@@ -79,7 +79,7 @@ export function CVForm({ cvData, setCvData, onNext, show, onSave }: CVFormProps)
   const [analysisResults, setAnalysisResults] = useState<JobAnalysisResults | null>(null)
 
   const handleSave = () => {
-      onSave(cvData)
+    onSave(cvData)
   }
 
   const analyzeJobDescription = async () => {
@@ -377,7 +377,7 @@ export function CVForm({ cvData, setCvData, onNext, show, onSave }: CVFormProps)
 
 
   return (
-      <div className="max-w-4xl h-full mx-auto space-y-8 my-5 overflow-auto no-scrollbar">
+    <div className="max-w-4xl h-full mx-auto space-y-8 my-5 overflow-auto no-scrollbar">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Let's Build Your Resume</h1>
         <p className="text-gray-600">Fill in your information to get started</p>
@@ -622,6 +622,7 @@ export function CVForm({ cvData, setCvData, onNext, show, onSave }: CVFormProps)
                 <div>
                   <Label>Start Date</Label>
                   <Input
+                    type="date"
                     value={edu.startDate}
                     onChange={(e) => updateEducation(edu.id, "startDate", e.target.value)}
                     placeholder="2018"
@@ -630,6 +631,7 @@ export function CVForm({ cvData, setCvData, onNext, show, onSave }: CVFormProps)
                 <div>
                   <Label>End Date</Label>
                   <Input
+                    type="date"
                     value={edu.endDate}
                     onChange={(e) => updateEducation(edu.id, "endDate", e.target.value)}
                     placeholder="2022"
@@ -933,7 +935,7 @@ export function CVForm({ cvData, setCvData, onNext, show, onSave }: CVFormProps)
           onClick={onNext}
           disabled={!isFormValid()}
         >
-          Next          
+          Next
         </Button>
       </div>
     </div>

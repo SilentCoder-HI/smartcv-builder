@@ -156,7 +156,7 @@
         "marginBottom": "0.75rem"
       },
       "skillCategory": {
-        "fontWeight": 500,
+        "fontWeight": "bold",
         "color": "#1e293b",
         "fontSize": "1rem"
       },

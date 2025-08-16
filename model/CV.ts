@@ -4,7 +4,6 @@ export interface UCV extends Document {
   id: string;
   userId: string;
   profileId: string;
-  role: string;
   templateId: string;
   title: string;
   description: string;
@@ -58,7 +57,6 @@ const CVSchema = new Schema<UCV>(
     id: { type: String, required: true },
     userId: { type: String, required: true },
     profileId: { type: String, required: true },
-    role: { type: String, required: true },
     templateId: { type: String, required: true },
     title: { type: String, required: true },
     description: { type: String, required: true },

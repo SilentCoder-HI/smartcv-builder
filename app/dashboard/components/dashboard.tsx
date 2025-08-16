@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CV } from "../data/data";
 
 // Types
 type Resume = {
@@ -81,20 +82,16 @@ const sampleCVs: Resume[] = [
 ];
 
 // Helper: get the N most recent CVs
-const getRecentCVs = (cvs: Resume[], count = 3): Resume[] => {
+const getRecentCVs = (cvs: any): CV[] => {
+  let count = 3
   return [...cvs]
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, count);
 };
 
 // Helper: get metrics from CVs
-function getMetricsFromCVs(cvs: Resume[]) {
+function getMetricsFromCVs(cvs: CV[]) {
   const totalCVs = cvs.length;
-  const avgViews = totalCVs
-    ? Math.round(
-        cvs.reduce((sum, cv) => sum + (typeof cv.views === "number" ? cv.views : 0), 0) / totalCVs
-      )
-    : 0;
 
   return [
     {
@@ -108,10 +105,10 @@ function getMetricsFromCVs(cvs: Resume[]) {
     },
     {
       label: "Avg Match Score",
-      value: avgViews + "%",
+      value: "0%",
       icon: Sparkles,
       trend: "up",
-      change: avgViews > 0 ? `+${Math.round(avgViews * 0.1)} from last week` : "+0 from last week",
+      change: "+0 from last week",
       badgeColor: "success",
       iconClass: "h-5 w-5 text-[#f59e42]",
     },
@@ -128,7 +125,6 @@ function getMetricsFromCVs(cvs: Resume[]) {
 }
 
 // Use sampleCVs for resumes - get 3 most recent
-const recentResumes = getRecentCVs(sampleCVs, 3);
 
 // Mock Jobs data
 const mockJobs: Job[] = [
@@ -158,23 +154,30 @@ const mockJobs: Job[] = [
   },
 ];
 
-// Mock Activities based on recent resumes
-const mockActivities: Activity[] = recentResumes.map((cv, idx) => ({
-  id: idx + 1,
-  type: idx === 0 ? "created" : idx === 1 ? "exported" : "matched",
-  description:
-    idx === 0
-      ? `Created new resume "${cv.title}"`
-      : idx === 1
-      ? `Exported resume "${cv.title}" as PDF`
-      : `Matched resume "${cv.title}" with ${Math.floor(Math.random() * 5) + 1} new jobs`,
-  time: idx === 0 ? "2 hours ago" : idx === 1 ? "1 day ago" : "3 days ago",
-}));
 
-const metricsData = getMetricsFromCVs(sampleCVs);
 
-export default function Dashboard({ onNavigate }: { onNavigate: (path: string) => void }) {
+type MyDashboardProps = {
+  cvs: CV[];
+  onNavigate: (path: string) => void
+};
+
+
+export default function Dashboard({ cvs, onNavigate }: MyDashboardProps) {
   const aiSuggestionsUsed = 1; // This can be dynamic
+  const metricsData = getMetricsFromCVs(cvs);
+  const recentResumes = getRecentCVs(cvs);
+  // Mock Activities based on recent resumes
+  const mockActivities: Activity[] = recentResumes.map((cv, idx) => ({
+    id: idx + 1,
+    type: idx === 0 ? "created" : idx === 1 ? "exported" : "matched",
+    description:
+      idx === 0
+        ? `Created new resume "${cv.title}"`
+        : idx === 1
+          ? `Exported resume "${cv.title}" as PDF`
+          : `Matched resume "${cv.title}" with ${Math.floor(Math.random() * 5) + 1} new jobs`,
+    time: idx === 0 ? "2 hours ago" : idx === 1 ? "1 day ago" : "3 days ago",
+  }));
 
   return (
     <div className="max-w-7xl py-8 px-6 sm:px-8 min-h-screen">
@@ -194,26 +197,23 @@ export default function Dashboard({ onNavigate }: { onNavigate: (path: string) =
           return (
             <div
               key={metric.label}
-              className={`flex-1 rounded-2xl bg-white dark:bg-gray-900 border-0 shadow-lg px-6 py-5 flex items-center gap-5 transition-all hover:scale-[1.025] hover:shadow-xl duration-200 ${
-                idx === 0
-                  ? "border-l-4 border-[#3b82f6]"
-                  : idx === 1
+              className={`flex-1 rounded-2xl bg-white dark:bg-gray-900 border-0 shadow-lg px-6 py-5 flex items-center gap-5 transition-all hover:scale-[1.025] hover:shadow-xl duration-200 ${idx === 0
+                ? "border-l-4 border-[#3b82f6]"
+                : idx === 1
                   ? "border-l-4 border-[#f59e42]"
                   : "border-l-4 border-[#10b981]"
-              }`}
+                }`}
             >
               <div
-                className={`rounded-xl p-3 flex items-center justify-center ${
-                  idx === 0 ? "bg-[#e0edfd]" : idx === 1 ? "bg-[#fff7e6]" : "bg-[#e6f9f3]"
-                } dark:bg-gray-800`}
+                className={`rounded-xl p-3 flex items-center justify-center ${idx === 0 ? "bg-[#e0edfd]" : idx === 1 ? "bg-[#fff7e6]" : "bg-[#e6f9f3]"
+                  } dark:bg-gray-800`}
               >
                 <Icon className={metric.iconClass} />
               </div>
               <div>
                 <div
-                  className={`text-xs font-bold uppercase tracking-wider ${
-                    idx === 0 ? "text-[#3b82f6]" : idx === 1 ? "text-[#f59e42]" : "text-[#10b981]"
-                  }`}
+                  className={`text-xs font-bold uppercase tracking-wider ${idx === 0 ? "text-[#3b82f6]" : idx === 1 ? "text-[#f59e42]" : "text-[#10b981]"
+                    }`}
                 >
                   {metric.label}
                 </div>
@@ -258,11 +258,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (path: string) =
               {recentResumes.map((resume) => (
                 <article
                   key={resume.id}
-                  className={`bg-white dark:bg-gray-900 rounded-2xl shadow-lg flex flex-col border-0 hover:shadow-xl transition-all duration-200 ${
-                    resume.status === "draft"
-                      ? "border-l-4 border-[#f59e42]"
-                      : "border-l-4 border-[#10b981]"
-                  }`}
+                  className={`bg-white dark:bg-gray-900 rounded-2xl shadow-lg flex flex-col border-0 hover:shadow-xl transition-all duration-200 ${resume.status === "draft"
+                    ? "border-l-4 border-[#f59e42]"
+                    : "border-l-4 border-[#10b981]"
+                    }`}
                 >
                   <div className="p-5 flex flex-col flex-grow">
                     <div className="flex items-center justify-between mb-2">
@@ -281,10 +280,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (path: string) =
                         {resume.status.charAt(0).toUpperCase() + resume.status.slice(1)}
                       </span>
                       <span className="text-xs text-[#94a3b8] dark:text-gray-400">
-                        Last used: {new Date(resume.lastUsedAt).toLocaleDateString()}
-                      </span>
-                      <span className="text-xs text-[#94a3b8] dark:text-gray-400">
-                        Views: {resume.views}
+                        Last used: {new Date(resume.updatedAt).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="mt-auto flex gap-2 border-t border-[#e0e7ef] dark:border-gray-800 pt-3">
@@ -373,14 +369,13 @@ export default function Dashboard({ onNavigate }: { onNavigate: (path: string) =
               <div className="flex items-center space-x-4">
                 <div
                   className={`p-3 rounded-xl flex items-center justify-center text-white
-                    ${
-                      activity.type === "created"
-                        ? "bg-gradient-to-br from-[#3b82f6] to-[#2563eb]"
-                        : activity.type === "exported"
+                    ${activity.type === "created"
+                      ? "bg-gradient-to-br from-[#3b82f6] to-[#2563eb]"
+                      : activity.type === "exported"
                         ? "bg-gradient-to-br from-[#10b981] to-[#059669]"
                         : activity.type === "ai"
-                        ? "bg-gradient-to-br from-[#f59e42] to-[#fbbf24]"
-                        : "bg-gradient-to-br from-[#a78bfa] to-[#6366f1]"
+                          ? "bg-gradient-to-br from-[#f59e42] to-[#fbbf24]"
+                          : "bg-gradient-to-br from-[#a78bfa] to-[#6366f1]"
                     }`}
                 >
                   {activity.type === "created" && <FileText size={22} />}
