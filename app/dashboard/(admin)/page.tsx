@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import AppSidebar from "../layout/AppSidebar";
 import Dashboard from "@dashboard/components/dashboard";
 import Settings from "@dashboard/components/Setting";
+import AIResumeAssistant  from "@dashboard/components/AIResumeAssistant";
 import MyCVs from "../components/MyCVs";
 import JobsPage from "../components/jobSearch";
 import AppHeader from "../layout/AppHeader";
@@ -13,18 +14,15 @@ import { CV } from "../data/data";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { CVData } from "@/types/cv-types";
+import { Job } from "@/types/jobs-types";
+import { fetchJobs } from "../utils/getJobs";
+import { frontendDeveloperCV } from "@/data/demoCVS/developer/developer-demo-cvs";
 
-// --- Helper Types ---
-type DashboardPageProps = {};
-type PathComponentProps = {
-  onNavigate: (path: string, sub?: string) => void;
-  sub?: string;
-  cvs: CV[];
-  setCvs: React.Dispatch<React.SetStateAction<CV[]>>;
-  addCV: (newCVData: CVData, publish?: boolean) => Promise<void>;
-  updateCV: (newCVData: CVData, publish?: boolean) => Promise<void>;
-  deleteCV: (id: string | number, title: string) => Promise<void>;
-};
+// --- Keyword Extraction System ---
+
+type KeywordMap = Record<string, number>;
+// Global keyword frequency map (in-memory, not persisted)
+const allKeywords: KeywordMap = {};
 
 // --- Helper Functions ---
 
@@ -37,54 +35,104 @@ function getViewFromSearch(search: string | null) {
   return { view, sub };
 }
 
-export default function DashboardPage(_props: DashboardPageProps) {
+// Extract and rank keywords from a description
+function extractAndRankKeywords(description: string): KeywordMap {
+  if (!description) return {};
+  const words = description
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, "")
+    .split(/\s+/);
+
+  const stopWords = [
+    "the", "is", "at", "which", "on", "and", "a", "an", "in", "of", "for", "to", "with", "by", "we", "are", "looking",
+    "it", "this", "that", "as", "from", "or", "be", "was", "were", "has", "have", "had", "but", "not", "so", "if", "then", "than", "can", "will", "would", "should", "could", "do", "does", "did", "you", "your", "our", "us", "they", "them", "their", "he", "she", "his", "her", "him", "i", "me", "my", "mine", "about", "also", "just", "out", "up", "down", "over", "under", "again", "more", "most", "some", "such", "no", "yes", "all", "any", "each", "other", "who", "whom", "whose", "when", "where", "why", "how", "what", "been", "because", "into", "too", "very", "there", "here", "after", "before", "between", "during", "while", "both", "few", "many", "much", "every", "own", "same", "new", "old", "off", "even", "may", "might", "get", "got", "getting", "go", "goes", "went", "come", "comes", "came", "see", "seen", "use", "used", "using", "make", "makes", "made", "want", "wants", "wanted", "need", "needs", "needed", "say", "says", "said", "let", "lets", "let's"
+  ];
+
+  const keywordMap: KeywordMap = {};
+
+  for (const word of words) {
+    if (word.length > 2 && !stopWords.includes(word)) {
+      keywordMap[word] = (keywordMap[word] || 0) + 1;
+    }
+  }
+  return keywordMap;
+}
+
+// Save keywords with ranking from a string (job description)
+function saveKeywords(description: string): void {
+  const keywordMap = extractAndRankKeywords(description);
+  for (const word in keywordMap) {
+    if (Object.prototype.hasOwnProperty.call(keywordMap, word)) {
+      allKeywords[word] = (allKeywords[word] || 0) + keywordMap[word];
+    }
+  }
+}
+
+// Remove HTML tags and normalize whitespace
+function stripHTML(html: string): string {
+  if (!html) return "";
+  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+export default function DashboardPage() {
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  // --- State: UI/UX Controls ---
-  const [selectedView, setSelectedView] = useState<string>("/overview");
-  const [selectedSub, setSelectedSub] = useState<string | undefined>(undefined);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [editCV, setEditCV] = useState<CV | null>(null);
+  // --- UI/UX State ---
+  const [selectedView, setSelectedView] = useState<string>("/overview"); // Current main view
+  const [selectedSub, setSelectedSub] = useState<string | undefined>(undefined); // Current subview/tab
+  const [loading, setLoading] = useState<boolean>(true); // Global loading spinner
+  const [error, setError] = useState<string | null>(null); // Global error message
 
-  // --- State: Data ---
-  const [cvs, setCvs] = useState<CV[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  // --- Pagination/Filter State for Delete Adjustments ---
-  const [selectedProfileId] = useState<string>("All");
-  const [selectedCreatedAt] = useState<string>("All");
-  const [selectedStatus] = useState<string>("All");
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const CVS_PER_PAGE = 10;
+  // --- CV Data State ---
+  const [cvs, setCvs] = useState<CV[]>([]); // All user CVs
+  const [editCV, setEditCV] = useState<CV | null>(null); // CV being edited
 
   // --- Add/Edit Form State ---
-  const [showAddForm, setShowAddForm] = useState<boolean>(false);
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [showAddForm, setShowAddForm] = useState<boolean>(false); // Show add CV form
+  const [currentStep, setCurrentStep] = useState<number>(1); // Step in add/edit CV wizard
 
-  // Set loading to false after mount
-  useEffect(() => {
-    setLoading(false);
-  }, []);
+  // --- Pagination/Filter State for MyCVs ---
+  const [selectedProfileId] = useState<string>("All"); // Filter: profileId
+  const [selectedCreatedAt] = useState<string>("All"); // Filter: createdAt
+  const [selectedStatus] = useState<string>("All"); // Filter: status
+  const [currentPage, setCurrentPage] = useState<number>(1); // Pagination: current page
+  const CVS_PER_PAGE = 10;
 
-  // Redirect /dashboard to /dashboard?view=Overview if view is missing
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    if (!params.get("view")) {
-      params.set("view", "Overview");
-      const newUrl = `${pathname}?${params.toString()}`;
-      window.history.replaceState(null, "", newUrl);
+  // --- Job Search State ---
+  const [query] = useState(frontendDeveloperCV?.personalInfo?.jobTitle || ""); // Job search query
+  const [allJobs, setAllJobs] = useState<Job[]>([]); // All fetched jobs
+  const [savedJobs, setSavedJobs] = useState<string[]>(() => {
+    // Saved jobs from localStorage
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("savedJobs");
+        if (stored && Array.isArray(JSON.parse(stored))) {
+          return JSON.parse(stored);
+        }
+        return [];
+      } catch {
+        return [];
+      }
     }
-  }, [pathname]);
+    return [];
+  });
 
-  // Sync state with query string
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const { view, sub } = getViewFromSearch(window.location.search);
-    setSelectedView(view);
-    setSelectedSub(sub);
-  }, [typeof window !== "undefined" ? window.location.search : ""]);
+  // --- Navigation Handler ---
+  const handleNavigate = useCallback(
+    (path: string, sub?: string) => {
+      setSelectedView(path);
+      setSelectedSub(sub);
+      const params = new URLSearchParams();
+      if (path.toLowerCase() !== "/overview")
+        params.set("view", path.replace(/^\//, ""));
+      else params.set("view", "Overview");
+      if (sub) params.set("sub", sub);
+      const url = `${pathname}?${params.toString()}`;
+      window.history.replaceState(null, "", url);
+    },
+    [pathname]
+  );
 
   // --- API: Fetch User CVs ---
   async function fetchUserCVs(userId?: string) {
@@ -127,7 +175,7 @@ export default function DashboardPage(_props: DashboardPageProps) {
         description: `CV for ${newCVData.personalInfo.fullName || "Unknown"}`,
         export: false,
         content: newCVData,
-        status: publish? "active":"inactive",
+        status: publish ? "active" : "inactive",
       };
       const res = await fetch("/dashboard/api/usersCV", {
         method: "POST",
@@ -159,18 +207,17 @@ export default function DashboardPage(_props: DashboardPageProps) {
   }
 
   // --- API: Update CV ---
-  async function updateCV(newCVData: CVData, publish: boolean = false, Template: string) {
-    if (!editCV) return;
+  async function updateCV(newCVData: CVData, publish: boolean = false, Template: string, EditCVID: string | number) {
     setLoading(true);
     setError(null);
     try {
       const body = {
-        id: editCV.id,
+        id: EditCVID,
         content: newCVData,
         title: newCVData.personalInfo.jobTitle || "Untitled CV",
         description: `CV for ${newCVData.personalInfo.fullName || "Unknown"}`,
         templateId: Template,
-        status: publish? "active":"inactive",
+        status: publish ? "active" : "inactive",
         updatedAt: new Date().toISOString(),
       };
       const res = await fetch("/dashboard/api/usersCV", {
@@ -189,7 +236,7 @@ export default function DashboardPage(_props: DashboardPageProps) {
       }
       const updated = await res.json();
       setCvs((prev: CV[]) =>
-        prev.map((cv) => (cv.id === editCV.id ? updated : cv))
+        prev.map((cv) => (cv.id === EditCVID ? updated : cv))
       );
       toast.success(
         `CV "${updated.title}" updated${publish ? " & published" : ""}!`
@@ -254,7 +301,7 @@ export default function DashboardPage(_props: DashboardPageProps) {
     }
   }
 
-  // Generates a random string of 24 alphanumeric characters
+  // --- Utility: Generate random string for CV id ---
   function generate24CharString(): string {
     const chars =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -265,37 +312,117 @@ export default function DashboardPage(_props: DashboardPageProps) {
     return result;
   }
 
-  // Fetch CVs on mount (simulate userId for demo)
+  // --- Effect: Set loading to false after mount ---
   useEffect(() => {
-    fetchUserCVs(session?.user?.id);
+    setLoading(false);
+  }, []);
+
+  // --- Effect: Redirect /dashboard to /dashboard?view=Overview if view is missing ---
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get("view")) {
+      params.set("view", "Overview");
+      const newUrl = `${pathname}?${params.toString()}`;
+      window.history.replaceState(null, "", newUrl);
+    }
+  }, [pathname]);
+
+  // --- Effect: Sync state with query string ---
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const { view, sub } = getViewFromSearch(window.location.search);
+    setSelectedView(view);
+    setSelectedSub(sub);
+  }, [typeof window !== "undefined" ? window.location.search : ""]);
+
+  // --- Effect: Fetch CVs on mount (simulate userId for demo) ---
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchUserCVs(session.user.id);
+    }
   }, [session?.user?.id]);
 
-  // --- Navigation Handler ---
-  const handleNavigate = useCallback(
-    (path: string, sub?: string) => {
-      setSelectedView(path);
-      setSelectedSub(sub);
-      const params = new URLSearchParams();
-      if (path.toLowerCase() !== "/overview")
-        params.set("view", path.replace(/^\//, ""));
-      else params.set("view", "Overview");
-      if (sub) params.set("sub", sub);
-      const url = `${pathname}?${params.toString()}`;
-      window.history.replaceState(null, "", url);
-    },
-    [pathname]
+  // --- Job Normalization ---
+  const normalizeJob = useCallback(
+    (job: any): Job => ({
+      id: job.id || job.jobSlug || job.url,
+      url: job.url,
+      jobSlug: job.jobSlug,
+      jobTitle: job.jobTitle || job.title || "",
+      companyName: job.companyName || job.company || "",
+      companyLogo: job.companyLogo || job.logo,
+      jobIndustry: job.jobIndustry,
+      jobType: job.jobType || job.type,
+      jobGeo: job.jobGeo,
+      jobLevel: job.jobLevel,
+      jobExcerpt: job.jobExcerpt,
+      jobDescription: job.jobDescription || job.description || "",
+      pubDate: job.pubDate,
+      publisher: job.publisher,
+      salary: job.salary,
+      benefits: job.benefits,
+      requirements: job.requirements,
+      location: job.jobGeo || job.location || "",
+      saved: savedJobs.includes(job.id || job.jobSlug || job.url),
+      applicationUrl: job.applicationUrl || job.url,
+    }),
+    [savedJobs]
   );
+
+  // --- Effect: Fetch all jobs and extract keywords from their descriptions ---
+  useEffect(() => {
+    let isMounted = true;
+    const fetchAllJobs = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await fetchJobs(`${query}`);
+        const jobs: Job[] = (Array.isArray(data) ? data : []).map(normalizeJob);
+
+        // Save all keywords from all job descriptions (only once, after API data comes)
+        jobs.forEach((job) => {
+          saveKeywords(stripHTML(job.jobDescription));
+        });
+
+        setAllJobs(jobs);
+      } catch (err) {
+        setError("Failed to fetch jobs. Please try again.");
+        setAllJobs([]);
+        if (process.env.NODE_ENV !== "production") {
+          // eslint-disable-next-line no-console
+          console.error(err);
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+    fetchAllJobs();
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, normalizeJob]);
 
   // --- Main Path Components Map ---
   type MainContentProps = {
     onNavigate: (path: string, sub?: string) => void;
     sub?: string;
+    // Add more props as needed for each component
+    // For MyCVs, we need: cvs, addCV, updateCV, deleteCV, editCV, setEditCV, showAddForm, setShowAddForm, currentStep, setCurrentStep, error, loading, pagination/filter state
+    // For JobsPage, we need: allJobs, savedJobs, setSavedJobs, allKeywords
   };
 
   const PATH_COMPONENTS: {
     [key: string]: React.ComponentType<MainContentProps>;
   } = {
-    "/overview": (props: MainContentProps) => <Dashboard cvs={cvs} onNavigate={props.onNavigate} />,
+    "/overview": (props: MainContentProps) => (
+      <Dashboard
+        allJobs={allJobs}
+        cvs={cvs}
+        onNavigate={props.onNavigate}
+      />
+    ),
     "/my-cvs": (props: MainContentProps) => (
       <MyCVs
         cvs={cvs}
@@ -334,8 +461,19 @@ export default function DashboardPage(_props: DashboardPageProps) {
         )}
       </div>
     ),
-    "/job-search": () => <JobsPage />,
-    "/settings": () => <Settings />,
+    "/ai-assistant": (props: MainContentProps) => <AIResumeAssistant />,
+    "/job-search": (props: MainContentProps) => (
+      <JobsPage
+        allJobs={allJobs}
+        savedJobs={savedJobs}
+        setSavedJobs={setSavedJobs}
+        setAllJobs={setAllJobs}
+        allKeywords={allKeywords}
+        onNavigate={props.onNavigate}
+        jobMatchingRequestsLeft={10}
+      />
+    ),
+    "/settings": (props: MainContentProps) => <Settings />,
   };
 
   // --- Render Main Content ---

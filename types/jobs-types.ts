@@ -1,0 +1,22 @@
+export type Job = {
+    id: string;
+    url: string;
+    jobSlug?: string;
+    jobTitle: string;
+    companyName: string;
+    companyLogo?: string;
+    jobIndustry?: string;
+    jobType?: string;
+    jobGeo?: string;
+    jobLevel?: string;
+    jobExcerpt?: string;
+    jobDescription: string;
+    pubDate?: string;
+    publisher?: string;
+    salary?: string;
+    benefits?: string[];
+    requirements?: string[];
+    location?: string;
+    saved?: boolean;
+    applicationUrl?: string;
+  };

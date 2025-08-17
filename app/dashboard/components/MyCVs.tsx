@@ -75,7 +75,7 @@ function formatDate(dateString: string): string {
 type MyCVsProps = {
   cvs: CV[];
   onNavigate?: (path: string, sub: string) => void;
-  updateCV: (newData: CVData, publish: boolean, Template: string) => void;
+  updateCV: (newData: CVData, publish: boolean, Template: string, EditCVID: string | number) => void;
   addCV: (newData: CVData, publish: boolean, Template: string) => void;
   deleteCV: (id: string | number, title: string) => void;
 };
@@ -149,8 +149,8 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
 
   // --- Derived Data ---
   const totalCVs = cvs.length;
-  const draftCount = cvs.filter((cv) => cv.status === "draft").length;
-  const publishedCount = cvs.filter((cv) => cv.status === "published").length;
+  const draftCount = cvs.filter((cv) => cv.status === "inactive").length;
+  const publishedCount = cvs.filter((cv) => cv.status === "active").length;
 
   // --- Filtering and Pagination ---
   const filteredCVs = useMemo(() => {
@@ -183,9 +183,9 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
     if (!isNaN(pageParam)) setCurrentPage(pageParam);
   }, [searchParams]);
 
-  function saveCVFromForm(newCVData: CVData, publish: boolean = false, Template: string) {
+  function saveCVFromForm(newCVData: CVData, publish: boolean, Template: string) {
     if (editCV) {
-      updateCV(newCVData, publish, Template);
+      updateCV(newCVData, publish, Template, editCV.id);
     } else {
       addCV(newCVData, publish, Template);
     }
@@ -394,7 +394,7 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
    * Start editing a CV.
    */
   function handleEditCV(cv: CV) {
-    setEditCV(cv);
+    setEditCV(cv)
     setCvData(cv.content);
     setSelectedTemplate(cv.templateId || "");
     setShowAddForm(true);
@@ -696,7 +696,7 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
               {paginatedCVs.map((cv) => (
                 <article
                   key={cv.id}
-                  className={`bg-white dark:bg-gray-900 rounded-2xl shadow-lg flex flex-col border-0 hover:shadow-xl transition-all duration-200 ${cv.status === "draft"
+                  className={`bg-white dark:bg-gray-900 rounded-2xl shadow-lg flex flex-col border-0 hover:shadow-xl transition-all duration-200 ${cv.status === "inactive"
                     ? "border-l-4 border-[#f59e42] dark:border-[#fbbf24]"
                     : "border-l-4 border-[#10b981] dark:border-[#34d399]"
                     }`}

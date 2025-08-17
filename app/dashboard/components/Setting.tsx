@@ -203,9 +203,6 @@ export default function SettingsPagePro({ sub, onNavigate }: SettingsPageProps) 
       className="max-w-7xl w-full"
     >
       <div className="rounded-2xl p-4 shadow-md mb-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-          Sections
-        </h3>
         <div className="mt-3 grid gap-3">
           {menuItems.map((it) => (
             <motion.button

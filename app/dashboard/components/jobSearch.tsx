@@ -18,86 +18,13 @@ import {
   ExternalLink,
   Briefcase,
 } from "lucide-react";
-import { fetchJobs } from "../utils/getJobs";
 import LoadingSpinner from "./loading/loading";
-import { frontendDeveloperCV } from "@/data/demoCVS/developer/developer-demo-cvs";
-
-// Harmonized Job type for Aorin
-type Job = {
-  id: string;
-  url: string;
-  jobSlug?: string;
-  jobTitle: string;
-  companyName: string;
-  companyLogo?: string;
-  jobIndustry?: string;
-  jobType?: string;
-  jobGeo?: string;
-  jobLevel?: string;
-  jobExcerpt?: string;
-  jobDescription: string;
-  pubDate?: string;
-  publisher?: string;
-  salary?: string;
-  benefits?: string[];
-  requirements?: string[];
-  location?: string;
-  saved?: boolean;
-  applicationUrl?: string;
-};
+import { Job } from "@/types/jobs-types";
 
 const JOBS_PER_PAGE = 8;
 
-// --- Keyword Extraction System ---
-
-type KeywordMap = Record<string, number>;
-
-// Remove HTML tags and normalize whitespace
-function stripHTML(html: string): string {
-  if (!html) return "";
-  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-}
-
-// Extract and rank keywords from a description
-function extractAndRankKeywords(description: string): KeywordMap {
-  if (!description) return {};
-  const words = description
-    .toLowerCase()
-    .replace(/[^a-z\s]/g, "")
-    .split(/\s+/);
-
-  const stopWords = [
-    "the", "is", "at", "which", "on", "and", "a", "an", "in", "of", "for", "to", "with", "by", "we", "are", "looking",
-    "it", "this", "that", "as", "from", "or", "be", "was", "were", "has", "have", "had", "but", "not", "so", "if", "then", "than", "can", "will", "would", "should", "could", "do", "does", "did", "you", "your", "our", "us", "they", "them", "their", "he", "she", "his", "her", "him", "i", "me", "my", "mine", "about", "also", "just", "out", "up", "down", "over", "under", "again", "more", "most", "some", "such", "no", "yes", "all", "any", "each", "other", "who", "whom", "whose", "when", "where", "why", "how", "what", "been", "because", "into", "too", "very", "there", "here", "after", "before", "between", "during", "while", "both", "few", "many", "much", "every", "own", "same", "new", "old", "off", "even", "may", "might", "get", "got", "getting", "go", "goes", "went", "come", "comes", "came", "see", "seen", "use", "used", "using", "make", "makes", "made", "want", "wants", "wanted", "need", "needs", "needed", "say", "says", "said", "let", "lets", "let's"
-  ];
-
-  const keywordMap: KeywordMap = {};
-
-  for (const word of words) {
-    if (word.length > 2 && !stopWords.includes(word)) {
-      keywordMap[word] = (keywordMap[word] || 0) + 1;
-    }
-  }
-  console.log(keywordMap)
-
-  return keywordMap;
-}
-
-// Global keyword frequency map (in-memory, not persisted)
-const allKeywords: KeywordMap = {};
-
-// Save keywords with ranking from a string (job description)
-function saveKeywords(description: string): void {
-  const keywordMap = extractAndRankKeywords(description);
-  for (const word in keywordMap) {
-    if (Object.prototype.hasOwnProperty.call(keywordMap, word)) {
-      allKeywords[word] = (allKeywords[word] || 0) + keywordMap[word];
-    }
-  }
-}
-
 // Search and sort by rank
-function searchKeywords(query: string): { word: string; count: number }[] {
+function searchKeywords(query: string, allKeywords: Record<string, number>): { word: string; count: number }[] {
   const lowerQuery = query.toLowerCase();
   return Object.entries(allKeywords)
     .filter(([word]) => word.includes(lowerQuery))
@@ -105,14 +32,34 @@ function searchKeywords(query: string): { word: string; count: number }[] {
     .map(([word, count]) => ({ word, count: count as number }));
 }
 
-export default function JobsPage() {
-  const [allJobs, setAllJobs] = useState<Job[]>([]);
+// Remove HTML tags and normalize whitespace
+function stripHTML(html: string): string {
+  if (!html) return "";
+  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+type JobsPageProps = {
+  allJobs: Job[];
+  savedJobs: string[];
+  setSavedJobs: React.Dispatch<React.SetStateAction<string[]>>;
+  setAllJobs: React.Dispatch<React.SetStateAction<Job[]>>;
+  allKeywords: Record<string, number>;
+  onNavigate?: (path: string, sub?: string) => void;
+  jobMatchingRequestsLeft?: number;
+};
+
+export default function JobsPage({ 
+  allJobs, 
+  savedJobs, 
+  setSavedJobs, 
+  setAllJobs,
+  allKeywords, 
+  onNavigate,
+  jobMatchingRequestsLeft = 10 
+}: JobsPageProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [ShowSuggestions, setShowSuggestions] = useState(false)
-  const [query] = useState(
-    frontendDeveloperCV?.personalInfo?.jobTitle || ""
-  );
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -120,81 +67,6 @@ export default function JobsPage() {
   const [suggestions, setSuggestions] = useState<
     { display: string; value: string }[]
   >([]);
-  const [savedJobs, setSavedJobs] = useState<string[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("savedJobs");
-        if (stored && Array.isArray(JSON.parse(stored))) {
-          return JSON.parse(stored);
-        }
-        return [];
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  });
-
-  // Normalize job data to Aorin format
-  const normalizeJob = useCallback(
-    (job: any): Job => ({
-      id: job.id || job.jobSlug || job.url,
-      url: job.url,
-      jobSlug: job.jobSlug,
-      jobTitle: job.jobTitle || job.title || "",
-      companyName: job.companyName || job.company || "",
-      companyLogo: job.companyLogo || job.logo,
-      jobIndustry: job.jobIndustry,
-      jobType: job.jobType || job.type,
-      jobGeo: job.jobGeo,
-      jobLevel: job.jobLevel,
-      jobExcerpt: job.jobExcerpt,
-      jobDescription: job.jobDescription || job.description || "",
-      pubDate: job.pubDate,
-      publisher: job.publisher,
-      salary: job.salary,
-      benefits: job.benefits,
-      requirements: job.requirements,
-      location: job.jobGeo || job.location || "",
-      saved: savedJobs.includes(job.id || job.jobSlug || job.url),
-      applicationUrl: job.applicationUrl || job.url,
-    }),
-    [savedJobs]
-  );
-
-  // Fetch all jobs and extract keywords from their descriptions
-  useEffect(() => {
-    let isMounted = true;
-    const fetchAllJobs = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const data = await fetchJobs(`${query}`);
-        const jobs: Job[] = (Array.isArray(data) ? data : []).map(normalizeJob);
-
-        // Save all keywords from all job descriptions (only once, after API data comes)
-        jobs.forEach((job) => {
-          saveKeywords(stripHTML(job.jobDescription));
-        });
-
-        setAllJobs(jobs);
-      } catch (err) {
-        setError("Failed to fetch jobs. Please try again.");
-        setAllJobs([]);
-        if (process.env.NODE_ENV !== "production") {
-          // eslint-disable-next-line no-console
-          console.error(err);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-    fetchAllJobs();
-    return () => {
-      isMounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, normalizeJob]);
 
   // Persist saved jobs to localStorage
   useEffect(() => {
@@ -218,8 +90,8 @@ export default function JobsPage() {
 
     // 1. Suggestions from job fields (title, company, location)
     const jobFieldMatches = allJobs
-    .filter((job) => {
-        const title= stripHTML(job.jobTitle)
+      .filter((job: Job) => {
+        const title = stripHTML(job.jobTitle);
         const company = typeof job.companyName === "string" ? job.companyName : "";
         const location = typeof job.location === "string" ? job.location : "";
         return (
@@ -229,13 +101,13 @@ export default function JobsPage() {
         );
       })
       .slice(0, 5)
-      .map((job) => ({
+      .map((job: Job) => ({
         display: `${job.jobTitle} at ${job.companyName}`,
         value: job.jobTitle,
       }));
 
     // 2. Suggestions from extracted keywords (ranked)
-    const keywordMatches = searchKeywords(searchTerm)
+    const keywordMatches = searchKeywords(searchTerm, allKeywords)
       .slice(0, 5)
       .map((kw) => ({
         display: kw.word,
@@ -251,23 +123,23 @@ export default function JobsPage() {
     }).slice(0, 8);
 
     setSuggestions(combined);
-  }, [searchTerm, allJobs]);
+  }, [searchTerm, allJobs, allKeywords]);
 
   // Save/unsave job
   const handleSaveJob = useCallback(
     (jobId: string) => {
-      setAllJobs((prev) =>
-        prev.map((job) =>
+      setAllJobs((prev: Job[]) =>
+        prev.map((job: Job) =>
           job.id === jobId ? { ...job, saved: !job.saved } : job
         )
       );
-      setSavedJobs((prev) =>
+      setSavedJobs((prev: string[]) =>
         prev.includes(jobId)
           ? prev.filter((id) => id !== jobId)
           : [...prev, jobId]
       );
     },
-    []
+    [setAllJobs, setSavedJobs]
   );
 
   // Open job link
@@ -288,15 +160,11 @@ export default function JobsPage() {
   const filteredJobs = useMemo(() => {
     const term = (searchTerm || "").toLowerCase();
     if (!term) return allJobs;
-    return allJobs.filter((job) => {
-      const jobTitle =
-        typeof job.jobTitle === "string" ? job.jobTitle : "";
-      const company =
-        typeof job.companyName === "string" ? job.companyName : "";
-      const location =
-        typeof job.location === "string" ? job.location : "";
-      const description =
-        typeof job.jobDescription === "string" ? job.jobDescription : "";
+    return allJobs.filter((job: Job) => {
+      const jobTitle = typeof job.jobTitle === "string" ? job.jobTitle : "";
+      const company = typeof job.companyName === "string" ? job.companyName : "";
+      const location = typeof job.location === "string" ? job.location : "";
+      const description = typeof job.jobDescription === "string" ? job.jobDescription : "";
       return (
         jobTitle.toLowerCase().includes(term) ||
         company.toLowerCase().includes(term) ||
@@ -361,6 +229,7 @@ export default function JobsPage() {
     setSelectedJob(job);
     setShowModal(true);
   }, []);
+  
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
     setSelectedJob(null);
@@ -399,7 +268,7 @@ export default function JobsPage() {
           autoFocus
         />
 
-        {suggestions.length > 0 && ShowSuggestions && (
+        {suggestions.length > 0 && showSuggestions && (
           <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border no-scrollbar border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
             {suggestions.map((item, idx) => {
               const regex = new RegExp(
@@ -456,7 +325,7 @@ export default function JobsPage() {
             ref={jobListRef}
             className="grid sm:grid-cols-2 gap-6 animate-fadeIn"
           >
-            {pagedJobs.map((job) => (
+            {pagedJobs.map((job: Job) => (
               <div
                 key={job.id}
                 className="relative bg-white dark:bg-gray-900 dark:text-gray-100 rounded-2xl shadow-md p-6 border border-gray-200 dark:border-gray-800 transition-all duration-200 hover:shadow-xl hover:border-blue-400 group"
@@ -493,8 +362,8 @@ export default function JobsPage() {
                   >
                     <Bookmark
                       className={`w-6 h-6 transition-colors duration-200 ${job.saved
-                          ? "text-blue-600 fill-blue-500"
-                          : "text-gray-300 dark:text-gray-600 group-hover:text-blue-400"
+                        ? "text-blue-600 fill-blue-500"
+                        : "text-gray-300 dark:text-gray-600 group-hover:text-blue-400"
                         }`}
                       aria-label={job.saved ? "Saved" : "Not saved"}
                     />
@@ -714,7 +583,7 @@ export default function JobsPage() {
         <Sparkles className="w-6 h-6 text-blue-500 animate-pulse" />
         <span className="font-semibold text-gray-900 dark:text-gray-100">
           Job matching requests left:{" "}
-          <span className="text-blue-500">10</span>
+          <span className="text-blue-500">{jobMatchingRequestsLeft}</span>
         </span>
       </div>
     </div>

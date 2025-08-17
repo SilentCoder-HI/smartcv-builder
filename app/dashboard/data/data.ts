@@ -1,6 +1,6 @@
 // types.ts
 import { CVData } from "@/types/cv-types"
-export type CVStatus = "draft" | "published";
+export type CVStatus = "inactive" | "active";
 export interface User {
   id: string;
   name: string;

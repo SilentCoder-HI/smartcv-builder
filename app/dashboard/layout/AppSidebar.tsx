@@ -59,11 +59,6 @@ const menu: MenuItem[] = [
     icon: <BriefcaseBusiness size={30} strokeWidth={1} />,
   },
   {
-    name: "Exports",
-    path: "/exports",
-    icon: <Download size={30} strokeWidth={1} />,
-  },
-  {
     name: "Settings",
     path: "/settings",
     icon: <Settings size={30} strokeWidth={1} />,
