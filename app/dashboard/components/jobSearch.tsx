@@ -45,7 +45,10 @@ type JobsPageProps = {
   setAllJobs: React.Dispatch<React.SetStateAction<Job[]>>;
   allKeywords: Record<string, number>;
   onNavigate?: (path: string, sub?: string) => void;
+  userSelectjob: (job: Job) => void;
   jobMatchingRequestsLeft?: number;
+  cvs?: any[]; // Add CVs prop
+
 };
 
 export default function JobsPage({ 
@@ -55,7 +58,9 @@ export default function JobsPage({
   setAllJobs,
   allKeywords, 
   onNavigate,
-  jobMatchingRequestsLeft = 10 
+  jobMatchingRequestsLeft = 10,
+  cvs = [],
+  userSelectjob
 }: JobsPageProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -148,6 +153,15 @@ export default function JobsPage({
       window.open(job.applicationUrl, "_blank", "noopener,noreferrer");
     }
   }, []);
+
+  // Analyze job with AI
+  const handleAnalyzeWithAI = useCallback((job: Job) => {
+    if (onNavigate) {
+      // Navigate to AI Assistant with job data
+      userSelectjob(job)
+      onNavigate("/ai-assistant");
+    }
+  }, [onNavigate]);
 
   // Shorten job description
   const getShortDescription = useCallback((desc: string) => {
@@ -423,6 +437,15 @@ export default function JobsPage({
                   >
                     <ExternalLink className="w-4 h-4 mr-1" />
                     Apply
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="bg-purple-600 hover:bg-purple-700 text-white dark:bg-purple-700 dark:hover:bg-purple-800 transition-colors flex items-center gap-1"
+                    onClick={() => handleAnalyzeWithAI(job)}
+                    aria-label={`Analyze ${job.jobTitle} with AI`}
+                  >
+                    <Sparkles className="w-4 h-4 mr-1" />
+                    Analyze with AI
                   </Button>
                 </div>
               </div>

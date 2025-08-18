@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { usePathname } from "next/navigation";
 import AppSidebar from "../layout/AppSidebar";
 import Dashboard from "@dashboard/components/dashboard";
 import Settings from "@dashboard/components/Setting";
-import AIResumeAssistant  from "@dashboard/components/AIResumeAssistant";
+import AIResumeAssistant from "@dashboard/components/AIResumeAssistant";
 import MyCVs from "../components/MyCVs";
 import JobsPage from "../components/jobSearch";
 import AppHeader from "../layout/AppHeader";
@@ -15,8 +15,6 @@ import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { CVData } from "@/types/cv-types";
 import { Job } from "@/types/jobs-types";
-import { fetchJobs } from "../utils/getJobs";
-import { frontendDeveloperCV } from "@/data/demoCVS/developer/developer-demo-cvs";
 
 // --- Keyword Extraction System ---
 
@@ -86,6 +84,7 @@ export default function DashboardPage() {
 
   // --- CV Data State ---
   const [cvs, setCvs] = useState<CV[]>([]); // All user CVs
+
   const [editCV, setEditCV] = useState<CV | null>(null); // CV being edited
 
   // --- Add/Edit Form State ---
@@ -97,10 +96,11 @@ export default function DashboardPage() {
   const [selectedCreatedAt] = useState<string>("All"); // Filter: createdAt
   const [selectedStatus] = useState<string>("All"); // Filter: status
   const [currentPage, setCurrentPage] = useState<number>(1); // Pagination: current page
+  const [userSeletjob, setuserSeletjob] = useState<Job | null>(null); // Selected job for AI assistant
+
   const CVS_PER_PAGE = 10;
 
   // --- Job Search State ---
-  const [query] = useState(frontendDeveloperCV?.personalInfo?.jobTitle || ""); // Job search query
   const [allJobs, setAllJobs] = useState<Job[]>([]); // All fetched jobs
   const [savedJobs, setSavedJobs] = useState<string[]>(() => {
     // Saved jobs from localStorage
@@ -337,6 +337,9 @@ export default function DashboardPage() {
   }, [typeof window !== "undefined" ? window.location.search : ""]);
 
   // --- Effect: Fetch CVs on mount (simulate userId for demo) ---
+  // We'll use a ref to know when CVs have loaded, so we can trigger jobs fetch after
+  const cvsLoadedRef = useRef(false);
+
   useEffect(() => {
     if (session?.user?.id) {
       fetchUserCVs(session.user.id);
@@ -370,48 +373,94 @@ export default function DashboardPage() {
     [savedJobs]
   );
 
-  // --- Effect: Fetch all jobs and extract keywords from their descriptions ---
+  // --- Effect: Fetch all jobs and extract keywords from their descriptions using API route ---
+  // Only call jobs API after CVs have loaded (not at the same time as CVs load)
+  // We use a ref to ensure we only fetch jobs after CVs have loaded at least once
+  const jobsLoadedRef = useRef(false);
+
+  // --- Effect: Fetch all jobs and extract keywords from their descriptions using API route ---
   useEffect(() => {
-    let isMounted = true;
-    const fetchAllJobs = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const data = await fetchJobs(`${query}`);
-        const jobs: Job[] = (Array.isArray(data) ? data : []).map(normalizeJob);
+    // Only trigger jobs fetch after CVs have loaded at least once and only if user has at least one CV
+    if (!cvsLoadedRef.current && cvs.length > 0) {
+      cvsLoadedRef.current = true;
+    }
+    // Only fetch jobs if CVs have loaded and user has at least one CV
+    if (cvsLoadedRef.current && cvs.length > 0) {
+      let isMounted = true;
+      const fetchAllJobs = async () => {
+        setLoading(true);
+        setError("");
+        try {
+          // Use the userId for the API, not the full CVs array
+          // The API expects: { userId }
+          const userId = session?.user?.id;
+          if (!userId) {
+            setError("No user ID found. Please log in again.");
+            setAllJobs([]);
+            setLoading(false);
+            return;
+          }
+          const response = await fetch("/dashboard/api/fetchjobs", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId }),
+          });
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+          }
+          const data = await response.json();
+          const jobs: Job[] = (Array.isArray(data) ? data : []).map(normalizeJob);
 
-        // Save all keywords from all job descriptions (only once, after API data comes)
-        jobs.forEach((job) => {
-          saveKeywords(stripHTML(job.jobDescription));
-        });
+          // Save all keywords from all job descriptions (only once, after API data comes)
+          jobs.forEach((job) => {
+            saveKeywords(stripHTML(job.jobDescription));
+          });
 
-        setAllJobs(jobs);
-      } catch (err) {
-        setError("Failed to fetch jobs. Please try again.");
-        setAllJobs([]);
-        if (process.env.NODE_ENV !== "production") {
-          // eslint-disable-next-line no-console
-          console.error(err);
+          setAllJobs(jobs);
+        } catch (err) {
+          setError("Failed to fetch jobs. Please try again.");
+          setAllJobs([]);
+          if (process.env.NODE_ENV !== "production") {
+            // eslint-disable-next-line no-console
+            console.error(err);
+          }
+        } finally {
+          if (isMounted) setLoading(false);
         }
-      } finally {
-        if (isMounted) setLoading(false);
+      };
+      // Only fetch jobs if we haven't already loaded them for this CV set
+      if (!jobsLoadedRef.current) {
+        fetchAllJobs();
+        jobsLoadedRef.current = true;
       }
-    };
-    fetchAllJobs();
-    return () => {
-      isMounted = false;
-    };
+      // If user adds/removes CVs after initial load, allow re-fetch
+      if (jobsLoadedRef.current && cvs.length === 0) {
+        jobsLoadedRef.current = false;
+        setAllJobs([]);
+      }
+      return () => {
+        isMounted = false;
+      };
+    } else if (cvsLoadedRef.current && cvs.length === 0) {
+      // If user deletes all CVs, reset jobs
+      setAllJobs([]);
+      jobsLoadedRef.current = false;
+      toast.info("You need to add a new CV to get jobs.");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, normalizeJob]);
+  }, [cvs, normalizeJob, session?.user?.id]);
 
   // --- Main Path Components Map ---
   type MainContentProps = {
     onNavigate: (path: string, sub?: string) => void;
     sub?: string;
-    // Add more props as needed for each component
-    // For MyCVs, we need: cvs, addCV, updateCV, deleteCV, editCV, setEditCV, showAddForm, setShowAddForm, currentStep, setCurrentStep, error, loading, pagination/filter state
-    // For JobsPage, we need: allJobs, savedJobs, setSavedJobs, allKeywords
   };
+
+  function HandleUserjob(job: Job) {
+    setuserSeletjob(job);
+  }
 
   const PATH_COMPONENTS: {
     [key: string]: React.ComponentType<MainContentProps>;
@@ -461,7 +510,7 @@ export default function DashboardPage() {
         )}
       </div>
     ),
-    "/ai-assistant": (props: MainContentProps) => <AIResumeAssistant />,
+    "/ai-assistant": (props: MainContentProps) => <AIResumeAssistant job={userSeletjob} cvs={cvs} />,
     "/job-search": (props: MainContentProps) => (
       <JobsPage
         allJobs={allJobs}
@@ -471,6 +520,8 @@ export default function DashboardPage() {
         allKeywords={allKeywords}
         onNavigate={props.onNavigate}
         jobMatchingRequestsLeft={10}
+        cvs={cvs}
+        userSelectjob={HandleUserjob}
       />
     ),
     "/settings": (props: MainContentProps) => <Settings />,
