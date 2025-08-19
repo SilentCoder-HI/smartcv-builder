@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import AppSidebar from "../layout/AppSidebar";
-import Dashboard from "@dashboard/components/dashboard";
-import Settings from "@dashboard/components/Setting";
-import AIResumeAssistant from "@dashboard/components/AIResumeAssistant";
-import MyCVs from "../components/MyCVs";
-import JobsPage from "../components/jobSearch";
+import dynamic from "next/dynamic";
+const Dashboard = dynamic(() => import("@dashboard/components/dashboard"), { ssr: false });
+const Settings = dynamic(() => import("@dashboard/components/Setting"), { ssr: false });
+const AIResumeAssistant = dynamic(() => import("@dashboard/components/AIResumeAssistant"), { ssr: false });
+const MyCVs = dynamic(() => import("../components/MyCVs"), { ssr: false });
+const JobsPage = dynamic(() => import("../components/jobSearch"), { ssr: false });
 import AppHeader from "../layout/AppHeader";
 import LoadingSpinner from "../components/loading/loading";
 import { CV } from "../data/data";
@@ -15,11 +16,11 @@ import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { CVData } from "@/types/cv-types";
 import { Job } from "@/types/jobs-types";
+import TemplatesSelector from "../components/Templates";
 
 // --- Keyword Extraction System ---
 
 type KeywordMap = Record<string, number>;
-// Global keyword frequency map (in-memory, not persisted)
 const allKeywords: KeywordMap = {};
 
 // --- Helper Functions ---
@@ -33,7 +34,6 @@ function getViewFromSearch(search: string | null) {
   return { view, sub };
 }
 
-// Extract and rank keywords from a description
 function extractAndRankKeywords(description: string): KeywordMap {
   if (!description) return {};
   const words = description
@@ -56,7 +56,6 @@ function extractAndRankKeywords(description: string): KeywordMap {
   return keywordMap;
 }
 
-// Save keywords with ranking from a string (job description)
 function saveKeywords(description: string): void {
   const keywordMap = extractAndRankKeywords(description);
   for (const word in keywordMap) {
@@ -66,7 +65,6 @@ function saveKeywords(description: string): void {
   }
 }
 
-// Remove HTML tags and normalize whitespace
 function stripHTML(html: string): string {
   if (!html) return "";
   return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
@@ -77,33 +75,37 @@ export default function DashboardPage() {
   const { data: session } = useSession();
 
   // --- UI/UX State ---
-  const [selectedView, setSelectedView] = useState<string>("/overview"); // Current main view
-  const [selectedSub, setSelectedSub] = useState<string | undefined>(undefined); // Current subview/tab
-  const [loading, setLoading] = useState<boolean>(true); // Global loading spinner
-  const [error, setError] = useState<string | null>(null); // Global error message
+  const [selectedView, setSelectedView] = useState<string>("/overview");
+  const [selectedSub, setSelectedSub] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isCVloaded, setisCVloaded] = useState<boolean>(false);
+  const [jobloading, setjobloading] = useState<[boolean, String]>([true, ""]);
+  const [error, setError] = useState<string | null>(null);
 
   // --- CV Data State ---
-  const [cvs, setCvs] = useState<CV[]>([]); // All user CVs
-
-  const [editCV, setEditCV] = useState<CV | null>(null); // CV being edited
+  const [cvs, setCvs] = useState<CV[]>([]);
+  const [editCV, setEditCV] = useState<CV | null>(null);
 
   // --- Add/Edit Form State ---
-  const [showAddForm, setShowAddForm] = useState<boolean>(false); // Show add CV form
-  const [currentStep, setCurrentStep] = useState<number>(1); // Step in add/edit CV wizard
+  const [showAddForm, setShowAddForm] = useState<boolean>(false);
+  const [currentStep, setCurrentStep] = useState<number>(1);
 
   // --- Pagination/Filter State for MyCVs ---
-  const [selectedProfileId] = useState<string>("All"); // Filter: profileId
-  const [selectedCreatedAt] = useState<string>("All"); // Filter: createdAt
-  const [selectedStatus] = useState<string>("All"); // Filter: status
-  const [currentPage, setCurrentPage] = useState<number>(1); // Pagination: current page
-  const [userSeletjob, setuserSeletjob] = useState<Job | null>(null); // Selected job for AI assistant
+  const [selectedProfileId] = useState<string>("All");
+  const [selectedCreatedAt] = useState<string>("All");
+  const [selectedStatus] = useState<string>("All");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [userSeletjob, setuserSeletjob] = useState<Job | null>(null);
+
+  // --- Template Selection State ---
+  // This state will hold the selected templateId from TemplatesSelector
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 
   const CVS_PER_PAGE = 10;
 
   // --- Job Search State ---
-  const [allJobs, setAllJobs] = useState<Job[]>([]); // All fetched jobs
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [savedJobs, setSavedJobs] = useState<string[]>(() => {
-    // Saved jobs from localStorage
     if (typeof window !== "undefined") {
       try {
         const stored = localStorage.getItem("savedJobs");
@@ -136,8 +138,8 @@ export default function DashboardPage() {
 
   // --- API: Fetch User CVs ---
   async function fetchUserCVs(userId?: string) {
-    setLoading(true);
     setError(null);
+    setLoading(true);
     const url = userId
       ? `/dashboard/api/usersCV?userId=${encodeURIComponent(userId)}`
       : "/dashboard/api/usersCV";
@@ -152,6 +154,7 @@ export default function DashboardPage() {
       }
       const data = await res.json();
       setCvs(data);
+      setisCVloaded(true)
     } catch (error: any) {
       setError(error?.message || "Failed to load CVs");
       setCvs([]);
@@ -273,7 +276,6 @@ export default function DashboardPage() {
       }
       setCvs((prev: CV[]) => prev.filter((cv) => cv.id !== id));
       toast.success(`CV "${title}" deleted!`);
-      // Adjust page if needed after deletion
       setTimeout(() => {
         const newFiltered = cvs
           .filter((cv) => cv.id !== id)
@@ -301,7 +303,6 @@ export default function DashboardPage() {
     }
   }
 
-  // --- Utility: Generate random string for CV id ---
   function generate24CharString(): string {
     const chars =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -312,12 +313,10 @@ export default function DashboardPage() {
     return result;
   }
 
-  // --- Effect: Set loading to false after mount ---
   useEffect(() => {
     setLoading(false);
   }, []);
 
-  // --- Effect: Redirect /dashboard to /dashboard?view=Overview if view is missing ---
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
@@ -328,7 +327,6 @@ export default function DashboardPage() {
     }
   }, [pathname]);
 
-  // --- Effect: Sync state with query string ---
   useEffect(() => {
     if (typeof window === "undefined") return;
     const { view, sub } = getViewFromSearch(window.location.search);
@@ -336,17 +334,6 @@ export default function DashboardPage() {
     setSelectedSub(sub);
   }, [typeof window !== "undefined" ? window.location.search : ""]);
 
-  // --- Effect: Fetch CVs on mount (simulate userId for demo) ---
-  // We'll use a ref to know when CVs have loaded, so we can trigger jobs fetch after
-  const cvsLoadedRef = useRef(false);
-
-  useEffect(() => {
-    if (session?.user?.id) {
-      fetchUserCVs(session.user.id);
-    }
-  }, [session?.user?.id]);
-
-  // --- Job Normalization ---
   const normalizeJob = useCallback(
     (job: any): Job => ({
       id: job.id || job.jobSlug || job.url,
@@ -373,84 +360,63 @@ export default function DashboardPage() {
     [savedJobs]
   );
 
-  // --- Effect: Fetch all jobs and extract keywords from their descriptions using API route ---
-  // Only call jobs API after CVs have loaded (not at the same time as CVs load)
-  // We use a ref to ensure we only fetch jobs after CVs have loaded at least once
-  const jobsLoadedRef = useRef(false);
-
-  // --- Effect: Fetch all jobs and extract keywords from their descriptions using API route ---
-  useEffect(() => {
-    // Only trigger jobs fetch after CVs have loaded at least once and only if user has at least one CV
-    if (!cvsLoadedRef.current && cvs.length > 0) {
-      cvsLoadedRef.current = true;
-    }
-    // Only fetch jobs if CVs have loaded and user has at least one CV
-    if (cvsLoadedRef.current && cvs.length > 0) {
-      let isMounted = true;
-      const fetchAllJobs = async () => {
-        setLoading(true);
-        setError("");
-        try {
-          // Use the userId for the API, not the full CVs array
-          // The API expects: { userId }
-          const userId = session?.user?.id;
-          if (!userId) {
-            setError("No user ID found. Please log in again.");
-            setAllJobs([]);
-            setLoading(false);
-            return;
-          }
-          const response = await fetch("/dashboard/api/fetchjobs", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ userId }),
-          });
-          if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-          }
-          const data = await response.json();
-          const jobs: Job[] = (Array.isArray(data) ? data : []).map(normalizeJob);
-
-          // Save all keywords from all job descriptions (only once, after API data comes)
-          jobs.forEach((job) => {
-            saveKeywords(stripHTML(job.jobDescription));
-          });
-
-          setAllJobs(jobs);
-        } catch (err) {
-          setError("Failed to fetch jobs. Please try again.");
-          setAllJobs([]);
-          if (process.env.NODE_ENV !== "production") {
-            // eslint-disable-next-line no-console
-            console.error(err);
-          }
-        } finally {
-          if (isMounted) setLoading(false);
-        }
-      };
-      // Only fetch jobs if we haven't already loaded them for this CV set
-      if (!jobsLoadedRef.current) {
-        fetchAllJobs();
-        jobsLoadedRef.current = true;
-      }
-      // If user adds/removes CVs after initial load, allow re-fetch
-      if (jobsLoadedRef.current && cvs.length === 0) {
-        jobsLoadedRef.current = false;
+  async function fetchAllJobs(userId?: string) {
+    setLoading(true);
+    setError("");
+    try {
+      if (!userId) {
+        setError("No user ID found. Please log in again.");
         setAllJobs([]);
+        setLoading(false);
+        return;
       }
-      return () => {
-        isMounted = false;
-      };
-    } else if (cvsLoadedRef.current && cvs.length === 0) {
-      // If user deletes all CVs, reset jobs
+      const response = await fetch("/dashboard/api/fetchjobs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setjobloading([false, "api error"]);
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const jobs: Job[] = (Array.isArray(data) ? data : []).map(normalizeJob);
+
+      if (Array.isArray(data) && (data as any).error === "No CVs found for user") {
+        setjobloading([false, "no cvs"]);
+      } else if (jobs.length === 0) {
+        setjobloading([false, "No CV found. Please create a new CV to see job recommendations."]);
+      } else {
+        setjobloading([false, "api error"]);
+      }
+
+      jobs.forEach((job) => {
+        saveKeywords(stripHTML(job.jobDescription));
+      });
+
+      setAllJobs(jobs);
+    } catch (err) {
+      setError("Failed to fetch jobs. Please try again.");
       setAllJobs([]);
-      jobsLoadedRef.current = false;
-      toast.info("You need to add a new CV to get jobs.");
+      if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
+    } finally {
+      setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cvs, normalizeJob, session?.user?.id]);
+  }
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchUserCVs(session.user.id);
+      fetchAllJobs(session.user.id);
+    }
+  }, [session?.user?.id]);
 
   // --- Main Path Components Map ---
   type MainContentProps = {
@@ -462,6 +428,14 @@ export default function DashboardPage() {
     setuserSeletjob(job);
   }
 
+  // Handler for when a template is selected in TemplatesSelector
+  function handleTemplateSelect(templateId: string) {
+    setSelectedTemplateId(templateId);
+    // After selecting a template, navigate to /my-cvs and pass the templateId as a prop
+    setSelectedView("/my-cvs");
+    setSelectedSub(undefined);
+  }
+
   const PATH_COMPONENTS: {
     [key: string]: React.ComponentType<MainContentProps>;
   } = {
@@ -470,6 +444,7 @@ export default function DashboardPage() {
         allJobs={allJobs}
         cvs={cvs}
         onNavigate={props.onNavigate}
+        jobloading={jobloading}
       />
     ),
     "/my-cvs": (props: MainContentProps) => (
@@ -479,36 +454,12 @@ export default function DashboardPage() {
         updateCV={updateCV}
         deleteCV={deleteCV}
         onNavigate={props.onNavigate}
+        // Pass the selectedTemplateId as a prop (string or undefined)
+        selectedTemplateId={selectedTemplateId || undefined}
       />
     ),
     "/templates": (props: MainContentProps) => (
-      <div>
-        <div className="flex gap-2 mb-4">
-          <button
-            className={`px-3 py-1 rounded ${props.sub === "free"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200"
-              }`}
-            onClick={() => props.onNavigate("/templates", "free")}
-          >
-            Free Templates
-          </button>
-          <button
-            className={`px-3 py-1 rounded ${props.sub === "pro"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200"
-              }`}
-            onClick={() => props.onNavigate("/templates", "pro")}
-          >
-            Pro Templates
-          </button>
-        </div>
-        {props.sub === "pro" ? (
-          <div>Pro Templates</div>
-        ) : (
-          <div>Free Templates</div>
-        )}
-      </div>
+      <TemplatesSelector onUseTemplate={handleTemplateSelect} />
     ),
     "/ai-assistant": (props: MainContentProps) => <AIResumeAssistant job={userSeletjob} cvs={cvs} />,
     "/job-search": (props: MainContentProps) => (
@@ -527,7 +478,6 @@ export default function DashboardPage() {
     "/settings": (props: MainContentProps) => <Settings />,
   };
 
-  // --- Render Main Content ---
   const renderContent = () => {
     const Comp = PATH_COMPONENTS[selectedView] || PATH_COMPONENTS["/overview"];
     return (
@@ -538,7 +488,6 @@ export default function DashboardPage() {
     );
   };
 
-  // --- Main Render ---
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-950">
       <AppSidebar

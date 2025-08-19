@@ -25,6 +25,10 @@ export const metadata: Metadata = {
     description: 'Try out demo CVs and templates in the SmartCV Builder app.',
     images: ['/og-image.png']
   },
+  icons: {
+    icon: '/SmartCV.ico',
+    shortcut: '/SmartCV.ico',
+  },
   authors: [{ name: 'SilentCoder-HI', url: 'https://github.com/SilentCoder-HI' }],
   metadataBase: new URL('https://smartcv-builder.com')
 }

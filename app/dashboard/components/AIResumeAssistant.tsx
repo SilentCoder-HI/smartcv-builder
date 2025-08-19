@@ -27,7 +27,8 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Job } from "@/types/jobs-types";
 import { CV } from "../data/data";
-import TemplateRenderer from "@/components/TemplateRenderer";
+import dynamic from "next/dynamic";
+const TemplateRenderer = dynamic(() => import("@/components/TemplateRenderer"), { ssr: false });
 
 interface CVAnalysis {
   jobMatch: {

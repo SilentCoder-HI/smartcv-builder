@@ -38,12 +38,12 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
-import html2canvas from "html2canvas";
+import dynamic from "next/dynamic";
 import { CV } from "../data/data";
 import { CVData, CVForm } from "@dashboard/components/CV/cv-form";
 import { TemplateSelector } from "./CV/template-selector";
 import PreviewEditor from "./CV/preview-editor";
-import TemplateRenderer from "@/components/TemplateRenderer";
+const TemplateRenderer = dynamic(() => import("@/components/TemplateRenderer"), { ssr: false });
 import { TemplateMeta } from "@/types/template-types";
 import { templates } from "@/data/TempleteIndex";
 import { useSession } from "next-auth/react";
@@ -72,16 +72,24 @@ function formatDate(dateString: string): string {
     minute: "2-digit",
   });
 }
+
 type MyCVsProps = {
   cvs: CV[];
-  onNavigate?: (path: string, sub: string) => void;
+  onNavigate?: (path: string, sub?: string) => void;
   updateCV: (newData: CVData, publish: boolean, Template: string, EditCVID: string | number) => void;
   addCV: (newData: CVData, publish: boolean, Template: string) => void;
   deleteCV: (id: string | number, title: string) => void;
+  selectedTemplateId?: string;
 };
 
-// --- Main Component ---
-export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
+export default function MyCVs({
+  cvs,
+  updateCV,
+  addCV,
+  deleteCV,
+  onNavigate,
+  selectedTemplateId,
+}: MyCVsProps) {
   const { data: session } = useSession();
   // --- Theme and Routing ---
   const { theme = "light", setTheme } = useTheme();
@@ -89,7 +97,7 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
   const searchParams = useSearchParams();
 
   // --- Refs ---
-  const templateRef = useRef<HTMLDivElement>(null);
+  // Download is handled inside PreviewEditor now
   const mainRef = useRef<HTMLDivElement>(null);
 
   // --- State: CVs and Form Data ---
@@ -113,6 +121,12 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
   const [showPreview, setShowPreview] = useState(false);
   const [previewCV, setPreviewCV] = useState<CV | null>(null);
   const [editCV, setEditCV] = useState<CV | null>(null);
+  const [downloadCV, setDownloadCV] = useState<CV | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | number | null>(null);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [downloadLayout, setDownloadLayout] = useState<"A4" | "Letter" | "Legal">("A4");
+  const [downloadFormat, setDownloadFormat] = useState<"PDF">("PDF");
+  const downloadRef = useRef<HTMLDivElement>(null);
 
   // --- State: Pagination and Filters ---
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -121,7 +135,7 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
   const [selectedCreatedAt, setSelectedCreatedAt] = useState<string>("All");
 
   // --- State: Template Selection ---
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+  const [selectedTemplate, setSelectedTemplate] = useState<string>(selectedTemplateId || "");
   const [previewTemplate, setPreviewTemplate] = useState<TemplateMeta | undefined>(undefined);
 
   // --- Loading/Error State ---
@@ -160,7 +174,12 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
       const createdAtMatch =
         selectedCreatedAt === "All" || cv.createdAt === selectedCreatedAt;
       const statusMatch =
-        selectedStatus === "All" || cv.status === selectedStatus;
+        selectedStatus === "All" ||
+        (selectedStatus === "published"
+          ? cv.status === "active"
+          : selectedStatus === "draft"
+          ? cv.status === "inactive"
+          : false);
       return profileMatch && createdAtMatch && statusMatch;
     });
   }, [cvs, selectedProfileId, selectedCreatedAt, selectedStatus]);
@@ -183,6 +202,13 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
     if (!isNaN(pageParam)) setCurrentPage(pageParam);
   }, [searchParams]);
 
+  // If selectedTemplateId prop changes, update state
+  useEffect(() => {
+    if (selectedTemplateId) {
+      setSelectedTemplate(selectedTemplateId);
+    }
+  }, [selectedTemplateId]);
+
   function saveCVFromForm(newCVData: CVData, publish: boolean, Template: string) {
     if (editCV) {
       updateCV(newCVData, publish, Template, editCV.id);
@@ -190,7 +216,6 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
       addCV(newCVData, publish, Template);
     }
   }
-
 
   // --- Render Step Content for Add/Edit Modal ---
   function renderStepContent() {
@@ -246,27 +271,7 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
                 >
                   <ArrowLeft className="w-5 h-5" /> Previous Tab
                 </Button>
-                <Button
-                  onClick={() => saveCVFromForm(cvData, false, selectedTemplate)}
-                  className="flex items-center gap-2 bg-[#1a73e8] hover:bg-[#1760c4] text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition-all duration-200"
-                  disabled={loading}
-                >
-                  <CheckCircle2 className="w-5 h-5" /> Save as Draft
-                </Button>
-                <Button
-                  onClick={() => saveCVFromForm(cvData, true, selectedTemplate)}
-                  className="flex items-center gap-2 bg-[#10b981] hover:bg-[#059669] text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition-all duration-200"
-                  disabled={loading}
-                >
-                  <FileText className="w-5 h-5" /> Publish
-                </Button>
-                <Button
-                  onClick={exportAsImage}
-                  className="flex items-center gap-2 bg-[#f59e42] hover:bg-[#ea580c] text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition-all duration-200"
-                  disabled={loading}
-                >
-                  <Download className="w-5 h-5" /> Download
-                </Button>
+                {/* Draft/Publish/Download actions moved into PreviewEditor */}
               </div>
               <Button
                 variant="ghost"
@@ -277,12 +282,15 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
                 Cancel
               </Button>
             </div>
-            <div ref={templateRef}>
+            <div>
               {/* CV Preview Section */}
               <PreviewEditor
                 UserCV={cvData}
                 userTemplate={selectedTemplate}
                 onCVChange={setCvData}
+                onSaveDraft={(cv, templateId) => saveCVFromForm(cv, false, templateId)}
+                onPublish={(cv, templateId) => saveCVFromForm(cv, true, templateId)}
+                loading={loading}
               />
             </div>
             {loading && (
@@ -342,28 +350,9 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
     setTheme(theme === "dark" ? "light" : "dark");
   }
 
-  // --- Export as Image ---
-  async function exportAsImage() {
-    if (!templateRef.current) return;
-    try {
-      const canvas = await html2canvas(templateRef.current, {
-        scale: 2,
-        backgroundColor: "#fff",
-      });
-      const imgData = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.href = imgData;
-      link.download = "cv.png";
-      link.click();
-    } catch (e) {
-      toast.error("Failed to export as image");
-    }
-  }
+  // Image export handled in editor
 
   // --- CV Actions ---
-
-  /**
-  
 
   /**
    * Go to a specific page in pagination.
@@ -375,6 +364,42 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
     params.set("view", "my-cvs");
     router.push(`/dashboard?${params.toString()}`);
     setCurrentPage(page);
+  }
+
+  // --- Export selected CV as PDF via API (called on modal confirm) ---
+  async function exportSelectedCV() {
+    if (!downloadCV) return;
+    try {
+      setDownloadingId(downloadCV.id);
+      // Wait a tick for hidden renderer to mount with selected CV
+      await new Promise((r) => setTimeout(r, 75));
+      if (!downloadRef.current) throw new Error("Renderer not ready");
+      const container = downloadRef.current.cloneNode(true) as HTMLDivElement;
+      (container as HTMLElement).style.maxWidth = "unset";
+      (container as HTMLElement).style.transform = "none";
+      const docHtml = `<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\"/>\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>\n<style>@page{size:${downloadLayout};margin:10mm}html,body{padding:0;margin:0}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style>\n</head>\n<body>\n${(container as HTMLElement).innerHTML}\n</body>\n</html>`;
+      const res = await fetch("/dashboard/api/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ html: docHtml, layout: downloadLayout }),
+      });
+      if (!res.ok) throw new Error("Failed to export PDF");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${downloadCV.title || "cv"}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("PDF downloaded!");
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to export PDF");
+    } finally {
+      setDownloadingId(null);
+      setShowDownloadModal(false);
+      // Keep downloadCV for hidden render until after a tick, then clear
+      setTimeout(() => setDownloadCV(null), 0);
+    }
   }
 
   /**
@@ -394,13 +419,12 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
    * Start editing a CV.
    */
   function handleEditCV(cv: CV) {
-    setEditCV(cv)
+    setEditCV(cv);
     setCvData(cv.content);
     setSelectedTemplate(cv.templateId || "");
     setShowAddForm(true);
     setCurrentStep(1);
   }
-
 
   // --- Delete a CV by id, with confirmation and page adjustment. ---
   function handleDeleteCV(id: number | string, title: string) {
@@ -440,7 +464,7 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
               certifications: [],
               hobbies: [],
             });
-            setSelectedTemplate("");
+            setSelectedTemplate(selectedTemplateId || "");
             setCurrentStep(1);
           }}
           className={`flex items-center gap-2 justify-center font-semibold px-5 py-2 rounded-lg shadow transition-all duration-200 ${showAddForm
@@ -637,6 +661,88 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
         </div>
       )}
 
+      {/* Download Options Modal */}
+      {showDownloadModal && downloadCV && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowDownloadModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md no-scrollbar relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Download Options</h3>
+              <button
+                className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                onClick={() => setShowDownloadModal(false)}
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Format</label>
+                <div className="flex gap-3">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="radio"
+                      name="format"
+                      value="PDF"
+                      checked={downloadFormat === "PDF"}
+                      onChange={() => setDownloadFormat("PDF")}
+                    />
+                    PDF
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Layout</label>
+                <select
+                  value={downloadLayout}
+                  onChange={(e) => setDownloadLayout(e.target.value as any)}
+                  className="w-full border rounded px-3 py-2 bg-white dark:bg-gray-800"
+                >
+                  <option value="A4">A4 (210 × 297 mm)</option>
+                  <option value="Letter">Letter (8.5 × 11 in)</option>
+                  <option value="Legal">Legal (8.5 × 14 in)</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                className="px-4 py-2 rounded-md border text-sm"
+                onClick={() => setShowDownloadModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded-md bg-[#1a73e8] text-white text-sm disabled:opacity-60"
+                onClick={exportSelectedCV}
+                disabled={!!downloadingId}
+              >
+                {downloadingId ? "Generating..." : "Download"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden renderer for PDF export */}
+      <div className="fixed -left-[9999px] -top-[9999px] w-[210mm] h-auto bg-white" aria-hidden="true">
+        <div ref={downloadRef} className="bg-white">
+          {downloadCV && (
+            <TemplateRenderer
+              cvData={downloadCV.content}
+              template={allTemplates.find((t) => t.templateId === downloadCV.templateId)}
+            />
+          )}
+        </div>
+      </div>
+
       {/* Loading Spinner */}
       {loading && (
         <div className="flex justify-center items-center py-12">
@@ -670,7 +776,7 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
                       certifications: [],
                       hobbies: [],
                     });
-                    setSelectedTemplate("");
+                    setSelectedTemplate(selectedTemplateId || "");
                     setCurrentStep(1);
                   }}
                   className="mt-4 block mx-auto text-[#1a73e8] dark:text-[#60a5fa] hover:underline"
@@ -755,24 +861,10 @@ export default function MyCVs({ cvs, updateCV, addCV, deleteCV }: MyCVsProps) {
                       <button
                         type="button"
                         onClick={() => {
-                          // Download as JSON for demo
-                          const blob = new Blob(
-                            [
-                              JSON.stringify(
-                                { ...cv.content, template: cv.templateId },
-                                null,
-                                2
-                              ),
-                            ],
-                            { type: "application/json" }
-                          );
-                          const url = URL.createObjectURL(blob);
-                          const a = document.createElement("a");
-                          a.href = url;
-                          a.download = `${cv.title || "cv"}.json`;
-                          a.click();
-                          URL.revokeObjectURL(url);
-                          toast.success("CV downloaded!");
+                          setDownloadLayout("A4");
+                          setDownloadFormat("PDF");
+                          setDownloadCV(cv);
+                          setShowDownloadModal(true);
                         }}
                         className="flex items-center gap-1 px-3 py-1.5 rounded-md text-[#f59e42] dark:text-[#fbbf24] hover:bg-[#fff7e6] dark:hover:bg-[#3f2e1e] text-xs font-semibold transition hover:scale-105 transform"
                         disabled={loading}

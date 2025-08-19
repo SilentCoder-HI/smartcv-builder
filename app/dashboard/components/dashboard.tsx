@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CV } from "../data/data";
 import { Job } from "@/types/jobs-types";
+import LoadingSpinner from "./loading/loading";
 
 type Activity = {
   id: number;
@@ -76,6 +77,7 @@ type MyDashboardProps = {
   cvs: CV[];
   allJobs: Job[];
   onNavigate: (path: string) => void;
+  jobloading: [boolean, String];
 };
 
 // Shorten a string to a max length, clean whitespace, and add ellipsis if needed
@@ -105,7 +107,7 @@ function uniformJobDescription(desc: string): string {
     : clean.slice(0, JOB_DESC_MAX_LEN).trim() + "...";
 }
 
-export default function Dashboard({ cvs, onNavigate, allJobs }: MyDashboardProps) {
+export default function Dashboard({ cvs, onNavigate, allJobs, jobloading }: MyDashboardProps) {
   const aiSuggestionsUsed = 1; // This can be dynamic
   const metricsData = getMetricsFromCVs(cvs);
   const recentResumes = getRecentCVs(cvs);
@@ -122,8 +124,8 @@ export default function Dashboard({ cvs, onNavigate, allJobs }: MyDashboardProps
       idx === 0
         ? `Created new resume "${cv.title}"`
         : idx === 1
-        ? `Exported resume "${cv.title}" as PDF`
-        : `Matched resume "${cv.title}" with ${Math.floor(Math.random() * 5) + 1} new jobs`,
+          ? `Exported resume "${cv.title}" as PDF`
+          : `Matched resume "${cv.title}" with ${Math.floor(Math.random() * 5) + 1} new jobs`,
     time: idx === 0 ? "2 hours ago" : idx === 1 ? "1 day ago" : "3 days ago",
   }));
 
@@ -145,34 +147,31 @@ export default function Dashboard({ cvs, onNavigate, allJobs }: MyDashboardProps
           return (
             <div
               key={metric.label}
-              className={`flex-1 rounded-2xl bg-white dark:bg-gray-900 border-0 shadow-lg px-6 py-5 flex items-center gap-5 transition-all hover:scale-[1.025] hover:shadow-xl duration-200 ${
-                idx === 0
+              className={`flex-1 rounded-2xl bg-white dark:bg-gray-900 border-0 shadow-lg px-6 py-5 flex items-center gap-5 transition-all hover:scale-[1.025] hover:shadow-xl duration-200 ${idx === 0
                   ? "border-l-4 border-[#3b82f6]"
                   : idx === 1
-                  ? "border-l-4 border-[#f59e42]"
-                  : "border-l-4 border-[#10b981]"
-              }`}
+                    ? "border-l-4 border-[#f59e42]"
+                    : "border-l-4 border-[#10b981]"
+                }`}
             >
               <div
-                className={`rounded-xl p-3 flex items-center justify-center ${
-                  idx === 0
+                className={`rounded-xl p-3 flex items-center justify-center ${idx === 0
                     ? "bg-[#e0edfd]"
                     : idx === 1
-                    ? "bg-[#fff7e6]"
-                    : "bg-[#e6f9f3]"
-                } dark:bg-gray-800`}
+                      ? "bg-[#fff7e6]"
+                      : "bg-[#e6f9f3]"
+                  } dark:bg-gray-800`}
               >
                 <Icon className={metric.iconClass} />
               </div>
               <div>
                 <div
-                  className={`text-xs font-bold uppercase tracking-wider ${
-                    idx === 0
+                  className={`text-xs font-bold uppercase tracking-wider ${idx === 0
                       ? "text-[#3b82f6]"
                       : idx === 1
-                      ? "text-[#f59e42]"
-                      : "text-[#10b981]"
-                  }`}
+                        ? "text-[#f59e42]"
+                        : "text-[#10b981]"
+                    }`}
                 >
                   {metric.label}
                 </div>
@@ -217,11 +216,10 @@ export default function Dashboard({ cvs, onNavigate, allJobs }: MyDashboardProps
               {recentResumes.map((cv) => (
                 <article
                   key={cv.id}
-                  className={`bg-white dark:bg-gray-900 rounded-2xl shadow-lg flex flex-col border-0 hover:shadow-xl transition-all duration-200 ${
-                    cv.status === "inactive"
+                  className={`bg-white dark:bg-gray-900 rounded-2xl shadow-lg flex flex-col border-0 hover:shadow-xl transition-all duration-200 ${cv.status === "inactive"
                       ? "border-l-4 border-[#f59e42] dark:border-[#fbbf24]"
                       : "border-l-4 border-[#10b981] dark:border-[#34d399]"
-                  }`}
+                    }`}
                 >
                   <div className="p-5 flex flex-col flex-grow">
                     {/* Title and Icon */}
@@ -296,17 +294,30 @@ export default function Dashboard({ cvs, onNavigate, allJobs }: MyDashboardProps
             View All <ChevronRight size={18} />
           </Button>
         </div>
-        {allJobs.length === 0 ? (
+        {/* Job Loading and Error Handling */}
+        {jobloading[0] ? (
+          // Show loading spinner while loading
+          <div className="flex flex-col items-center justify-center py-16">
+            <LoadingSpinner />
+            <span className="mt-4 text-[#8a8fa3] dark:text-gray-400 text-lg font-medium select-none">
+              Loading job matches...
+            </span>
+          </div>
+        ) : jobloading[1] === "No CV found. Please create a new CV to see job recommendations." ? (
+          // Show message and button to go to My CVs if no CVs found
           <div className="text-center text-[#8a8fa3] dark:text-gray-400 py-16 text-lg font-medium select-none">
-            No jobs found. Try searching for jobs to see matches.
+            <span>
+              No jobs found for your CVs. Please create or update your CV to get job recommendations.
+            </span>
             <button
-              onClick={() => onNavigate("/job-search")}
+              onClick={() => onNavigate("/my-cvs")}
               className="mt-4 block mx-auto text-[#1a73e8] dark:text-[#60a5fa] hover:underline"
             >
-              Search Jobs
+              Go to My CVs
             </button>
           </div>
         ) : (
+          // Show job cards if jobs are available
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
             {allJobs.slice(0, 3).map((job) => (
               <article
@@ -388,14 +399,13 @@ export default function Dashboard({ cvs, onNavigate, allJobs }: MyDashboardProps
               <div className="flex items-center space-x-4">
                 <div
                   className={`p-3 rounded-xl flex items-center justify-center text-white
-                    ${
-                      activity.type === "created"
-                        ? "bg-gradient-to-br from-[#3b82f6] to-[#2563eb]"
-                        : activity.type === "exported"
+                    ${activity.type === "created"
+                      ? "bg-gradient-to-br from-[#3b82f6] to-[#2563eb]"
+                      : activity.type === "exported"
                         ? "bg-gradient-to-br from-[#10b981] to-[#059669]"
                         : activity.type === "ai"
-                        ? "bg-gradient-to-br from-[#f59e42] to-[#fbbf24]"
-                        : "bg-gradient-to-br from-[#a78bfa] to-[#6366f1]"
+                          ? "bg-gradient-to-br from-[#f59e42] to-[#fbbf24]"
+                          : "bg-gradient-to-br from-[#a78bfa] to-[#6366f1]"
                     }`}
                 >
                   {activity.type === "created" && <FileText size={22} />}

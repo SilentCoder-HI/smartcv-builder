@@ -47,11 +47,8 @@ const menu: MenuItem[] = [
   },
   {
     name: "Templates",
+    path: "/templates",
     icon: <Layers size={30} strokeWidth={1} />,
-    subItems: [
-      { name: "Free Templates", path: "/templates", sub: "free" },
-      { name: "Pro Templates", path: "/templates", sub: "pro" },
-    ],
   },
   {
     name: "Job Search",
@@ -171,9 +168,8 @@ export default function AppSidebar({
               <div key={item.name}>
                 <button
                   onClick={() => setOpenTemplate((prev) => !prev)}
-                  className={`flex items-center gap-3 w-full px-3 py-2 rounded-md text-left focus:outline-none focus:ring-0 hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                    openTemplate ? "bg-gray-100 dark:bg-gray-800" : ""
-                  }`}
+                  className={`flex items-center gap-3 w-full px-3 py-2 rounded-md text-left focus:outline-none focus:ring-0 hover:bg-gray-100 dark:hover:bg-gray-800 ${openTemplate ? "bg-gray-100 dark:bg-gray-800" : ""
+                    }`}
                   style={{
                     minHeight: 40,
                     width: "100%",
@@ -187,9 +183,8 @@ export default function AppSidebar({
                       <span>{item.name}</span>
                       <ChevronDown
                         size={16}
-                        className={`ml-auto transition-transform ${
-                          openTemplate ? "rotate-180" : ""
-                        }`}
+                        className={`ml-auto transition-transform ${openTemplate ? "rotate-180" : ""
+                          }`}
                       />
                     </>
                   )}
@@ -209,11 +204,10 @@ export default function AppSidebar({
                       <li key={sub.name}>
                         <button
                           onClick={() => onNavigate?.(sub.path, sub.sub)}
-                          className={`block w-full text-left px-2 py-1 rounded-md text-sm hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 ${
-                            isActive(sub.path, sub.sub)
+                          className={`block w-full text-left px-2 py-1 rounded-md text-sm hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 ${isActive(sub.path, sub.sub)
                               ? "font-semibold text-blue-600"
                               : ""
-                          }`}
+                            }`}
                           style={{
                             width: "100%",
                             textAlign: "left",
@@ -231,11 +225,10 @@ export default function AppSidebar({
               <button
                 key={item.name}
                 onClick={() => onNavigate?.(item.path!)}
-                className={`flex items-center gap-3 w-full px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 ${
-                  isActive(item.path)
+                className={`flex items-center gap-3 w-full px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-0 ${isActive(item.path)
                     ? "bg-gray-100 dark:bg-gray-800 font-semibold text-blue-600"
                     : ""
-                }`}
+                  }`}
                 style={{
                   minHeight: 40,
                   width: "100%",
