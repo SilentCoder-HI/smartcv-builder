@@ -119,6 +119,11 @@ export default function DashboardPage() {
     }
     return [];
   });
+  useEffect(() => {
+    if(session?.user?.id){
+      setLoading(false)
+    }
+  }, [session?.user?.id])
 
   // --- Navigation Handler ---
   const handleNavigate = useCallback(
@@ -445,6 +450,7 @@ export default function DashboardPage() {
         cvs={cvs}
         onNavigate={props.onNavigate}
         jobloading={jobloading}
+        jobsaved={savedJobs.length}
       />
     ),
     "/my-cvs": (props: MainContentProps) => (
@@ -461,7 +467,7 @@ export default function DashboardPage() {
     "/templates": (props: MainContentProps) => (
       <TemplatesSelector onUseTemplate={handleTemplateSelect} />
     ),
-    "/ai-assistant": (props: MainContentProps) => <AIResumeAssistant job={userSeletjob} cvs={cvs} />,
+    "/ai-assistant": (props: MainContentProps) => <AIResumeAssistant job={userSeletjob} cvs={cvs} onNavigate={props.onNavigate} />,
     "/job-search": (props: MainContentProps) => (
       <JobsPage
         allJobs={allJobs}

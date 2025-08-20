@@ -1,66 +1,57 @@
 import type { NextRequest } from "next/server";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
-type LayoutFormat = "A4" | "Letter" | "Legal";
+export const runtime = "nodejs"; // ensures Node runtime for Buffer
 
 export async function POST(req: NextRequest) {
-  let browser: any = null;
   try {
-    const { html, layout }: { html: string; layout?: LayoutFormat } = await req.json();
-    if (!html || typeof html !== "string") {
-      return new Response(JSON.stringify({ error: "Invalid HTML payload" }), {
-        status: 400,
-        headers: { "content-type": "application/json" },
-      });
+    // 1. Parse JSON body
+    const { html } = await req.json();
+
+    if (!html) {
+      return new Response(
+        JSON.stringify({ error: "Missing HTML content" }),
+        { status: 400 }
+      );
     }
 
-    const { default: puppeteer } = await import("puppeteer");
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--no-zygote",
-      ],
+    // 2. Send request to PDFShift API
+    const response = await fetch("https://api.pdfshift.io/v3/convert/pdf", {
+      method: "POST",
+      headers: {
+        "X-API-Key":"sk_93203dca97fe7567e8ed13898c1d57bc5a31dfaf",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        source: html,     // OR "https://example.com"
+        sandbox: true,    // false in production
+        format: "A4",     // A4, Letter, Legal
+      }),
     });
 
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1200, height: 1600, deviceScaleFactor: 2 });
-    await page.setContent(html, { waitUntil: "networkidle0" });
-    await page.emulateMediaType("screen");
+    // 3. Handle errors from PDFShift
+    if (!response.ok) {
+      const err = await response.text();
+      return new Response(
+        JSON.stringify({ error: err }),
+        { status: response.status }
+      );
+    }
 
-    const pdf = await page.pdf({
-      printBackground: true,
-      preferCSSPageSize: true,
-      format: (layout as LayoutFormat) || "A4",
-      margin: { top: "10mm", right: "10mm", bottom: "10mm", left: "10mm" },
-    });
+    // 4. Convert result to Buffer
+    const pdfBuffer = Buffer.from(await response.arrayBuffer());
 
-    await page.close();
-    await browser.close();
-    browser = null;
-
-    return new Response(pdf, {
+    // 5. Return PDF response
+    return new Response(pdfBuffer, {
       status: 200,
       headers: {
-        "content-type": "application/pdf",
-        "content-disposition": `attachment; filename=cv.pdf`,
-        "cache-control": "no-store",
+        "Content-Type": "application/pdf",
+        "Content-Disposition": 'inline; filename="document.pdf"',
       },
     });
   } catch (error: any) {
-    if (browser) {
-      try { await browser.close(); } catch {}
-    }
-    return new Response(JSON.stringify({ error: error?.message || "Failed to export PDF" }), {
-      status: 500,
-      headers: { "content-type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500 }
+    );
   }
 }
-
-

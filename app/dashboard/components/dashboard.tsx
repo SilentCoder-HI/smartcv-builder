@@ -39,7 +39,7 @@ function stripHTML(html: string): string {
 }
 
 // Helper: get metrics from CVs
-function getMetricsFromCVs(cvs: CV[]) {
+function getMetricsFromCVs(cvs: CV[], jobsaved: number) {
   const totalCVs = cvs.length;
 
   return [
@@ -48,7 +48,6 @@ function getMetricsFromCVs(cvs: CV[]) {
       value: totalCVs.toString(),
       icon: FileText,
       trend: "up",
-      change: totalCVs > 1 ? `+${totalCVs - 1} from last month` : "+0 from last month",
       badgeColor: "success",
       iconClass: "h-5 w-5 text-[#3b82f6]",
     },
@@ -57,16 +56,14 @@ function getMetricsFromCVs(cvs: CV[]) {
       value: "0%",
       icon: Sparkles,
       trend: "up",
-      change: "+0 from last week",
       badgeColor: "success",
       iconClass: "h-5 w-5 text-[#f59e42]",
     },
     {
       label: "Jobs Saved",
-      value: "25",
+      value: jobsaved.toString(),
       icon: Briefcase,
       trend: "up",
-      change: 5 > 0 ? `+${Math.round(5 * 0.2)} this week` : "+0 this week",
       badgeColor: "success",
       iconClass: "h-5 w-5 text-[#10b981]",
     },
@@ -78,6 +75,7 @@ type MyDashboardProps = {
   allJobs: Job[];
   onNavigate: (path: string) => void;
   jobloading: [boolean, String];
+  jobsaved: number;
 };
 
 // Shorten a string to a max length, clean whitespace, and add ellipsis if needed
@@ -107,9 +105,9 @@ function uniformJobDescription(desc: string): string {
     : clean.slice(0, JOB_DESC_MAX_LEN).trim() + "...";
 }
 
-export default function Dashboard({ cvs, onNavigate, allJobs, jobloading }: MyDashboardProps) {
+export default function Dashboard({ cvs, onNavigate, allJobs, jobloading, jobsaved }: MyDashboardProps) {
   const aiSuggestionsUsed = 1; // This can be dynamic
-  const metricsData = getMetricsFromCVs(cvs);
+  const metricsData = getMetricsFromCVs(cvs, jobsaved);
   const recentResumes = getRecentCVs(cvs);
 
   // Use the improved shortener for both resume and job descriptions
@@ -148,18 +146,18 @@ export default function Dashboard({ cvs, onNavigate, allJobs, jobloading }: MyDa
             <div
               key={metric.label}
               className={`flex-1 rounded-2xl bg-white dark:bg-gray-900 border-0 shadow-lg px-6 py-5 flex items-center gap-5 transition-all hover:scale-[1.025] hover:shadow-xl duration-200 ${idx === 0
-                  ? "border-l-4 border-[#3b82f6]"
-                  : idx === 1
-                    ? "border-l-4 border-[#f59e42]"
-                    : "border-l-4 border-[#10b981]"
+                ? "border-l-4 border-[#3b82f6]"
+                : idx === 1
+                  ? "border-l-4 border-[#f59e42]"
+                  : "border-l-4 border-[#10b981]"
                 }`}
             >
               <div
                 className={`rounded-xl p-3 flex items-center justify-center ${idx === 0
-                    ? "bg-[#e0edfd]"
-                    : idx === 1
-                      ? "bg-[#fff7e6]"
-                      : "bg-[#e6f9f3]"
+                  ? "bg-[#e0edfd]"
+                  : idx === 1
+                    ? "bg-[#fff7e6]"
+                    : "bg-[#e6f9f3]"
                   } dark:bg-gray-800`}
               >
                 <Icon className={metric.iconClass} />
@@ -167,19 +165,16 @@ export default function Dashboard({ cvs, onNavigate, allJobs, jobloading }: MyDa
               <div>
                 <div
                   className={`text-xs font-bold uppercase tracking-wider ${idx === 0
-                      ? "text-[#3b82f6]"
-                      : idx === 1
-                        ? "text-[#f59e42]"
-                        : "text-[#10b981]"
+                    ? "text-[#3b82f6]"
+                    : idx === 1
+                      ? "text-[#f59e42]"
+                      : "text-[#10b981]"
                     }`}
                 >
                   {metric.label}
                 </div>
                 <div className="text-3xl font-extrabold text-[#22223b] dark:text-white leading-tight">
                   {metric.value}
-                </div>
-                <div className="text-xs text-[#64748b] dark:text-gray-400 font-medium">
-                  {metric.change}
                 </div>
               </div>
             </div>
@@ -217,8 +212,8 @@ export default function Dashboard({ cvs, onNavigate, allJobs, jobloading }: MyDa
                 <article
                   key={cv.id}
                   className={`bg-white dark:bg-gray-900 rounded-2xl shadow-lg flex flex-col border-0 hover:shadow-xl transition-all duration-200 ${cv.status === "inactive"
-                      ? "border-l-4 border-[#f59e42] dark:border-[#fbbf24]"
-                      : "border-l-4 border-[#10b981] dark:border-[#34d399]"
+                    ? "border-l-4 border-[#f59e42] dark:border-[#fbbf24]"
+                    : "border-l-4 border-[#10b981] dark:border-[#34d399]"
                     }`}
                 >
                   <div className="p-5 flex flex-col flex-grow">

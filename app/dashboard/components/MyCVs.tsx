@@ -8,6 +8,9 @@
  * - Shows clear messages for empty, error, and loading states
  * - All add/edit/delete actions use API and update UI accordingly
  * - Well-commented and logically sorted for clarity and maintainability
+ * - Improved error handling for API issues
+ * - Improved Download: Shows preview of HTML with page break logic, uses ref for hidden HTML, and shows preview modal
+ * - Download: When user selects layout and clicks Download, render HTML in hidden page, measure height, insert page breaks, then show preview modal with paginated HTML.
  */
 
 import React, {
@@ -47,7 +50,6 @@ const TemplateRenderer = dynamic(() => import("@/components/TemplateRenderer"), 
 import { TemplateMeta } from "@/types/template-types";
 import { templates } from "@/data/TempleteIndex";
 import { useSession } from "next-auth/react";
-
 // --- Types ---
 type CVStatus = "draft" | "published";
 
@@ -73,6 +75,13 @@ function formatDate(dateString: string): string {
   });
 }
 
+// --- Page size mapping for layout ---
+const PAGE_SIZES: Record<"A4" | "Letter" | "Legal", { width: number; height: number }> = {
+  A4: { width: 794, height: 1123 }, // px at 96dpi: 210mm x 297mm
+  Letter: { width: 816, height: 1056 }, // 8.5in x 11in
+  Legal: { width: 816, height: 1344 }, // 8.5in x 14in
+};
+
 type MyCVsProps = {
   cvs: CV[];
   onNavigate?: (path: string, sub?: string) => void;
@@ -95,10 +104,12 @@ export default function MyCVs({
   const { theme = "light", setTheme } = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   // --- Refs ---
-  // Download is handled inside PreviewEditor now
   const mainRef = useRef<HTMLDivElement>(null);
+  const downloadRef = useRef<HTMLDivElement>(null);
+  const hiddenPaginateRef = useRef<HTMLDivElement>(null);
 
   // --- State: CVs and Form Data ---
   const [cvData, setCvData] = useState<CVData>({
@@ -114,6 +125,7 @@ export default function MyCVs({
     certifications: [],
     hobbies: [],
   });
+  const [html, setHtml] = useState<string | undefined>(undefined);
 
   // --- State: UI/UX Controls ---
   const [showAddForm, setShowAddForm] = useState(false);
@@ -126,7 +138,6 @@ export default function MyCVs({
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadLayout, setDownloadLayout] = useState<"A4" | "Letter" | "Legal">("A4");
   const [downloadFormat, setDownloadFormat] = useState<"PDF">("PDF");
-  const downloadRef = useRef<HTMLDivElement>(null);
 
   // --- State: Pagination and Filters ---
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -178,8 +189,8 @@ export default function MyCVs({
         (selectedStatus === "published"
           ? cv.status === "active"
           : selectedStatus === "draft"
-          ? cv.status === "inactive"
-          : false);
+            ? cv.status === "inactive"
+            : false);
       return profileMatch && createdAtMatch && statusMatch;
     });
   }, [cvs, selectedProfileId, selectedCreatedAt, selectedStatus]);
@@ -209,13 +220,36 @@ export default function MyCVs({
     }
   }, [selectedTemplateId]);
 
-  function saveCVFromForm(newCVData: CVData, publish: boolean, Template: string) {
-    if (editCV) {
-      updateCV(newCVData, publish, Template, editCV.id);
-    } else {
-      addCV(newCVData, publish, Template);
-    }
+  // --- API Error Handling Wrappers ---
+  function safeApiCall<T extends (...args: any[]) => any>(
+    fn: T,
+    errorMsg: string
+  ) {
+    return async (...args: Parameters<T>) => {
+      setLoading(true);
+      setError(null);
+      try {
+        await fn(...args);
+      } catch (err: any) {
+        setError(errorMsg + (err?.message ? `: ${err.message}` : ""));
+        toast.error(errorMsg + (err?.message ? `: ${err.message}` : ""));
+      } finally {
+        setLoading(false);
+      }
+    };
   }
+
+  // --- Save CV (Add/Edit) with error handling ---
+  const saveCVFromForm = safeApiCall(
+    (newCVData: CVData, publish: boolean, Template: string) => {
+      if (editCV) {
+        return updateCV(newCVData, publish, Template, editCV.id);
+      } else {
+        return addCV(newCVData, publish, Template);
+      }
+    },
+    "Failed to save CV"
+  );
 
   // --- Render Step Content for Add/Edit Modal ---
   function renderStepContent() {
@@ -299,6 +333,11 @@ export default function MyCVs({
                 <span className="ml-3 text-blue-500 font-semibold">Saving...</span>
               </div>
             )}
+            {error && (
+              <div className="flex justify-center items-center py-4">
+                <span className="text-red-500 font-semibold">{error}</span>
+              </div>
+            )}
           </div>
         );
       default:
@@ -350,8 +389,6 @@ export default function MyCVs({
     setTheme(theme === "dark" ? "light" : "dark");
   }
 
-  // Image export handled in editor
-
   // --- CV Actions ---
 
   /**
@@ -366,40 +403,141 @@ export default function MyCVs({
     setCurrentPage(page);
   }
 
-  // --- Export selected CV as PDF via API (called on modal confirm) ---
-  async function exportSelectedCV() {
+  // --- Download/Export logic with ref and page break preview ---
+
+  // Helper: get HTML from ref and add page break logic
+  function getDownloadHtmlFromRef() {
+    if (!downloadRef.current) return "";
+    let html = downloadRef.current.innerHTML;
+    const style = `
+      <style>
+        body { font-family: sans-serif; margin: 0; padding: 0; }
+        .pdf-section { margin-bottom: 20px; page-break-inside: avoid; break-inside: avoid; }
+        .page-break { page-break-after: always; break-after: page; height: 0; }
+      </style>
+    `;
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8"/>
+          <meta name="viewport" content="width=device-width, initial-scale=1"/>
+          ${style}
+        </head>
+        <body>
+          ${html}
+        </body>
+      </html>
+    `;
+  }
+
+  // --- Paginate HTML for preview: render in hidden div, measure, insert page breaks ---
+  async function paginateAndPreviewHTML(layout: "A4" | "Letter" | "Legal") {
     if (!downloadCV) return;
+    setError(null);
+    setDownloadingId(downloadCV.id);
+
     try {
-      setDownloadingId(downloadCV.id);
-      // Wait a tick for hidden renderer to mount with selected CV
-      await new Promise((r) => setTimeout(r, 75));
-      if (!downloadRef.current) throw new Error("Renderer not ready");
-      const container = downloadRef.current.cloneNode(true) as HTMLDivElement;
-      (container as HTMLElement).style.maxWidth = "unset";
-      (container as HTMLElement).style.transform = "none";
-      const docHtml = `<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\"/>\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>\n<style>@page{size:${downloadLayout};margin:10mm}html,body{padding:0;margin:0}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style>\n</head>\n<body>\n${(container as HTMLElement).innerHTML}\n</body>\n</html>`;
-      const res = await fetch("/dashboard/api/export-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ html: docHtml, layout: downloadLayout }),
-      });
-      if (!res.ok) throw new Error("Failed to export PDF");
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${downloadCV.title || "cv"}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success("PDF downloaded!");
-    } catch (e: any) {
-      toast.error(e?.message || "Failed to export PDF");
+      // 1. Render the CV HTML in a hidden div (hiddenPaginateRef)
+      // 2. Wait for DOM to update
+      await new Promise((r) => setTimeout(r, 100));
+
+      const pageHeightPx = PAGE_SIZES[layout].height;
+      const pageWidthPx = PAGE_SIZES[layout].width;
+
+      const container = hiddenPaginateRef.current;
+      if (!container) throw new Error("Renderer not ready");
+
+      // Find all direct children (sections) to paginate
+      // If the template doesn't use .pdf-section, fallback to all children
+      let sections = Array.from(container.querySelectorAll(".pdf-section"));
+      if (sections.length === 0) {
+        // fallback: all direct children
+        sections = Array.from(container.children);
+      }
+
+      // Build pages
+      let pages: HTMLElement[][] = [];
+      let currentPage: HTMLElement[] = [];
+      let currentHeight = 0;
+
+      // Helper: get element height (including margin)
+      function getElementTotalHeight(el: HTMLElement) {
+        const style = window.getComputedStyle(el);
+        const marginTop = parseFloat(style.marginTop) || 0;
+        const marginBottom = parseFloat(style.marginBottom) || 0;
+        return el.offsetHeight + marginTop + marginBottom;
+      }
+
+      for (let i = 0; i < sections.length; i++) {
+        const el = sections[i] as HTMLElement;
+        const elHeight = getElementTotalHeight(el);
+
+        if (currentHeight + elHeight > pageHeightPx && currentPage.length > 0) {
+          // Start new page
+          pages.push(currentPage);
+          currentPage = [];
+          currentHeight = 0;
+        }
+        currentPage.push(el);
+        currentHeight += elHeight;
+      }
+      if (currentPage.length > 0) {
+        pages.push(currentPage);
+      }
+
+      // Build paginated HTML string
+      let paginatedHtml = "";
+      for (let i = 0; i < pages.length; i++) {
+        paginatedHtml += `<div class="pdf-page" style="width:${pageWidthPx}px;min-height:${pageHeightPx}px;max-width:100%;margin:0 auto;box-sizing:border-box;position:relative;">`;
+        pages[i].forEach((el) => {
+          paginatedHtml += el.outerHTML;
+        });
+        paginatedHtml += "</div>";
+        if (i < pages.length - 1) {
+          paginatedHtml += `<div class="page-break"></div>`;
+        }
+      }
+
+      // Add style for page breaks and page size
+      const style = `
+        <style>
+          body { font-family: sans-serif; margin: 0; padding: 0; }
+          .pdf-page { page-break-after: always; break-after: page; background: #fff; }
+          .page-break { page-break-after: always; break-after: page; height: 0; }
+        </style>
+      `;
+
+      const docHtml = `
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="utf-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1"/>
+            ${style}
+          </head>
+          <body style="background:#f5f5f5;">
+            ${paginatedHtml}
+          </body>
+        </html>
+      `;
+
+      setHtml(docHtml);
+      toast.success("Preview opened with page breaks!");
+    } catch (err: any) {
+      setError(err?.message || "Failed to preview CV");
+      toast.error(err?.message || "Failed to preview CV");
     } finally {
       setDownloadingId(null);
       setShowDownloadModal(false);
-      // Keep downloadCV for hidden render until after a tick, then clear
       setTimeout(() => setDownloadCV(null), 0);
     }
+  }
+
+  // --- Download/Export logic: called from Download modal ---
+  async function exportSelectedCV() {
+    // Instead of old logic, use paginateAndPreviewHTML with selected layout
+    await paginateAndPreviewHTML(downloadLayout);
   }
 
   /**
@@ -427,18 +565,42 @@ export default function MyCVs({
   }
 
   // --- Delete a CV by id, with confirmation and page adjustment. ---
-  function handleDeleteCV(id: number | string, title: string) {
-    if (
-      typeof window !== "undefined" &&
-      window.confirm(`Are you sure you want to delete "${title}"?`)
-    ) {
-      deleteCV(id, title);
-    }
-  }
+  const handleDeleteCV = safeApiCall(
+    (id: number | string, title: string) => {
+      if (
+        typeof window !== "undefined" &&
+        window.confirm(`Are you sure you want to delete "${title}"?`)
+      ) {
+        return deleteCV(id, title);
+      }
+    },
+    "Failed to delete CV"
+  );
 
   // --- Render ---
   return (
     <div className="max-w-7xl py-8 px-6 sm:px-8 min-h-screen">
+      {/* Preview HTML in modal */}
+      {html && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] overflow-auto relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+              onClick={() => setHtml(undefined)}
+              aria-label="Close preview"
+            >
+              &times;
+            </button>
+            <div className="p-6">
+              <div
+                dangerouslySetInnerHTML={{ __html: html }}
+                className="prose max-w-none"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -642,7 +804,7 @@ export default function MyCVs({
           onClick={() => setShowPreview(false)}
         >
           <div
-            className="bg-white dark:bg-gray-900 my-5 rounded-2xl shadow-2xl p-8 w-full max-w-2xl no-scrollbar relative overflow-y-auto max-h-screen"
+            className="bg-white dark:bg-gray-900 my-5 rounded-2xl shadow-2xl p-8 w-full max-w-[794px] no-scrollbar relative overflow-y-auto max-h-screen"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
@@ -727,20 +889,64 @@ export default function MyCVs({
                 {downloadingId ? "Generating..." : "Download"}
               </button>
             </div>
+            {error && (
+              <div className="mt-4 text-center text-red-500 text-sm font-semibold">
+                {error}
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Hidden renderer for PDF export */}
+      {/* Hidden renderer for PDF export (ref logic) */}
       <div className="fixed -left-[9999px] -top-[9999px] w-[210mm] h-auto bg-white" aria-hidden="true">
         <div ref={downloadRef} className="bg-white">
           {downloadCV && (
+            <div id="cv-preview">
+              <TemplateRenderer
+                cvData={downloadCV.content}
+                template={allTemplates.find((t) => t.templateId === downloadCV.templateId)}
+              />
+              <style>
+                {`
+                  .pdf-section { margin-bottom: 20px; page-break-inside: avoid; break-inside: avoid; }
+                  .page-break { page-break-after: always; break-after: page; height: 0; }
+                `}
+              </style>
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Hidden renderer for paginating and measuring HTML for preview */}
+      <div
+        ref={hiddenPaginateRef}
+        style={{
+          position: "fixed",
+          left: "-9999px",
+          top: "-9999px",
+          width: `${PAGE_SIZES[downloadLayout].width}px`,
+          minHeight: `${PAGE_SIZES[downloadLayout].height}px`,
+          background: "#fff",
+          zIndex: -1,
+          pointerEvents: "none",
+          overflow: "visible",
+        }}
+        aria-hidden="true"
+      >
+        {downloadCV && (
+          <div id="cv-paginate-preview">
             <TemplateRenderer
               cvData={downloadCV.content}
               template={allTemplates.find((t) => t.templateId === downloadCV.templateId)}
             />
-          )}
-        </div>
+            <style>
+              {`
+                .pdf-section { margin-bottom: 20px; page-break-inside: avoid; break-inside: avoid; }
+                .page-break { page-break-after: always; break-after: page; height: 0; }
+              `}
+            </style>
+          </div>
+        )}
       </div>
 
       {/* Loading Spinner */}
@@ -748,6 +954,13 @@ export default function MyCVs({
         <div className="flex justify-center items-center py-12">
           <Loader2 className="animate-spin w-10 h-10 text-blue-500" />
           <span className="ml-4 text-blue-500 font-semibold text-lg">Loading CVs...</span>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && !loading && (
+        <div className="flex justify-center items-center py-8">
+          <span className="text-red-500 font-semibold text-lg">{error}</span>
         </div>
       )}
 

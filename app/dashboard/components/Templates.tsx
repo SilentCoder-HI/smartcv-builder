@@ -141,7 +141,7 @@ export default function TemplatesSelector({
           >
             &times;
           </button>
-          <div className="max-h-[85vh] overflow-y-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 shadow-inner p-4">
+          <div className="max-h-[85vh] overflow-y-auto no-scrollbar rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 shadow-inner p-4">
             <div className="mb-4 flex items-center gap-3">
               <span className="font-bold text-xl">{tpl.templateName}</span>
               {tpl.plan && getPlanBadge(tpl.plan)}

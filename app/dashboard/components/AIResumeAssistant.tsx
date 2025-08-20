@@ -53,10 +53,19 @@ interface CVAnalysis {
 type AIResumeAssistantProps = {
   job: Job | null,
   cvs: CV[],
+  onNavigate?: (path: string, sub?: string) => void;
 }
 
-export default function AIResumeAssistant({ job, cvs }: AIResumeAssistantProps) {
-
+export default function AIResumeAssistant({ job, cvs,onNavigate }: AIResumeAssistantProps) {
+  if (job == null) {
+    toast.error("Please select a job first");
+    if (onNavigate) {
+      onNavigate("/job-search");
+    } else if (typeof window !== "undefined") {
+      window.location.href = "/dashboard?view=job-search";
+    }
+    return null;
+  }
   const [selectedJob] = useState<Job | null>(job);
   const [selectedCV, setSelectedCV] = useState<CV | null>(null);
   const [analysis, setAnalysis] = useState<CVAnalysis | null>(null);
