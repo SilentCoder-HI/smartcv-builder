@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     const response = await fetch("https://api.pdfshift.io/v3/convert/pdf", {
       method: "POST",
       headers: {
-        "X-API-Key":"sk_93203dca97fe7567e8ed13898c1d57bc5a31dfaf",
+        "X-API-Key":"",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
