@@ -3,9 +3,6 @@ import classicBlack from "./Templets/classic/classic-black.json"
 import classicBlue from "./Templets/classic/classic-blue.json"
 import corporateFormal from "./Templets/corporate/CorporateFormal.json"
 import corporateModern from "./Templets/corporate/CorporateModern.json"
-// import elegantContrast from "./elegant-contrast.json"
-// import colorfulCreative from "./colorful-creative.json"
-// import modernMinimal from "./modern-minimal.json"
 
 export type PlanType = "free" | "pro" | "proPlus"
 export type TextAlign = "left" | "center" | "right" | string;

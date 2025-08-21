@@ -22,18 +22,36 @@
                 "textAlign": "center",
                 "marginBottom": "2.5rem",
                 "paddingBottom": "1.5rem",
-                "borderBottom": "1px solid #d1d5db"
+                "borderBottom": "1px solid #d1d5db",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "h1": {
                 "fontSize": "2.25rem",
                 "fontWeight": "bold",
-                "marginBottom": "0.25rem"
+                "marginBottom": "0.25rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "jobTitle": {
                 "fontSize": "1.125rem",
                 "fontStyle": "italic",
                 "marginBottom": "1rem",
-                "color": "#4b5563"
+                "color": "#4b5563",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "contact": {
                 "container": {
@@ -41,16 +59,34 @@
                     "justifyContent": "center",
                     "gap": "1.5rem",
                     "fontSize": "0.875rem",
-                    "color": "#4b5563"
+                    "color": "#4b5563",
+                    "pageBreakBefore": "auto",
+                    "pageBreakAfter": "auto",
+                    "pageBreakInside": "avoid",
+                    "breakBefore": "auto",
+                    "breakAfter": "auto",
+                    "breakInside": "avoid"
                 },
                 "item": {
                     "display": "flex",
-                    "alignItems": "center"
+                    "alignItems": "center",
+                    "pageBreakBefore": "auto",
+                    "pageBreakAfter": "auto",
+                    "pageBreakInside": "avoid",
+                    "breakBefore": "auto",
+                    "breakAfter": "auto",
+                    "breakInside": "avoid"
                 },
                 "icon": {
                     "width": "1rem",
                     "height": "1rem",
-                    "marginRight": "0.25rem"
+                    "marginRight": "0.25rem",
+                    "pageBreakBefore": "auto",
+                    "pageBreakAfter": "auto",
+                    "pageBreakInside": "avoid",
+                    "breakBefore": "auto",
+                    "breakAfter": "auto",
+                    "breakInside": "avoid"
                 }
             }
         },
@@ -60,79 +96,183 @@
                 "fontWeight": 600,
                 "marginBottom": "0.75rem",
                 "borderBottom": "1px solid #d1d5db",
-                "paddingBottom": "0.25rem"
+                "paddingBottom": "0.25rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "summaryText": {
                 "color": "#1f2937",
                 "lineHeight": 1.6,
                 "fontSize": "0.875rem",
-                "textAlign": "justify"
+                "textAlign": "justify",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             }
         },
         "layout": {
+            "sectionGap": {
+                "margin":"10px 0px"
+            },
             "twoColumn": {
                 "display": "grid",
                 "gridTemplateColumns": "repeat(auto-fit, minmax(300px, 1fr))",
-                "gap": "3rem"
+                "gap": "3rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "leftColumn": {
                 "display": "flex",
                 "flexDirection": "column",
-                "gap": "2.5rem"
+                "gap": "2.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "rightColumn": {
                 "display": "flex",
                 "flexDirection": "column",
-                "gap": "2.5rem"
+                "gap": "2.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "experienceList": {
                 "display": "flex",
+                "flexDirection": "column"
+            },
+            "experienceContainer": {
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid",
+                "margin": "10px 0px"
+            },
+            "educationContainer": {
+                "display": "flex",
                 "flexDirection": "column",
-                "gap": "1.5rem"
+                "gap": "0.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "educationList": {
                 "display": "flex",
                 "flexDirection": "column",
-                "gap": "1.5rem"
+                "gap": "0.5rem",
+                "margin": "20px 0px"
             },
             "skillsList": {
                 "display": "flex",
                 "flexDirection": "column",
-                "gap": "1.5rem"
+                "gap": "0.5rem"
             },
             "skillsContainer": {
                 "display": "flex",
+                "flexDirection": "column",
                 "flexWrap": "wrap",
-                "gap": "0.5rem"
+                "gap": "0.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid",
+                "margin": "20px 0px"
+            },
+            "Container": {
+                "display": "flex",
+                "flexDirection": "column",
+                "flexWrap": "wrap",
+                "gap": "0.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid",
+                "margin": "20px 0px"
             }
         },
         "experience": {
             "h3": {
                 "fontSize": "1rem",
                 "fontWeight": "bold",
-                "color": "black"
+                "color": "black",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "h4": {
                 "fontSize": "0.875rem",
                 "fontStyle": "italic",
-                "color": "#4b5563"
+                "color": "#4b5563",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "dateText": {
                 "fontSize": "0.75rem",
-                "color": "#6b7280"
+                "color": "#6b7280",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "summaryText": {
                 "fontSize": "0.875rem",
                 "marginTop": "0.5rem",
                 "color": "#1f2937",
-                "lineHeight": 1.6
+                "lineHeight": 1.6,
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "sectionTitle": {
                 "fontSize": "1.25rem",
                 "fontWeight": 600,
                 "marginBottom": "0.75rem",
                 "borderBottom": "1px solid #d1d5db",
-                "paddingBottom": "0.25rem"
+                "paddingBottom": "0.25rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             }
         },
         "education": {
@@ -166,26 +306,50 @@
                 "fontWeight": "bold",
                 "color": "#374151",
                 "fontSize": "0.95rem",
-                "marginBottom": "0.25rem"
+                "marginBottom": "0.25rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "skillItem": {
                 "backgroundColor": "#f3f4f6",
                 "fontSize": "0.875rem",
                 "padding": "0.25rem 0.75rem",
                 "borderRadius": "9999px",
-                "color": "#1f2937"
+                "color": "#1f2937",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "container": {
                 "display": "flex",
                 "flexWrap": "wrap",
-                "gap": "0.5rem"
+                "gap": "0.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "sectionTitle": {
                 "fontSize": "1.25rem",
                 "fontWeight": 600,
                 "marginBottom": "0.75rem",
                 "borderBottom": "1px solid #d1d5db",
-                "paddingBottom": "0.25rem"
+                "paddingBottom": "0.25rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             }
         },
         "certifications": {
@@ -194,11 +358,28 @@
                 "fontWeight": 600,
                 "marginBottom": "0.75rem",
                 "borderBottom": "1px solid #d1d5db",
-                "paddingBottom": "0.25rem"
+                "paddingBottom": "0.25rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "list": {
                 "listStyle": "disc",
                 "paddingLeft": "1rem",
+                "fontSize": "0.875rem",
+                "color": "#1f2937",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
+            },
+            "listContainer": {
+                "listStyle": "disc",
                 "fontSize": "0.875rem",
                 "color": "#1f2937"
             }
@@ -209,13 +390,25 @@
                 "fontWeight": 600,
                 "marginBottom": "0.75rem",
                 "borderBottom": "1px solid #d1d5db",
-                "paddingBottom": "0.25rem"
+                "paddingBottom": "0.25rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "list": {
                 "listStyle": "disc",
                 "paddingLeft": "1rem",
                 "fontSize": "0.875rem",
-                "color": "#1f2937"
+                "color": "#1f2937",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             }
         },
         "hobbies": {
@@ -224,13 +417,25 @@
                 "fontWeight": 600,
                 "marginBottom": "0.75rem",
                 "borderBottom": "1px solid #d1d5db",
-                "paddingBottom": "0.25rem"
+                "paddingBottom": "0.25rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "list": {
                 "listStyle": "disc",
                 "paddingLeft": "1rem",
                 "fontSize": "0.875rem",
-                "color": "#1f2937"
+                "color": "#1f2937",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             }
         }
     },

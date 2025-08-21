@@ -377,7 +377,7 @@ export function CVForm({ cvData, setCvData, onNext, show, onSave }: CVFormProps)
 
 
   return (
-    <div className="max-w-4xl h-full mx-auto space-y-8 my-5 overflow-auto no-scrollbar">
+    <div className="relative max-w-4xl h-full mx-auto space-y-8 my-5 overflow-auto no-scrollbar">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Let's Build Your Resume</h1>
         <p className="text-gray-600">Fill in your information to get started</p>
@@ -922,16 +922,16 @@ export function CVForm({ cvData, setCvData, onNext, show, onSave }: CVFormProps)
           )}
         </CardContent>
       </Card>
-      <div className="flex justify-end space-x-4 mt-8 pb-8">
+      <div className="flex sticky bottom-0 w-full justify-end bg-white dark:bg-gray-900 space-x-4 mt-8 p-8 border-t border-gray-200 dark:border-gray-700 shadow-lg z-20 transition-colors">
         <Button
           variant="outline"
-          className="border-gray-300 text-gray-700 hover:bg-gray-100"
+          className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           onClick={show}
         >
           Cancel
         </Button>
         <Button
-          className="bg-blue-600 text-white hover:bg-blue-700"
+          className="bg-blue-600 dark:bg-blue-500 text-white dark:text-gray-100 hover:bg-blue-700 dark:hover:bg-blue-600 shadow-md transition-colors"
           onClick={onNext}
           disabled={!isFormValid()}
         >

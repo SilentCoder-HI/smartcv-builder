@@ -9,8 +9,8 @@
  * - All add/edit/delete actions use API and update UI accordingly
  * - Well-commented and logically sorted for clarity and maintainability
  * - Improved error handling for API issues
- * - Improved Download: Shows preview of HTML with page break logic, uses ref for hidden HTML, and shows preview modal
- * - Download: When user selects layout and clicks Download, render HTML in hidden page, measure height, insert page breaks, then show preview modal with paginated HTML.
+ * - Improved Download: Uses print CSS for automatic pagination, page numbers in footer, and includes template styles for proper rendering.
+ * - Simplified PDF generation without manual measurement for better reliability.
  */
 
 import React, {
@@ -76,10 +76,10 @@ function formatDate(dateString: string): string {
 }
 
 // --- Page size mapping for layout ---
-const PAGE_SIZES: Record<"A4" | "Letter" | "Legal", { width: number; height: number }> = {
-  A4: { width: 794, height: 1123 }, // px at 96dpi: 210mm x 297mm
-  Letter: { width: 816, height: 1056 }, // 8.5in x 11in
-  Legal: { width: 816, height: 1344 }, // 8.5in x 14in
+const PAGE_SIZES: Record<"A4" | "Letter" | "Legal", { width: string; height: string }> = {
+  A4: { width: "210mm", height: "297mm" },
+  Letter: { width: "8.5in", height: "11in" },
+  Legal: { width: "8.5in", height: "14in" },
 };
 
 type MyCVsProps = {
@@ -104,12 +104,14 @@ export default function MyCVs({
   const { theme = "light", setTheme } = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // --- Refs ---
   const mainRef = useRef<HTMLDivElement>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
   const hiddenPaginateRef = useRef<HTMLDivElement>(null);
+
+  const [ShowPdfViewer, setShowPdfViewer] = useState(true)
 
   // --- State: CVs and Form Data ---
   const [cvData, setCvData] = useState<CVData>({
@@ -125,8 +127,6 @@ export default function MyCVs({
     certifications: [],
     hobbies: [],
   });
-  const [html, setHtml] = useState<string | undefined>(undefined);
-
   // --- State: UI/UX Controls ---
   const [showAddForm, setShowAddForm] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -403,36 +403,10 @@ export default function MyCVs({
     setCurrentPage(page);
   }
 
-  // --- Download/Export logic with ref and page break preview ---
+  // --- Download/Export logic with print CSS for pagination and page numbers ---
 
-  // Helper: get HTML from ref and add page break logic
-  function getDownloadHtmlFromRef() {
-    if (!downloadRef.current) return "";
-    let html = downloadRef.current.innerHTML;
-    const style = `
-      <style>
-        body { font-family: sans-serif; margin: 0; padding: 0; }
-        .pdf-section { margin-bottom: 20px; page-break-inside: avoid; break-inside: avoid; }
-        .page-break { page-break-after: always; break-after: page; height: 0; }
-      </style>
-    `;
-    return `
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="utf-8"/>
-          <meta name="viewport" content="width=device-width, initial-scale=1"/>
-          ${style}
-        </head>
-        <body>
-          ${html}
-        </body>
-      </html>
-    `;
-  }
-
-  // --- Paginate HTML for preview: render in hidden div, measure, insert page breaks ---
-  async function paginateAndPreviewHTML(layout: "A4" | "Letter" | "Legal") {
+  // Download the HTML as PDF using the export-pdf API route
+  async function generateAndDownloadPDF(layout: "A4" | "Letter" | "Legal") {
     if (!downloadCV) return;
     setError(null);
     setDownloadingId(downloadCV.id);
@@ -442,70 +416,33 @@ export default function MyCVs({
       // 2. Wait for DOM to update
       await new Promise((r) => setTimeout(r, 100));
 
-      const pageHeightPx = PAGE_SIZES[layout].height;
-      const pageWidthPx = PAGE_SIZES[layout].width;
-
       const container = hiddenPaginateRef.current;
       if (!container) throw new Error("Renderer not ready");
 
-      // Find all direct children (sections) to paginate
-      // If the template doesn't use .pdf-section, fallback to all children
-      let sections = Array.from(container.querySelectorAll(".pdf-section"));
-      if (sections.length === 0) {
-        // fallback: all direct children
-        sections = Array.from(container.children);
-      }
+      const contentHtml = container.innerHTML;
 
-      // Build pages
-      let pages: HTMLElement[][] = [];
-      let currentPage: HTMLElement[] = [];
-      let currentHeight = 0;
+      const template = allTemplates.find((t) => t.templateId === downloadCV.templateId);
 
-      // Helper: get element height (including margin)
-      function getElementTotalHeight(el: HTMLElement) {
-        const style = window.getComputedStyle(el);
-        const marginTop = parseFloat(style.marginTop) || 0;
-        const marginBottom = parseFloat(style.marginBottom) || 0;
-        return el.offsetHeight + marginTop + marginBottom;
-      }
+      const pageSize = PAGE_SIZES[layout];
 
-      for (let i = 0; i < sections.length; i++) {
-        const el = sections[i] as HTMLElement;
-        const elHeight = getElementTotalHeight(el);
-
-        if (currentHeight + elHeight > pageHeightPx && currentPage.length > 0) {
-          // Start new page
-          pages.push(currentPage);
-          currentPage = [];
-          currentHeight = 0;
+      const css = `
+        @page {
+          size: ${pageSize.width} ${pageSize.height};
+          @bottom-center {
+            content: "Page " counter(page) " of " counter(pages);
+            font-size: 8pt;
+            color: #777;
+          }
         }
-        currentPage.push(el);
-        currentHeight += elHeight;
-      }
-      if (currentPage.length > 0) {
-        pages.push(currentPage);
-      }
-
-      // Build paginated HTML string
-      let paginatedHtml = "";
-      for (let i = 0; i < pages.length; i++) {
-        paginatedHtml += `<div class="pdf-page" style="width:${pageWidthPx}px;min-height:${pageHeightPx}px;max-width:100%;margin:0 auto;box-sizing:border-box;position:relative;">`;
-        pages[i].forEach((el) => {
-          paginatedHtml += el.outerHTML;
-        });
-        paginatedHtml += "</div>";
-        if (i < pages.length - 1) {
-          paginatedHtml += `<div class="page-break"></div>`;
+        body {
+          margin: 0;
+          padding: 0;
+          font-family: sans-serif;
         }
-      }
-
-      // Add style for page breaks and page size
-      const style = `
-        <style>
-          body { font-family: sans-serif; margin: 0; padding: 0; }
-          .pdf-page { page-break-after: always; break-after: page; background: #fff; }
-          .page-break { page-break-after: always; break-after: page; height: 0; }
-        </style>
+        .pdf-section {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
       `;
 
       const docHtml = `
@@ -514,19 +451,54 @@ export default function MyCVs({
           <head>
             <meta charset="utf-8"/>
             <meta name="viewport" content="width=device-width, initial-scale=1"/>
-            ${style}
+            <style>
+              ${css}
+              ${template?.styles || ''}
+            </style>
           </head>
-          <body style="background:#f5f5f5;">
-            ${paginatedHtml}
+          <body>
+            ${contentHtml}
           </body>
         </html>
       `;
 
-      setHtml(docHtml);
-      toast.success("Preview opened with page breaks!");
+      // --- Download the HTML as PDF using the API route ---
+      const response = await fetch("/dashboard/api/generate-document", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ html: docHtml }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to generate PDF");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      console.log(blob)
+
+      // // Create a temporary link to download the PDF
+      // const a = document.createElement("a");
+      // a.href = url;
+      // a.download = `${downloadCV.title || "cv"}.pdf`;
+      // document.body.appendChild(a);
+      // a.click();
+      // setTimeout(() => {
+      //   document.body.removeChild(a);
+      //   window.URL.revokeObjectURL(url);
+      // }, 100);
+
+      // Display PDF in iframe
+      if (iframeRef.current) {
+        iframeRef.current.src = url;
+        setShowPdfViewer(true);
+      }
+
+      toast.success("PDF downloaded!");
     } catch (err: any) {
-      setError(err?.message || "Failed to preview CV");
-      toast.error(err?.message || "Failed to preview CV");
+      setError(err?.message || "Failed to download PDF");
+      toast.error(err?.message || "Failed to download PDF");
     } finally {
       setDownloadingId(null);
       setShowDownloadModal(false);
@@ -536,8 +508,7 @@ export default function MyCVs({
 
   // --- Download/Export logic: called from Download modal ---
   async function exportSelectedCV() {
-    // Instead of old logic, use paginateAndPreviewHTML with selected layout
-    await paginateAndPreviewHTML(downloadLayout);
+    await generateAndDownloadPDF(downloadLayout);
   }
 
   /**
@@ -580,26 +551,6 @@ export default function MyCVs({
   // --- Render ---
   return (
     <div className="max-w-7xl py-8 px-6 sm:px-8 min-h-screen">
-      {/* Preview HTML in modal */}
-      {html && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] overflow-auto relative">
-            <button
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-              onClick={() => setHtml(undefined)}
-              aria-label="Close preview"
-            >
-              &times;
-            </button>
-            <div className="p-6">
-              <div
-                dangerouslySetInnerHTML={{ __html: html }}
-                className="prose max-w-none"
-              />
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
@@ -907,47 +858,89 @@ export default function MyCVs({
                 cvData={downloadCV.content}
                 template={allTemplates.find((t) => t.templateId === downloadCV.templateId)}
               />
-              <style>
-                {`
-                  .pdf-section { margin-bottom: 20px; page-break-inside: avoid; break-inside: avoid; }
-                  .page-break { page-break-after: always; break-after: page; height: 0; }
-                `}
-              </style>
             </div>
           )}
         </div>
       </div>
-      {/* Hidden renderer for paginating and measuring HTML for preview */}
+      {/* Hidden renderer for getting content HTML */}
       <div
         ref={hiddenPaginateRef}
         style={{
-          position: "fixed",
+          position: "absolute",
           left: "-9999px",
           top: "-9999px",
-          width: `${PAGE_SIZES[downloadLayout].width}px`,
-          minHeight: `${PAGE_SIZES[downloadLayout].height}px`,
+          width: "210mm",
+          height: "auto",
           background: "#fff",
-          zIndex: -1,
+          zIndex: 666666,
           pointerEvents: "none",
           overflow: "visible",
         }}
         aria-hidden="true"
       >
         {downloadCV && (
-          <div id="cv-paginate-preview">
-            <TemplateRenderer
-              cvData={downloadCV.content}
-              template={allTemplates.find((t) => t.templateId === downloadCV.templateId)}
-            />
-            <style>
-              {`
-                .pdf-section { margin-bottom: 20px; page-break-inside: avoid; break-inside: avoid; }
-                .page-break { page-break-after: always; break-after: page; height: 0; }
-              `}
-            </style>
-          </div>
+          <TemplateRenderer
+            cvData={downloadCV.content}
+            template={allTemplates.find((t) => t.templateId === downloadCV.templateId)}
+          />
         )}
       </div>
+      {/* PDF Viewer Modal */}
+      {ShowPdfViewer && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowPdfViewer(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-6xl h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                PDF Preview: {downloadCV?.title || "CV"}
+              </h2>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (iframeRef.current?.src) {
+                      const a = document.createElement("a");
+                      a.href = iframeRef.current.src;
+                      a.download = `${downloadCV?.title || "cv"}.pdf`;
+                      a.click();
+                    }
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Download Again
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowPdfViewer(false)}
+                  className="rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+            <div className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+              <iframe
+                ref={iframeRef}
+                className="w-full h-full"
+                title="PDF Preview"
+                style={{ border: 'none' }}
+              />
+            </div>
+            <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 text-center">
+              The PDF is now available for viewing. You can also download it again using the button above.
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Loading Spinner */}
       {loading && (

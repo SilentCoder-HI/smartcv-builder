@@ -61,7 +61,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
       }}
     >
       {/* === 📘 MAIN HEADING: Header (Name, Job, Contact Info) === */}
-      <div style={styles.header?.wrapper}>
+      <div style={{ ...styles.header?.wrapper }}>
         {/* 🟦 Full Name */}
         <h1
           style={{
@@ -137,7 +137,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
 
       {/* === 📘 MAIN HEADING: Summary === */}
       {personalInfo.summary && (
-        <div>
+        <div style={styles.layout?.sectionGap}>
           <div
             style={{
               ...styles.summary?.sectionTitle,
@@ -161,7 +161,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
 
       {/* === 📘 MAIN HEADING: Experience === */}
       {experience.length > 0 && (
-        <div>
+        <div style={styles.layout?.sectionGap}>
           <div
             style={{
               ...styles.experience?.sectionTitle,
@@ -172,7 +172,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
           </div>
           <div style={styles.layout?.experienceList}>
             {experience.map((exp: any) => (
-              <div key={exp.id}>
+              <div key={exp.id} style={styles.layout?.experienceContainer}>
                 {/* 🟦 Position + Company */}
                 <h3
                   style={{
@@ -219,7 +219,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
 
       {/* === 📘 MAIN HEADING: Education === */}
       {education.length > 0 && (
-        <div>
+        <div style={styles.layout?.sectionGap}>
           <div
             style={{
               ...styles.education?.sectionTitle,
@@ -230,7 +230,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
           </div>
           <div style={styles.layout?.educationList}>
             {education.map((edu: any) => (
-              <div key={edu.id}>
+              <div key={edu.id} style={styles.layout?.educationContainer}>
                 {/* 🟦 Degree + Field */}
                 <h3
                   style={{
@@ -287,7 +287,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
 
       {/* === 📘 MAIN HEADING: Skills === */}
       {skills.length > 0 && (
-        <div>
+        <div style={styles.layout?.sectionGap}>
           <div
             style={{
               ...styles.skills?.sectionTitle,
@@ -297,7 +297,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
             Skills
           </div>
           {skills.map((group: any, i: number) => (
-            <div key={i}>
+            <div key={i} style={styles.layout?.skillsContainer}>
               {/* 🟦 Category Title */}
               <div
                 style={{
@@ -334,7 +334,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
 
       {/* === 📘 MAIN HEADING: Certifications === */}
       {certifications.length > 0 && (
-        <div>
+        <div style={styles.layout?.sectionGap}>
           <div
             style={{
               ...styles.certifications?.sectionTitle,
@@ -347,7 +347,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
             {certifications.map((cert: string, i: number) => (
               <li
                 key={i}
-                style={{ color: textColor ?? styles.certifications?.list?.color }}
+                style={{ color: textColor, ...styles.certifications?.listContainer }}
                 onClick={() => handleTextClick(`certifications.${i}`, cert ?? '')}
                 className={onTextClick ? 'cursor-pointer hover:bg-gray-100' : ''}
               >
@@ -360,7 +360,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
 
       {/* === 📘 MAIN HEADING: Languages === */}
       {languages.length > 0 && (
-        <div>
+        <div style={styles.layout?.Container}>
           <div
             style={{
               ...styles.languages?.sectionTitle,
@@ -386,7 +386,7 @@ const TemplateRenderer: React.FC<TemplateRendererProps> = ({
 
       {/* === 📘 MAIN HEADING: Hobbies === */}
       {hobbies.length > 0 && (
-        <div>
+        <div style={styles.layout?.Container}>
           <div
             style={{
               ...styles.hobbies?.sectionTitle,

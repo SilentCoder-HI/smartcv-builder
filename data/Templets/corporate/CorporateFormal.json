@@ -3,7 +3,7 @@
     "templateName": "Corporate Formal",
     "description": "A clean, formal corporate resume template with modern serif typography and subtle gray accents.",
     "templateType": "corporate",
-    "version": "1.0",
+    "version": "1.1",
     "plan": "free",
     "demo": true,
     "styles": {
@@ -16,27 +16,44 @@
             "minHeight": "297mm",
             "maxWidth": "210mm",
             "margin": "0 auto",
-            "border": "1px solid #d1d5db",
             "textAlign": "left"
         },
         "header": {
             "wrapper": {
                 "borderBottom": "2px solid #6b7280",
                 "paddingBottom": "1.5rem",
-                "marginBottom": "2rem"
+                "marginBottom": "2rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "h1": {
                 "fontSize": "2.25rem",
-                "fontWeight": "bold",
+                "fontWeight": "900",
                 "textTransform": "uppercase",
                 "letterSpacing": "0.1em",
-                "color": "#111827"
+                "color": "#111827",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "jobTitle": {
                 "fontSize": "1.25rem",
                 "fontStyle": "italic",
                 "marginTop": "0.5rem",
-                "color": "#374151"
+                "color": "#374151",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "contact": {
                 "container": {
@@ -44,16 +61,34 @@
                     "gap": "1.5rem",
                     "marginTop": "1rem",
                     "fontSize": "0.95rem",
-                    "color": "#4b5563"
+                    "color": "#4b5563",
+                    "pageBreakBefore": "auto",
+                    "pageBreakAfter": "auto",
+                    "pageBreakInside": "avoid",
+                    "breakBefore": "auto",
+                    "breakAfter": "auto",
+                    "breakInside": "avoid"
                 },
                 "item": {
                     "display": "flex",
                     "alignItems": "center",
-                    "gap": "0.25rem"
+                    "gap": "0.25rem",
+                    "pageBreakBefore": "auto",
+                    "pageBreakAfter": "auto",
+                    "pageBreakInside": "avoid",
+                    "breakBefore": "auto",
+                    "breakAfter": "auto",
+                    "breakInside": "avoid"
                 },
                 "icon": {
                     "width": "1rem",
-                    "height": "1rem"
+                    "height": "1rem",
+                    "pageBreakBefore": "auto",
+                    "pageBreakAfter": "auto",
+                    "pageBreakInside": "avoid",
+                    "breakBefore": "auto",
+                    "breakAfter": "auto",
+                    "breakInside": "avoid"
                 }
             }
         },
@@ -64,13 +99,25 @@
                 "textTransform": "uppercase",
                 "color": "#1f2937",
                 "marginBottom": "0.5rem",
-                "borderBottom": "1px solid #9ca3af"
+                "borderBottom": "1px solid #9ca3af",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "summaryText": {
                 "color": "#374151",
                 "fontSize": "0.98rem",
                 "lineHeight": 1.7,
-                "textAlign": "justify"
+                "textAlign": "justify",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             }
         },
         "experience": {
@@ -80,24 +127,67 @@
                 "textTransform": "uppercase",
                 "color": "#1f2937",
                 "marginBottom": "0.5rem",
-                "borderBottom": "1px solid #9ca3af"
+                "borderBottom": "1px solid #9ca3af",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "h3": {
                 "fontWeight": "bold",
-                "color": "#111827"
+                "color": "#111827",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "company": {
                 "fontStyle": "italic",
-                "color": "#374151"
+                "color": "#374151",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "dateText": {
                 "fontSize": "0.9rem",
-                "color": "#6b7280"
+                "color": "#6b7280",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "description": {
                 "fontSize": "0.95rem",
                 "color": "#374151",
-                "marginTop": "0.5rem"
+                "marginTop": "0.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
+            },
+            "experienceContainer": {
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid",
+                "margin": "10px 0px"
+            },
+            "experienceList": {
+                "display": "flex",
+                "flexDirection": "column"
             }
         },
         "education": {
@@ -107,23 +197,70 @@
                 "textTransform": "uppercase",
                 "color": "#1f2937",
                 "marginBottom": "0.5rem",
-                "borderBottom": "1px solid #9ca3af"
+                "borderBottom": "1px solid #9ca3af",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "h3": {
                 "fontWeight": "bold",
-                "color": "#111827"
+                "color": "#111827",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "institution": {
                 "fontStyle": "italic",
-                "color": "#374151"
+                "color": "#374151",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "dateText": {
                 "fontSize": "0.9rem",
-                "color": "#6b7280"
+                "color": "#6b7280",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "gpaText": {
                 "fontSize": "0.9rem",
-                "color": "#6b7280"
+                "color": "#6b7280",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
+            },
+            "educationContainer": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "0.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
+            },
+            "educationList": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "0.5rem",
+                "margin": "20px 0px"
             }
         },
         "skills": {
@@ -133,24 +270,66 @@
                 "textTransform": "uppercase",
                 "color": "#1f2937",
                 "marginBottom": "0.5rem",
-                "borderBottom": "1px solid #9ca3af"
+                "borderBottom": "1px solid #9ca3af",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "skillCategory": {
                 "fontWeight": "bold",
                 "color": "#374151",
-                "fontSize": "1rem"
+                "fontSize": "1rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "skillItem": {
                 "backgroundColor": "#f3f4f6",
                 "fontSize": "0.95rem",
                 "padding": "0.25rem 0.75rem",
                 "borderRadius": "0.25rem",
-                "color": "#374151"
+                "color": "#374151",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "container": {
                 "display": "flex",
                 "flexWrap": "wrap",
+                "gap": "0.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
+            },
+            "skillsList": {
+                "display": "flex",
+                "flexDirection": "column",
                 "gap": "0.5rem"
+            },
+            "skillsContainer": {
+                "display": "flex",
+                "flexDirection": "column",
+                "flexWrap": "wrap",
+                "gap": "0.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid",
+                "margin": "20px 0px"
             }
         },
         "certifications": {
@@ -160,11 +339,28 @@
                 "textTransform": "uppercase",
                 "color": "#1f2937",
                 "marginBottom": "0.5rem",
-                "borderBottom": "1px solid #9ca3af"
+                "borderBottom": "1px solid #9ca3af",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "list": {
                 "listStyle": "disc",
                 "paddingLeft": "1rem",
+                "fontSize": "0.95rem",
+                "color": "#374151",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
+            },
+            "listContainer": {
+                "listStyle": "disc",
                 "fontSize": "0.95rem",
                 "color": "#374151"
             }
@@ -176,13 +372,25 @@
                 "textTransform": "uppercase",
                 "color": "#1f2937",
                 "marginBottom": "0.5rem",
-                "borderBottom": "1px solid #9ca3af"
+                "borderBottom": "1px solid #9ca3af",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "list": {
                 "listStyle": "disc",
                 "paddingLeft": "1rem",
                 "fontSize": "0.95rem",
-                "color": "#374151"
+                "color": "#374151",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             }
         },
         "hobbies": {
@@ -192,20 +400,76 @@
                 "textTransform": "uppercase",
                 "color": "#1f2937",
                 "marginBottom": "0.5rem",
-                "borderBottom": "1px solid #9ca3af"
+                "borderBottom": "1px solid #9ca3af",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             },
             "list": {
                 "listStyle": "disc",
                 "paddingLeft": "1rem",
                 "fontSize": "0.95rem",
-                "color": "#374151"
+                "color": "#374151",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
             }
         },
         "layout": {
+            "sectionGap": {
+                "margin": "10px 0px"
+            },
             "twoColumn": {
                 "display": "grid",
                 "gridTemplateColumns": "repeat(auto-fit, minmax(320px, 1fr))",
-                "gap": "2.5rem"
+                "gap": "2.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
+            },
+            "leftColumn": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "2.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
+            },
+            "rightColumn": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "2.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid"
+            },
+            "Container": {
+                "display": "flex",
+                "flexDirection": "column",
+                "flexWrap": "wrap",
+                "gap": "0.5rem",
+                "pageBreakBefore": "auto",
+                "pageBreakAfter": "auto",
+                "pageBreakInside": "avoid",
+                "breakBefore": "auto",
+                "breakAfter": "auto",
+                "breakInside": "avoid",
+                "margin": "20px 0px"
             }
         }
     },
