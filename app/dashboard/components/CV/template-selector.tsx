@@ -5,8 +5,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react"
 import type { CVData } from "@/types/cv-types"
 import { RefObject, useEffect, useRef, useState, useCallback } from "react"
-import TemplateRenderer from "@/components/TemplateRenderer";
-import { templates } from "@/data/TempleteIndex";
+import TemplateRenderer from "@dashboard/components/TemplateRenderer";
+import { htmltemplates } from "@/data/TempleteIndex";
 import { TemplateMeta } from "@/types/template-types"
 import { frontendDeveloperCV } from "@/data/demoCVS/developer/developer-demo-cvs"
 import LoadingSpinner from "../loading/loading"
@@ -74,8 +74,8 @@ export function TemplateSelector({
   // Shuffle templates on mount
   useEffect(() => {
     let safeTemplates: TemplateMeta[] = []
-    if (Array.isArray(templates)) {
-      safeTemplates = [...templates]
+    if (Array.isArray(htmltemplates)) {
+      safeTemplates = [...htmltemplates]
     }
     const shuffled = safeTemplates.sort(() => 0.5 - Math.random());
     setShuffledTemplates(shuffled);
@@ -140,7 +140,7 @@ export function TemplateSelector({
         },
         body: JSON.stringify({
           cvData,
-          templates,
+          htmltemplates,
         }),
       })
 
@@ -176,7 +176,7 @@ export function TemplateSelector({
           skills: cvData.skills,
           education: cvData.education,
           cvData,
-          templates,
+          htmltemplates,
         }),
       })
 

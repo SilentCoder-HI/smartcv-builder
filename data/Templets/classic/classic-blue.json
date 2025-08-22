@@ -5,6 +5,7 @@
     "templateType": "classic",
     "version": "1.0",
     "plan": "free",
+    "renderType": "html",
     "demo": true,
     "styles": {
       "root": {

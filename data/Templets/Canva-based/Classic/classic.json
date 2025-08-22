@@ -1,0 +1,97 @@
+{
+  "templateId": "two-column-classic",
+  "templateName": "Two Column Classic",
+  "description": "A simple two-column CV template designed for a canvas system",
+  "version": "1.0",
+  "free": true,
+  "category": "professional",
+  "author": "CVBuilder Team",
+  "renderType": "canvas",
+  "styles": {
+    "root": {
+      "backgroundColor": "#ffffff",
+      "width": 800,
+      "height": 1100,
+      "fontFamily": "Arial"
+    },
+    "header": {
+      "backgroundColor": "#1e1e1e",
+      "height": 120,
+      "x": 0,
+      "y": 0,
+      "width": 800,
+      "h1": { "color": "#ffffff", "fontSize": 28, "fontWeight": "bold" },
+      "jobTitle": { "color": "#e5e5e5", "fontSize": 18 },
+      "contact": { "color": "#cccccc", "fontSize": 14 }
+    },
+    "layout": {
+      "leftColumn": {
+        "x": 20,
+        "y": 140,
+        "width": 240
+      },
+      "rightColumn": {
+        "x": 280,
+        "y": 140,
+        "width": 500
+      },
+      "sectionGap": 30
+    },
+    "sectionTitle": {
+      "fontSize": 20,
+      "color": "#1e1e1e",
+      "fontStyle": "bold",
+      "marginBottom": 10
+    },
+    "text": {
+      "fontSize": 14,
+      "color": "#333333",
+      "lineHeight": 1.4
+    },
+    "skillItem": {
+      "backgroundColor": "#f2f2f2",
+      "color": "#333333",
+      "padding": 4,
+      "borderRadius": 4,
+      "marginRight": 6,
+      "marginBottom": 6
+    }
+  },
+  "sections": [
+    {
+      "id": "summary",
+      "title": "Professional Summary",
+      "column": "rightColumn"
+    },
+    {
+      "id": "experience",
+      "title": "Experience",
+      "column": "rightColumn"
+    },
+    {
+      "id": "education",
+      "title": "Education",
+      "column": "rightColumn"
+    },
+    {
+      "id": "skills",
+      "title": "Skills",
+      "column": "leftColumn"
+    },
+    {
+      "id": "certifications",
+      "title": "Certifications",
+      "column": "leftColumn"
+    },
+    {
+      "id": "languages",
+      "title": "Languages",
+      "column": "leftColumn"
+    },
+    {
+      "id": "hobbies",
+      "title": "Hobbies",
+      "column": "leftColumn"
+    }
+  ]
+}

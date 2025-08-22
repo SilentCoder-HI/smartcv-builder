@@ -6,6 +6,7 @@
     "version": "1.1",
     "plan": "free",
     "demo": true,
+    "renderType": "html",
     "styles": {
         "root": {
             "backgroundColor": "white",
@@ -119,7 +120,7 @@
         },
         "layout": {
             "sectionGap": {
-                "margin":"10px 0px"
+                "margin": "10px 0px"
             },
             "twoColumn": {
                 "display": "grid",
@@ -165,29 +166,28 @@
                 "breakBefore": "auto",
                 "breakAfter": "auto",
                 "breakInside": "avoid",
-                "margin": "10px 0px"
+                "margin": "5px 0px"
             },
             "educationContainer": {
                 "display": "flex",
+                "gap":"0.2rem",
                 "flexDirection": "column",
-                "gap": "0.5rem",
                 "pageBreakBefore": "auto",
                 "pageBreakAfter": "auto",
                 "pageBreakInside": "avoid",
                 "breakBefore": "auto",
                 "breakAfter": "auto",
-                "breakInside": "avoid"
+                "breakInside": "avoid",
+                "margin":"5px 0px"
             },
             "educationList": {
                 "display": "flex",
                 "flexDirection": "column",
-                "gap": "0.5rem",
                 "margin": "20px 0px"
             },
             "skillsList": {
                 "display": "flex",
-                "flexDirection": "column",
-                "gap": "0.5rem"
+                "flexDirection": "column"
             },
             "skillsContainer": {
                 "display": "flex",
@@ -200,13 +200,12 @@
                 "breakBefore": "auto",
                 "breakAfter": "auto",
                 "breakInside": "avoid",
-                "margin": "20px 0px"
+                "margin": "5px 0px"
             },
             "Container": {
                 "display": "flex",
                 "flexDirection": "column",
                 "flexWrap": "wrap",
-                "gap": "0.5rem",
                 "pageBreakBefore": "auto",
                 "pageBreakAfter": "auto",
                 "pageBreakInside": "avoid",

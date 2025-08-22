@@ -46,9 +46,9 @@ import { CV } from "../data/data";
 import { CVData, CVForm } from "@dashboard/components/CV/cv-form";
 import { TemplateSelector } from "./CV/template-selector";
 import PreviewEditor from "./CV/preview-editor";
-const TemplateRenderer = dynamic(() => import("@/components/TemplateRenderer"), { ssr: false });
+const TemplateRenderer = dynamic(() => import("@dashboard/components/TemplateRenderer"), { ssr: false });
 import { TemplateMeta } from "@/types/template-types";
-import { templates } from "@/data/TempleteIndex";
+import { htmltemplates } from "@/data/TempleteIndex";
 import { useSession } from "next-auth/react";
 // --- Types ---
 type CVStatus = "draft" | "published";
@@ -104,14 +104,10 @@ export default function MyCVs({
   const { theme = "light", setTheme } = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
   // --- Refs ---
   const mainRef = useRef<HTMLDivElement>(null);
   const downloadRef = useRef<HTMLDivElement>(null);
   const hiddenPaginateRef = useRef<HTMLDivElement>(null);
-
-  const [ShowPdfViewer, setShowPdfViewer] = useState(true)
 
   // --- State: CVs and Form Data ---
   const [cvData, setCvData] = useState<CVData>({
@@ -155,11 +151,11 @@ export default function MyCVs({
 
   // --- Memoized Data ---
   const allTemplates: TemplateMeta[] = useMemo(
-    () => templates.filter((t) => t.styles),
+    () => htmltemplates.filter((t) => t.styles),
     []
   );
   const selectedCVTemplate = useMemo(
-    () => templates.find((t) => t.templateId === selectedTemplate),
+    () => htmltemplates.find((t) => t.templateId === selectedTemplate),
     [selectedTemplate]
   );
   const profileOptions = useMemo(() => getUnique(cvs, "profileId"), [cvs]);
@@ -412,8 +408,7 @@ export default function MyCVs({
     setDownloadingId(downloadCV.id);
 
     try {
-      // 1. Render the CV HTML in a hidden div (hiddenPaginateRef)
-      // 2. Wait for DOM to update
+      // 1. Render the CV HTML in a hidden div
       await new Promise((r) => setTimeout(r, 100));
 
       const container = hiddenPaginateRef.current;
@@ -421,8 +416,9 @@ export default function MyCVs({
 
       const contentHtml = container.innerHTML;
 
-      const template = allTemplates.find((t) => t.templateId === downloadCV.templateId);
-
+      const template = allTemplates.find(
+        (t) => t.templateId === downloadCV.templateId
+      );
       const pageSize = PAGE_SIZES[layout];
 
       const css = `
@@ -453,7 +449,7 @@ export default function MyCVs({
             <meta name="viewport" content="width=device-width, initial-scale=1"/>
             <style>
               ${css}
-              ${template?.styles || ''}
+              ${template?.styles || ""}
             </style>
           </head>
           <body>
@@ -462,7 +458,7 @@ export default function MyCVs({
         </html>
       `;
 
-      // --- Download the HTML as PDF using the API route ---
+      // 2. Send request to server
       const response = await fetch("/dashboard/api/generate-document", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -475,27 +471,19 @@ export default function MyCVs({
       }
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      console.log(blob)
+      const pdfBlob = new Blob([blob], { type: "application/pdf" });
+      const url = URL.createObjectURL(pdfBlob);
 
-      // // Create a temporary link to download the PDF
-      // const a = document.createElement("a");
-      // a.href = url;
-      // a.download = `${downloadCV.title || "cv"}.pdf`;
-      // document.body.appendChild(a);
-      // a.click();
-      // setTimeout(() => {
-      //   document.body.removeChild(a);
-      //   window.URL.revokeObjectURL(url);
-      // }, 100);
+      // 5. Also allow opening in new tab (debugging / fallback)
+      // Also trigger download in browser
+      const downloadLink = document.createElement("a");
+      downloadLink.href = url;
+      downloadLink.download = `${session?.user?.name || "cv"}.pdf`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
 
-      // Display PDF in iframe
-      if (iframeRef.current) {
-        iframeRef.current.src = url;
-        setShowPdfViewer(true);
-      }
-
-      toast.success("PDF downloaded!");
+      toast.success("PDF ready!");
     } catch (err: any) {
       setError(err?.message || "Failed to download PDF");
       toast.error(err?.message || "Failed to download PDF");
@@ -866,7 +854,7 @@ export default function MyCVs({
       <div
         ref={hiddenPaginateRef}
         style={{
-          position: "absolute",
+          // position: "absolute",
           left: "-9999px",
           top: "-9999px",
           width: "210mm",
@@ -885,62 +873,6 @@ export default function MyCVs({
           />
         )}
       </div>
-      {/* PDF Viewer Modal */}
-      {ShowPdfViewer && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setShowPdfViewer(false)}
-        >
-          <div
-            className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-6xl h-[90vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                PDF Preview: {downloadCV?.title || "CV"}
-              </h2>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    if (iframeRef.current?.src) {
-                      const a = document.createElement("a");
-                      a.href = iframeRef.current.src;
-                      a.download = `${downloadCV?.title || "cv"}.pdf`;
-                      a.click();
-                    }
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Download Again
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowPdfViewer(false)}
-                  className="rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-            </div>
-            <div className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-              <iframe
-                ref={iframeRef}
-                className="w-full h-full"
-                title="PDF Preview"
-                style={{ border: 'none' }}
-              />
-            </div>
-            <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 text-center">
-              The PDF is now available for viewing. You can also download it again using the button above.
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Loading Spinner */}
       {loading && (

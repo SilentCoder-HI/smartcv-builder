@@ -197,7 +197,7 @@ export default function Dashboard({ cvs, onNavigate, allJobs, jobloading, jobsav
         ) : (
           <>
             <div className="flex justify-between items-center mb-5">
-              <h3 className="text-2xl font-bold text-[#22223b] dark:text-white">Your Resumes</h3>
+              <h3 className="text-2xl font-bold text-[#22223b] dark:text-white">Your CV's</h3>
               <Button
                 onClick={() => onNavigate("/my-cvs")}
                 className="flex items-center gap-2 justify-center bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold px-5 py-2 rounded-lg shadow"

@@ -4,6 +4,7 @@
   "description": "A clean, modern corporate resume template with blue accents, rounded corners, and a professional sans-serif look.",
   "templateType": "corporate",
   "version": "1.0",
+  "renderType": "html",
   "plan": "free",
   "demo": true,
   "styles": {

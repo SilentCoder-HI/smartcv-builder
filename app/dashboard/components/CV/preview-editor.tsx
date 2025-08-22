@@ -8,8 +8,8 @@ import React, {
   useMemo,
   useReducer,
 } from "react";
-import TemplateRenderer from "@/components/TemplateRenderer";
-import { templates } from "@/data/TempleteIndex";
+import TemplateRenderer from "@dashboard/components/TemplateRenderer";
+import { htmltemplates } from "@/data/TempleteIndex";
 import { CVData } from "@/types/cv-types";
 import { FaCheck as Check, FaTimes, FaSave } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
@@ -307,9 +307,9 @@ const TabSwitcher = ({
 const useGroupedTemplates = (): GroupedTemplates =>
   useMemo(() => {
     return {
-      All: templates.filter((t) => t.styles),
-      Classic: templates.filter((t) => t.templateType === "classic" && t.styles),
-      Corporate: templates.filter((t) => t.templateType === "corporate" && t.styles),
+      All: htmltemplates.filter((t) => t.styles),
+      Classic: htmltemplates.filter((t) => t.templateType === "classic" && t.styles),
+      Corporate: htmltemplates.filter((t) => t.templateType === "corporate" && t.styles),
     };
   }, []); // templates is imported, not a dependency
 
@@ -392,7 +392,7 @@ const PreviewEditor = ({
 
   // --- All templates memoized ---
   const allTemplates: TemplateMeta[] = useMemo(
-    () => templates.filter((t) => t.styles),
+    () => htmltemplates.filter((t) => t.styles),
     []
   );
 
